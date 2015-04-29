@@ -126,7 +126,7 @@ static ESTDOC *est_doc_new_from_text(const char *buf, int size,
       CB_DATUMSETSIZE(datum, 0);
     } else {
       CB_DATUMCAT(datum, " ", 1);
-      CB_DATUMCAT(datum, line, strlen(line));
+      CB_DATUMCAT(datum, line, (ssize_t)strlen(line));
     }
   }
   est_doc_add_text(doc, CB_DATUMPTR(datum));
@@ -570,7 +570,7 @@ ESTDOC *est_doc_new_from_mime(const char *buf, int size,
             CB_DATUMSETSIZE(datum, 0);
           } else {
             CB_DATUMCAT(datum, " ", 1);
-            CB_DATUMCAT(datum, line, strlen(line));
+            CB_DATUMCAT(datum, line, (ssize_t)strlen(line));
           }
         }
         est_doc_add_text(doc, CB_DATUMPTR(datum));
