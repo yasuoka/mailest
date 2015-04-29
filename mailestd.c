@@ -19,6 +19,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/tree.h>
+#include <sys/mman.h>
 #include <sys/un.h>
 
 #include <ctype.h>
@@ -48,6 +49,14 @@
 #include "bytebuf.h"
 #include <cabin.h>
 #include <estraier.h>
+#ifdef HAVE_LIBESTDRAFT
+#include <estdraft.h>
+#else
+/*
+ * Without estdraft, forking "estdoc" to create a draft message, this
+ * decreases performance so much.
+ */
+#endif
 
 #include "defs.h"
 #include "mailestd.h"
@@ -743,12 +752,53 @@ mailestd_fts(struct mailestd *_this, struct gather *ctx, time_t curr_time,
 static void
 mailestd_draft(struct mailestd *_this, struct rfc822 *msg)
 {
+#ifdef HAVE_LIBESTDRAFT
+	int		 fd = -1;
+	struct stat	 st;
+	char		*msgs = NULL, buf[PATH_MAX + 128];
+	struct tm	 tm;
+
+	if ((fd = open(msg->path, O_RDONLY)) < 0) {
+		mailestd_log(LOG_WARNING, "open(%s): %m", msg->path);
+		goto on_error;
+	}
+	if (fstat(fd, &st) == -1) {
+		mailestd_log(LOG_WARNING, "fstat(%s): %m", msg->path);
+		goto on_error;
+	}
+	if ((msgs = mmap(0, st.st_size, PROT_READ, MAP_FILE, fd, 0)) ==
+	    MAP_FAILED) {
+		mailestd_log(LOG_WARNING, "mmap(%s): %m", msg->path);
+		goto on_error;
+	}
+	msg->draft = est_doc_new_from_mime(msgs, st.st_size, "UTF-8",
+	    ESTLANGEN, 0);
+	if (msg->draft == NULL) {
+		mailestd_log(LOG_WARNING, "est_doc_new_from_mime(%s) failed",
+		    msg->path);
+		goto on_error;
+	}
+	est_doc_slim(msg->draft, MAILESTD_TRIMSIZE);
+	strlcpy(buf, "file://", sizeof(buf));
+	strlcat(buf, msg->path, sizeof(buf));
+	est_doc_add_attr(msg->draft, ESTDATTRURI, buf);
+	gmtime_r(&msg->mtime, &tm);
+	strftime(buf, sizeof(buf), MAILESTD_TIMEFMT "\n", &tm);
+	est_doc_add_attr(msg->draft, ESTDATTRMDATE, buf);
+
+on_error:
+	if (fd >= 0)
+		close(fd);
+	if (msgs != NULL)
+		munmap(msgs, st.st_size);
+	return;
+#else
 	FILE		*fpin, *fpout;
 	char		*draft = NULL, buf[BUFSIZ];
 	size_t		 siz, draftsiz = 0;
 	int		 status;
+	struct tm	 tm;
 
-    /* XXX may be the file is removed */
 	fpout = open_memstream(&draft, &draftsiz);
 	snprintf(buf, sizeof(buf), "estcmd draft -fm %s", msg->path);
 	fpin = popen(buf, "r");
@@ -766,44 +816,36 @@ mailestd_draft(struct mailestd *_this, struct rfc822 *msg)
 	} else {
 		MAILESTD_ASSERT(msg->draft == NULL);
 		MAILESTD_ASSERT(draftsiz > 0);
-		msg->draft = draft;
+		msg->draft = est_doc_new_from_draft(draft);
+		gmtime_r(&msg->mtime, &tm);
+		strftime(buf, sizeof(buf), MAILESTD_TIMEFMT "\n", &tm);
+		est_doc_add_attr(msg->draft, ESTDATTRMDATE, buf);
 	}
+#endif
 }
 
 static void
 mailestd_putdb(struct mailestd *_this, ESTDB *db, struct rfc822 *msg)
 {
 	int		 ecode;
-	ESTDOC		*esdoc;
-	struct tm	 tm;
-	char		 buf[128];
 
 	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 	MAILESTD_ASSERT(msg->draft != NULL);
-	esdoc = est_doc_new_from_draft(msg->draft);
-	if (esdoc == NULL)
-		goto on_db_error;
 
-	gmtime_r(&msg->mtime, &tm);
-	strftime(buf, sizeof(buf), MAILESTD_TIMEFMT "\n", &tm);
-	est_doc_add_attr(esdoc, ESTDATTRMDATE, buf);
-
-	if (est_db_put_doc(db, esdoc, 0)) {
-		msg->db_id = est_doc_id(esdoc);
+	if (est_db_put_doc(db, msg->draft, 0)) {
+		msg->db_id = est_doc_id(msg->draft);
 		if (debug > 2)
 			mailestd_log(LOG_DEBUG, "put %s successfully.  id=%d",
 			    msg->path, msg->db_id);
 	} else {
-on_db_error:
 		ecode = est_db_error(db);
 		mailestd_log(LOG_WARNING,
 		    "putting %s failed: %s", msg->path, est_err_msg(ecode));
 		mailestd_db_error(_this);
 	}
 
-	free(msg->draft);
+	est_doc_delete(msg->draft);
 	msg->draft = NULL;
-	est_doc_delete(esdoc);
 }
 
 static void

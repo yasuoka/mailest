@@ -6,7 +6,7 @@ PROG=		mailestd
 SRCS=		bytebuf.c mailestd.c mailestctl.c parse.y parser.c
 LINKS=		${BINDIR}/mailestd ${PREFIX}/bin/mailestctl
 NOMAN=		#
-CPPFLAGS=	-I/usr/local/include
+CFLAGS+=	-I/usr/local/include -DHAVE_LIBESTDRAFT
 LDFLAGS=	-L/usr/local/lib
 LDADD=		-lestraier -levent
 DPADD=		${LIBESTRAIER} ${LIBEVENT}
@@ -23,5 +23,15 @@ DPADD+=		${LIBPTHREAD}
 beforeinstall:
 	${INSTALL} ${INSTALL_COPY} -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} \
 	    ${.CURDIR}/../mew-mailest.sh ${DESTDIR}${PREFIX}/bin/mew-mailest
+
+.include <bsd.obj.mk>
+
+.if exists(${.CURDIR}/../libestdraft/${__objdir})
+LDADD+=         -L${.CURDIR}/../libestdraft/${__objdir} -lestdraft
+DPADD+=         ${.CURDIR}/../libestdraft/${__objdir}/libestdraft.a
+.else
+LDADD+=         -L${.CURDIR}/../libestdraft -lestdraft
+DPADD+=         ${.CURDIR}/../libestdraft/libestdraft.a
+.endif
 
 .include <bsd.prog.mk>

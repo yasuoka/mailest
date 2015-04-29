@@ -81,7 +81,7 @@ struct mailestd {
 
 struct rfc822 {
 	char			*path;
-	char			*draft;
+	ESTDOC			*draft;
 	int			 db_id;
 	time_t			 mtime;
 	off_t			 size;
