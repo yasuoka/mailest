@@ -16,10 +16,33 @@
 
 enum actions {
 	NONE,
+	DEBUGI,
+	DEBUGD,
+	START,
+	STOP,
+	RESTART,
+	UPDATE,
+	SUSPEND,
+	RESUME,
+	CSEARCH		/* estcmd search compatibile search command */
 };
 
 struct parse_result {
-	enum actions		 action;
+	enum actions	  action;
+	char		 *folder;
+	struct {
+#define SEARCH_FLAG_VU		0x01
+#define SEARCH_FLAG_IC		0x02
+#define SEARCH_FLAG_MAX		0x04
+#define SEARCH_FLAG_ORD		0x08
+#define SEARCH_FLAG_ATTR	0x10
+		u_int	  flags;
+		int	  max;
+		char	 *ord;
+		char	 *ic;
+		char	**attrs;
+		char	 *phrase;
+	} search;
 };
 
 struct parse_result	*parse(int, char *[]);

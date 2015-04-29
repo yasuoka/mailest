@@ -27,13 +27,30 @@
 #include <sys/types.h>
 #include <sys/queue.h>
 #include <sys/stat.h>
-#include <syslog.h>
-#include <stdarg.h>
+
 #include <ctype.h>
-#include <limits.h>
 #include <err.h>
-#include <unistd.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <syslog.h>
+#include <unistd.h>
+
+#include "mailestd.h"
+#include "defs.h"
+
+void			 mailestd_log(int, const char *, ...)
+			    __attribute__((__format__(__syslog__,2,3)));
+void			 mailestd_vlog(int, const char *, va_list);
+
+static struct mailestd_conf	*conf;
+
+#define logit mailestd_log
+static void log_warn(const char *, ...);
+static void log_warnx(const char *, ...);
+static void fatal(const char *);
+static void fatalx(const char *);
 
 TAILQ_HEAD(files, file)		 files = TAILQ_HEAD_INITIALIZER(files);
 static struct file {
@@ -70,8 +87,9 @@ char		*symget(const char *);
 
 typedef struct {
 	union {
-		int64_t		 number;
-		char		*string;
+		int64_t		  number;
+		char		 *string;
+		char		**strings;
 	} v;
 	int lineno;
 } YYSTYPE;
@@ -79,14 +97,18 @@ typedef struct {
 %}
 
 %token	INCLUDE ERROR
+%token	COUNT DATABASE DEBUG IGNORE INCLUDE LEVEL LOG MAILDIR ROTATE PATH
+%token	SOCKET SUFFIXES SIZE TASKS TRIMSIZE
 %token	<v.string>	STRING
 %token  <v.number>	NUMBER
+%type	<v.strings>	strings
 
 %%
 
 grammar		: /* empty */
 		| grammar include '\n'
 		| grammar '\n'
+		| grammar main '\n'
 		| grammar error '\n'		{ file->errors++; }
 		;
 
@@ -111,6 +133,83 @@ varset		: STRING '=' STRING	{
 			free($1);
 			free($3);
 		}
+		;
+
+main		: MAILDIR STRING	{
+			conf->maildir = $2;
+		}
+		| SOCKET STRING {
+			conf->sock_path = $2;
+		}
+		| TASKS NUMBER {
+			conf->tasks = $2;
+		}
+		| TRIMSIZE NUMBER {
+			conf->trim_size = $2;
+		}
+		| SUFFIXES strings {
+			conf->suffixes = $2;
+		}
+		| IGNORE strings {
+			conf->ignores = $2;
+		}
+		| LOG log_opts
+		| DATABASE database_opts
+		| DEBUG LEVEL NUMBER {
+			conf->debug = $3;
+		}
+		;
+
+strings		: strings STRING {
+			int n;
+			char **strings;
+			for (n = 0; $1[n] != NULL; n++)
+				;
+			strings = reallocarray($1, n + 1, sizeof(char *));
+			if (strings == NULL)
+				fatal("out of memory");
+			$$ = strings;
+			$$[n++] = $2;
+			$$[n++] = NULL;
+		}
+		| STRING {
+			$$ = calloc(2, sizeof(char *));
+			if ($$ == NULL)
+				fatal("out of memory");
+			$$[0] = $1;
+			$$[1] = NULL;
+		}
+		;
+
+log_opts	: log_opts log_opt
+		| log_opt
+		;
+
+log_opt		: PATH STRING		{
+			conf->log_path = $2;
+		}
+		| ROTATE log_rotate_opts
+		;
+
+log_rotate_opts : log_rotate_opts log_rotate_opt
+		| log_rotate_opt
+		;
+
+log_rotate_opt	: COUNT NUMBER		{
+			conf->log_count = $2;
+		}
+		| SIZE NUMBER		{
+			conf->log_size = $2;
+		}
+		;
+
+database_opt	: PATH STRING		{
+			conf->db_path = $2;
+		}
+		;
+
+database_opts	: database_opts database_opt
+		| database_opt
 		;
 
 %%
@@ -147,7 +246,21 @@ lookup(char *s)
 {
 	/* this has to be sorted always */
 	static const struct keywords keywords[] = {
+		{ "count",		COUNT },
+		{ "database",		DATABASE },
+		{ "debug",		DEBUG },
+		{ "ignore",		IGNORE },
 		{ "include",		INCLUDE },
+		{ "level",		LEVEL },
+		{ "log",		LOG },
+		{ "maildir",		MAILDIR },
+		{ "path",		PATH },
+		{ "rotate",		ROTATE },
+		{ "size",		SIZE },
+		{ "socket",		SOCKET },
+		{ "suffixes",		SUFFIXES },
+		{ "tasks",		TASKS },
+		{ "trim-size",		TRIMSIZE },
 	};
 	const struct keywords	*p;
 
@@ -188,7 +301,8 @@ lgetc(int quotec)
 
 	if (quotec) {
 		if ((c = getc(file->stream)) == EOF) {
-			yyerror("reached end of file while parsing quoted string");
+			yyerror("reached end of file while parsing quoted "
+			    "string");
 			if (file == topfile || popfile() == EOF)
 				return (EOF);
 			return (quotec);
@@ -549,4 +663,148 @@ symget(const char *nam)
 			return (sym->val);
 		}
 	return (NULL);
+}
+
+void
+free_config(struct mailestd_conf *c)
+{
+	int	 i;
+
+	if (c->ignores != NULL) {
+		for (i = 0; c->ignores[i] != NULL; i++)
+			free(c->ignores[i]);
+	}
+	free(c->ignores);
+	if (c->suffixes != NULL) {
+		for (i = 0; c->suffixes[i] != NULL; i++)
+			free(c->suffixes[i]);
+	}
+	free(c->suffixes);
+	free(c->log_path);
+	free(c->db_path);
+	free(c->maildir);
+	free(c);
+}
+
+struct mailestd_conf *
+parse_config(const char *filename, const char *maildir)
+{
+	struct sym	*sym, *next;
+	int		 errors;
+	char		 tmppath[PATH_MAX];
+	struct stat	 st;
+
+	conf = calloc(1, sizeof(struct mailestd_conf));
+	conf->tasks = MAILESTD_NTASKS;
+	conf->log_size = MAILESTD_LOGSIZ;
+	conf->log_count = MAILESTD_LOGROTMAX;
+	conf->trim_size = MAILESTD_TRIMSIZE;
+
+	if (stat(filename, &st) == 0) {
+		if ((file = pushfile(filename, 0)) == NULL) {
+			free(conf);
+			return (NULL);
+		}
+		topfile = file;
+
+		yyparse();
+		errors = file->errors;
+		popfile();
+
+		/* Free macros and check which have not been used. */
+		TAILQ_FOREACH_SAFE(sym, &symhead, entry, next) {
+			if (!sym->persist) {
+				TAILQ_REMOVE(&symhead, sym, entry);
+				free(sym->nam);
+				free(sym->val);
+				free(sym);
+			}
+		}
+		if (errors) {
+			free_config(conf);
+			return (NULL);
+		}
+	} else if (errno != ENOENT) {
+		log_warn("open(%s)", filename);
+		return (NULL);
+	}
+	if (conf->maildir == NULL || conf->maildir[0] != '/') {
+		strlcpy(tmppath, getenv("HOME"), sizeof(tmppath));
+		strlcat(tmppath, "/", sizeof(tmppath));
+		if (conf->maildir != NULL) {
+			strlcat(tmppath, conf->maildir, sizeof(tmppath));
+			free(conf->maildir);
+		} else
+			strlcpy(tmppath, maildir, sizeof(tmppath));
+		conf->maildir = strdup(tmppath);
+	}
+	if (conf->log_path == NULL || conf->log_path[0] != '/') {
+		strlcpy(tmppath, conf->maildir, sizeof(tmppath));
+		strlcat(tmppath, "/", sizeof(tmppath));
+		if (conf->log_path != NULL) {
+			strlcat(tmppath, conf->log_path, sizeof(tmppath));
+			free(conf->log_path);
+		} else
+			strlcat(tmppath, MAILESTD_LOG_PATH, sizeof(tmppath));
+		conf->log_path = strdup(tmppath);
+	}
+	if (conf->sock_path == NULL || conf->sock_path[0] != '/') {
+		strlcpy(tmppath, conf->maildir, sizeof(tmppath));
+		strlcat(tmppath, "/", sizeof(tmppath));
+		if (conf->sock_path != NULL) {
+			strlcat(tmppath, conf->sock_path, sizeof(tmppath));
+			free(conf->sock_path);
+		} else
+			strlcat(tmppath, MAILESTD_SOCK_PATH, sizeof(tmppath));
+		conf->sock_path = strdup(tmppath);
+	}
+	if (conf->db_path == NULL || conf->db_path[0] != '/') {
+		strlcpy(tmppath, conf->maildir, sizeof(tmppath));
+		strlcat(tmppath, "/", sizeof(tmppath));
+		if (conf->db_path != NULL) {
+			strlcat(tmppath, conf->db_path, sizeof(tmppath));
+			free(conf->db_path);
+		} else
+			strlcat(tmppath, MAILESTD_DBNAME, sizeof(tmppath));
+		conf->db_path = strdup(tmppath);
+	}
+
+	return (conf);
+}
+
+static void
+log_warn(const char *fmt, ...)
+{
+	char	fmt0[BUFSIZ];
+
+	strlcpy(fmt0, fmt, sizeof(fmt0));
+	strlcat(fmt0, ": %m", sizeof(fmt0));
+
+	va_list ap;
+	va_start(ap, fmt);
+	mailestd_vlog(LOG_WARNING, fmt0, ap);
+	va_end(ap);
+}
+
+static void
+log_warnx(const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	mailestd_vlog(LOG_WARNING, fmt, ap);
+	va_end(ap);
+}
+
+static void
+fatal(const char *msg)
+{
+	mailestd_log(LOG_CRIT, "%s: %m", msg);
+	abort();
+}
+
+static void
+fatalx(const char *msg)
+{
+	mailestd_log(LOG_CRIT, "%s", msg);
+	abort();
 }
