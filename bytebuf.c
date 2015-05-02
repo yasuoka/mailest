@@ -54,11 +54,11 @@
 #ifndef	BYTEBUF_ASSERT
 #ifdef	BYTEBUF_DEBUG
 #define	BYTEBUF_ASSERT(cond)						\
-	if (!(cond)) {						\
-	    fprintf(stderr,					\
-		"\nASSERT(" #cond ") failed on %s() at %s:%d.\n"\
-		, __func__, __FILE__, __LINE__);		\
-	    abort(); 						\
+	if (!(cond)) {							\
+		fprintf(stderr,						\
+		    "\nASSERT(" #cond ") failed on %s() at %s:%d.\n"	\
+		    , __func__, __FILE__, __LINE__);			\
+		abort();						\
 	}
 #else
 #define	BYTEBUF_ASSERT(cond)
@@ -69,13 +69,13 @@
 
 struct _bytebuffer {
 	/** current position */
-	int 	position;
+	int	position;
 	/** current limit */
 	int	limit;
 	/** position mark*/
-	int 	mark;
+	int	mark;
 	/** capacity of buffer */
-	size_t 	capacity;
+	size_t	capacity;
 	/** allocated memory area */
 	void	*data;
 };
@@ -166,7 +166,7 @@ bytebuffer_realloc(bytebuffer *_this, size_t capacity)
 
 	BYTEBUF_ASSERT(_this->limit <= capacity);
 
-	if (_this->limit > capacity) {
+	if ((size_t)_this->limit > capacity) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -175,7 +175,7 @@ bytebuffer_realloc(bytebuffer *_this, size_t capacity)
 		return -1;
 
 	_this->data = new_data;
-	if (_this->limit == _this->capacity)
+	if ((size_t)_this->limit == _this->capacity)
 		_this->limit = capacity;
 	_this->capacity = capacity;
 
@@ -262,7 +262,7 @@ bytebuffer_put(bytebuffer *_this, const void *src, size_t srclen)
  *
  * @param	dst	pointer of the destination memory.  Specify NULL
  *			to skip transferring the data.
- * @param	dstlne	memory size of the destination.
+ * @param	dstlen	memory size of the destination.
  */
 void *
 bytebuffer_get(bytebuffer *_this, void *dst, size_t dstlen)
