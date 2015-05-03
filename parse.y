@@ -776,11 +776,11 @@ static void
 log_warn(const char *fmt, ...)
 {
 	char	fmt0[BUFSIZ];
+	va_list ap;
 
 	strlcpy(fmt0, fmt, sizeof(fmt0));
 	strlcat(fmt0, ": %m", sizeof(fmt0));
 
-	va_list ap;
 	va_start(ap, fmt);
 	mailestd_vlog(LOG_WARNING, fmt0, ap);
 	va_end(ap);

@@ -18,6 +18,8 @@
 #include <estraier.h>
 #include <assert.h>
 
+#include "estdraft.h"
+
 #define NUMBUFSIZ      32                /* size of a buffer for a number */
 #define MINIBNUM       31                /* bucket number of a small map */
 #define TRUE           1

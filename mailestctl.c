@@ -306,7 +306,7 @@ stop_daemon(void)
 		usleep(500000);
 	}
 	if (ntry <= 0)
-		warnx(1, "cannot stop mailestd");
+		warnx("cannot stop mailestd");
 }
 
 size_t

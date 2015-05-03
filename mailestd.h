@@ -54,10 +54,12 @@ struct mailestctl_search {
 };
 
 __BEGIN_DECLS
+int			 mailestctl_main(int, char *[]);
 void			 mailestd_log(int, const char *, ...)
 			    __attribute__((__format__(__syslog__,2,3)));
 struct mailestd_conf	*parse_config(const char *, const char *);
 void			 free_config(struct mailestd_conf *);
+int			 cmdline_symset(char *);
 __END_DECLS
 
 #endif

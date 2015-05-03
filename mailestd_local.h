@@ -205,8 +205,6 @@ static void	 mailestd_start(struct mailestd *, bool);
 static uint64_t	 mailestd_new_id(struct mailestd *);
 static void	 mailestd_stop(struct mailestd *);
 static void	 mailestd_fini(struct mailestd *);
-static struct gather *
-		 mailestd_get_gahter(struct mailestd *, uint64_t);
 
 static void	 mailestd_on_timer(int, short, void *);
 static void	 mailestd_on_sigterm(int, short, void *);

@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <event.h>
 #include <fcntl.h>
+#include <fnmatch.h>
 #include <fts.h>
 #include <glob.h>
 #include <libgen.h>
@@ -202,7 +203,7 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 	_this->ignore = conf->ignores;
 	if (conf->ignores == NULL) {
 		_this->ignore = xcalloc(nitems(defignore), sizeof(char *));
-		for (i = 0; i < nitems(defignore); i++)
+		for (i = 0; i < (int)nitems(defignore); i++)
 			_this->ignore[i] = xstrdup(defignore[i]);
 		_this->ignore[i] = NULL;
 	}
@@ -249,12 +250,12 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 }
 
 static void
-mailestd_start(struct mailestd *_this, bool foreground)
+mailestd_start(struct mailestd *_this, bool fg)
 {
 	int		 i;
 	struct task	*task;
 
-	if (!foreground)
+	if (!fg)
 		mailestd_log_rotation(_this->logfn, 0, 0);
 	EVENT_SET(&_this->evsigterm, SIGTERM, EV_SIGNAL | EV_PERSIST,
 	    mailestd_on_sigterm, _this);
@@ -567,7 +568,7 @@ mailestd_syncdb(struct mailestd *_this)
 static int
 mailestd_gather(struct mailestd *_this, struct task_gather *task)
 {
-	int		 lrdir, update = 0, remove = 0, total = 0;
+	int		 lrdir, update = 0, delete = 0, total = 0;
 	char		 rdir[PATH_MAX], *paths[2];
 	const char	*folder = task->folder;
 	struct gather	*ctx;
@@ -612,7 +613,7 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 		total++;
 		if (msge->fstime != curr_time) {
 			RB_REMOVE(rfc822_tree, &_this->root, msge);
-			remove++;
+			delete++;
 			if (!msge->ontask) {
 				if (msge->db_id != 0) {
 					if (ctx != NULL)
@@ -626,12 +627,12 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 
 	mailestd_log(LOG_INFO,
 	    "Gathered %s%s (Total: %d Remove: %d Update: %d)",
-	    (folder[0] != '/')? "+" : "", folder, total, remove, update);
+	    (folder[0] != '/')? "+" : "", folder, total, delete, update);
 
 	if (ctx != NULL) {
 		if (ctx->puts == ctx->puts_done &&
 		    ctx->dels == ctx->dels_done) {
-			if (update > 0 || remove > 0)
+			if (update > 0 || delete > 0)
 				strlcpy(ctx->errmsg,
 				    "other task is running",
 				    sizeof(ctx->errmsg));
@@ -855,11 +856,11 @@ mailestd_deldb(struct mailestd *_this, ESTDB *db, struct rfc822 *msg)
 
 	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 	MAILESTD_ASSERT(msg->db_id != 0);
-	if (est_db_out_doc(db, msg->db_id, 0))
+	if (est_db_out_doc(db, msg->db_id, 0)) {
 		if (debug > 2)
 			mailestd_log(LOG_DEBUG, "delete %s(%d) successfully",
 			    msg->path, msg->db_id);
-	else {
+	} else {
 		ecode = est_db_error(db);
 		mailestd_log(LOG_WARNING, "deleting %s(%d) failed: %s",
 		    msg->path, msg->db_id, est_err_msg(ecode));
@@ -982,7 +983,6 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 	DIR		*dp;
 	struct dirent	*de;
 	ssize_t		 lmaildir;
-	uint64_t	 task_id;
 	struct gather	*ctx;
 
 	ctx = xcalloc(1, sizeof(struct gather));
@@ -1362,7 +1362,6 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 	enum MAILESTD_TASK	 task_type;
 	struct mailestd		*mailestd = _this->mailestd_this;
 	struct task_search	*search;
-	struct gather		*gather;
 
 	if (task == NULL)
 		task_type = MAILESTD_TASK_NONE;
@@ -1737,7 +1736,7 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
 	    {
 		struct gather	*result = (struct gather *)inform;
 		bool		 del_compl, put_compl;
-		const char	*msg = NULL, msg0[80];
+		char		*msg = NULL, msg0[80];
 
 		del_compl = (result->dels_done == result->dels)? true : false;
 		put_compl = (result->puts_done == result->puts)? true : false;
