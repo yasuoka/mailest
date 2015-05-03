@@ -1,0 +1,8 @@
+SUBDIRS =
+if WITH_LIBESTDRAFT
+SUBDIRS +=	libestdraft
+endif
+
+SUBDIRS +=	mailestd
+
+EXTRA_DIST = README.md Makefile libestdraft/Makefile mailestd/Makefile

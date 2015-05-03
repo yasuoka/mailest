@@ -1,0 +1,36 @@
+sbin_PROGRAMS = mailestd
+
+mailestd_SOURCES = ../mailestd.c ../mailestctl.c
+mailestd_SOURCES += ../parse.y ../parser.c
+mailestd_SOURCES += ../bytebuf.c
+mailestd_SOURCES += ../bytebuf.h ../defs.h
+mailestd_SOURCES += ../mailestd.h ../mailestd_local.h
+mailestd_SOURCES += ../parser.h ../thread.h
+mailestd_CPPFLAGS = -I$(top_srcdir)
+mailestd_LDADD = -lestraier -levent
+mailestd_LDFLAGS =
+
+if ENABLE_MULTI_THREADS
+mailestd_CPPFLAGS += -DMAILESTD_MT
+mailestd_LDADD += -lpthread
+endif
+
+if WITH_LIBESTDRAFT
+mailestd_CPPFLAGS += -DHAVE_LIBESTDRAFT
+mailestd_LDFLAGS += -L../libestdraft
+mailestd_LDADD += -lestdraft
+endif
+
+bin_SCRIPTS = mew-mailest
+CLEANFILES = mew-mailest
+EXTRA_DIST = $(top_srcdir)/mew-mailest.sh
+
+mew-mailest: $(top_srcdir)/mew-mailest.sh
+	cp $(top_srcdir)/mew-mailest.sh mew-mailest
+	chmod +x mew-mailest
+
+install-exec-hook:
+	ln -f $(DESTDIR)$(sbindir)/mailestd$(EXEEXT) \
+		$(DESTDIR)$(bindir)/mailestctl$(EXEEXT)
+uninstall-hook:
+	rm $(DESTDIR)$(bindir)/mailestctl$(EXEEXT)
