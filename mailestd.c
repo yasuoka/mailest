@@ -1166,17 +1166,24 @@ task_worker_init(struct task_worker *_this, struct mailestd *mailestd)
 static void
 task_worker_start(struct task_worker *_this)
 {
-	int	 on, pairsock[2];
+	int	 flags, pairsock[2];
 
 	_this->thread = _thread_self();
 	if (socketpair(PF_UNIX, SOCK_SEQPACKET, 0, pairsock) == -1)
 		err(EX_OSERR, "socketpair()");
 	_this->sock = pairsock[1];
 	_this->sock_itc = pairsock[0];
-	on = 1;
-	fcntl(_this->sock, O_NONBLOCK, &on);
-	on = 1;
-	fcntl(_this->sock_itc, O_NONBLOCK, &on);
+	if ((flags = fcntl(_this->sock, F_GETFL)) == -1 ||
+	    fcntl(_this->sock, F_SETFL, flags | O_NONBLOCK) == -1) {
+		mailestd_log(LOG_CRIT, "%s: O_NONBLOCK by fcntl(): %m", __func__);
+		abort();
+	}
+	if ((flags = fcntl(_this->sock_itc, F_GETFL)) == -1 ||
+	    fcntl(_this->sock_itc, F_SETFL, flags | O_NONBLOCK) == -1) {
+		mailestd_log(LOG_CRIT, "%s: O_NONBLOCK by fcntl(): %m", __func__);
+		abort();
+	}
+
 	EVENT_SET(&_this->evsock, _this->sock, EV_READ | EV_PERSIST,
 		task_worker_on_itc_event, _this);
 	event_add(&_this->evsock, NULL);
@@ -1366,16 +1373,16 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 
 	if (task == NULL)
 		task_type = MAILESTD_TASK_NONE;
-	else {
+	else
 		task_type = task->type;
-		msg = ((struct task_rfc822 *)task)->msg;
-	}
+
 
 	switch (task_type) {
 	default:
 		break;
 
 	case MAILESTD_TASK_RFC822_PUTDB:
+		msg = ((struct task_rfc822 *)task)->msg;
 		if ((db = mailestd_db_open_wr(mailestd)) == NULL)
 			break;
 		ctx->puts++;
@@ -1390,6 +1397,7 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 		break;
 
 	case MAILESTD_TASK_RFC822_DELDB:
+		msg = ((struct task_rfc822 *)task)->msg;
 		if ((db = mailestd_db_open_wr(mailestd)) == NULL)
 			break;
 		ctx->dels++;
