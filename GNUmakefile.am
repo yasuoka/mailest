@@ -5,5 +5,5 @@ endif
 
 SUBDIRS +=	mailestd
 
-EXTRA_DIST = README.md Makefile Makefile.inc libestdraft/Makefile mailestd/Makefile
-EXTRA_DIST += compat.h
+EXTRA_DIST = README.md Makefile Makefile.inc libestdraft/Makefile
+EXTRA_DIST += mailestd/Makefile compat.h mailestd.conf
