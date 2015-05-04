@@ -35,7 +35,6 @@
 #include <libgen.h>
 #include <limits.h>
 #include <paths.h>
-#include <pthread.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -47,6 +46,9 @@
 #include <syslog.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef MAILESTD_MT
+#include <pthread.h>
+#endif
 
 #include "bytebuf.h"
 #include <cabin.h>
