@@ -1,9 +1,9 @@
-mailest - search with "Hyper Estrairer" for mew
-===============================================
+mailest - search mail messages with Hyper Estrairer
+===================================================
 
 WIP
 
-"mailest" is a "search" backend for [mew](http://mew.org) using
+"mailest" is a "search" backend for [Mew](http://mew.org) using
 [Hyper Estraier](fallabs.com/hyperestraier/index.html).  It can replace
 the existing backend `mewest`.
 
@@ -28,7 +28,7 @@ On other BSD or Linux
 Quick Usage
 -----------
 
-+ Add the below line to .mew.el to let mew use "Hyper Estrairer" for
++ Add the below line to .mew.el to let Mew use "Hyper Estrairer" for
   search.
 
       ((setq mew-search-method 'est)
@@ -39,9 +39,20 @@ Quick Usage
       (defvar mew-prog-est        "mew-mailest")
       (defvar mew-prog-est-update "mew-mailest")
 
-+ Use `km`, `kM`, `k/` or `k?` in mew.  See
++ Use `km`, `kM`, `k/` or `k?` in Mew.  See
   http://mew.org/en/info/release/mew_6.html#dbsearch for search commands
-  in mew.
+  in Mew.
+
+
+Documentations
+--------------
+
+Manpages:
+
+- [mailestctl(1)](http://yasuoka.github.io/mailest/mailestctl.1.html)
+- [mailestd(8)](http://yasuoka.github.io/mailest/mailestd.8.html)
+- [mailestd.conf(5)](http://yasuoka.github.io/mailest/mailestd.conf.5.html)
+- [mew-mailest(8)](http://yasuoka.github.io/mailest/mew-mailest.1.html)
 
 
 Differences from `mewest`
