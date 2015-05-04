@@ -2,12 +2,7 @@
 #
 # wrapper script for mew
 #
-MAILESTCTL=${MAILESTCTL:-/usr/local/bin/mailestctl}
-
-if [ ! -x "$MAILESTCTL" ]; then
-	echo "$(basename $0) not found...failed" >&1
-	exit 1
-fi
+MAILESTCTL=${MAILESTCTL:-mailestctl}
 
 if [ "$1" = "search" ]; then
 	shift
