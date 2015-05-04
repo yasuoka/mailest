@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+table.head, table.foot { width: 100%; }
+td.head-rtitle, td.foot-os { text-align: right; }
+td.head-vol { text-align: center; }
+table.foot td { width: 50%; }
+table.head td { width: 33%; }
+div.spacer { margin: 1em 0; }
+</style>
+<title>
+MAILESTCTL(1)</title>
+</head>
+<body>
+<div class="mandoc">
+<table class="head">
+<tbody>
+<tr>
+<td class="head-ltitle">
+MAILESTCTL(1)</td>
+<td class="head-vol">
+General Commands Manual</td>
+<td class="head-rtitle">
+MAILESTCTL(1)</td>
+</tr>
+</tbody>
+</table>
+<div class="section">
+<h1 id="x4e414d45">NAME</h1> <b class="name">mailestctl</b> &#8212; <span class="desc">control the mailest</span></div>
+<div class="section">
+<h1 id="x53594e4f50534953">SYNOPSIS</h1><table class="synopsis">
+<col style="width: 10.00ex;"/>
+<col/>
+<tbody>
+<tr>
+<td>
+mailestctl</td>
+<td>
+[<span class="opt"><b class="flag">-h</b></span>] [<span class="opt"><b class="flag">-S</b> <i class="arg">suffix</i></span>] [<span class="opt"><b class="flag">-s</b> <i class="arg">socket</i></span>] [<span class="opt"><b class="flag">-m</b> <i class="arg">maildir</i></span>] <i class="arg">command</i> [<span class="opt"><i class="arg">args ...</i></span>]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section">
+<h1 id="x4445534352495054494f4e">DESCRIPTION</h1> The <b class="name">mailestctl</b> program controls the <a class="link-man">mailestd(8)</a> daemon. To use the <b class="name">mailest</b> for the search backend for the Mew program, see the <span class="emph">EXAMPLE</span> section in <a class="link-man">mew-mailest(1)</a>.<div class="spacer">
+</div>
+The options are as follows:<dl style="margin-top: 0.00em;margin-bottom: 0.00em;" class="list list-tag">
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">-S</b> <i class="arg">suffix</i></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+The suffix of the mail files instead of the default <i class="file">.mew</i>. This option is only used only when the <b class="name">mailestctl</b> invoking <a class="link-man">mailestd(8)</a> to pass the suffix configuration. This option exists to keep the compatibility with the existing &#8220;mewest&#8221;, and it doesn't change the suffix configuration of the running <a class="link-man">mailestd(8)</a>. See the <a class="link-man">mailestd.conf(5)</a> to configure in proper way.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">-s</b> <i class="arg">socket</i></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Use the socket instead of the default <i class="file">(maildir)/.mailest.sock</i> to comunicate with <a class="link-man">mailestd(8)</a>.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">-m</b> <i class="arg">maildir</i></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+The base directory of the mail folders instead of the default <i class="file">${HOME}/Mail</i>.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">-h</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Show the usage.</dd>
+</dl>
+<div class="spacer">
+</div>
+The following commands are available:<dl style="margin-top: 0.00em;margin-bottom: 0.00em;" class="list list-tag">
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">start</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Start the <a class="link-man">mailestd(8)</a> daemon.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">stop</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Stop the running <a class="link-man">mailestd(8)</a> daemon.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">restart</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Restart the <a class="link-man">mailestd(8)</a> daemon.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">message-id</b> <i class="arg">message-id</i></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Search the indexes by the <i class="arg">message-id</i>.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">csearch</b> [<span class="opt"><b class="flag">-vu</b></span>] [<span class="opt"><b class="flag">-max</b> <i class="arg">max</i></span>] [<span class="opt"><b class="flag">-ord</b> <i class="arg">ord</i></span>] [<span class="opt"><b class="flag">-ic</b> <i class="arg">ic</i></span>] [<span class="opt"><b class="flag">-attr</b> <i class="arg">attr</i></span>] phrase</dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Search the indexes of the mail messages in <a class="link-man">estcmd(1)</a> compatible arguments. This command is used by &#8220;Mew&#8221; though the wrapper program <a class="link-man">mew-mailest(1)</a> to search the file names which include the given <i class="arg">phrase</i>. Specify <b class="flag">-vu</b> always since the other output options are not avaiable. The <a class="link-man">mailestd(8)</a> daemon will start automatically if it's not running.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">update</b> [<span class="opt"><i class="arg">folder</i></span>]</dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Start the indexes of the messages. If the <i class="arg">folder</i> is specified, the indexing is done in the specified folder, otherwise index all folders following the configuration of <a class="link-man">mailestd</a>. A shell globing pattern (like &#8220;openbsd-*&#8221;) is usable for the <i class="arg">folder</i>. The <a class="link-man">mailestd(8)</a> daemon will start automatically if it's not running.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">suspend</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Suspend the indexing.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">resume</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Resume the indexing.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">debug</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Increase the debug level of the <a class="link-man">mailestd(8)</a> daemon.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">--</b> <b class="flag">-debug</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Decrease the debug level of the <a class="link-man">mailestd(8)</a> daemon. &#8220;<b class="flag">--</b>&#8221; is needed to speparate this command from treating as the <b class="name">mailestctl</b> program's option.</dd>
+</dl>
+</div>
+<div class="section">
+<h1 id="x46494c4553">FILES</h1><dl style="margin-top: 0.00em;margin-bottom: 0.00em;" class="list list-tag">
+<dt class="list-tag" style="margin-top: 0.00em;">
+${HOME}/Mail</dt>
+<dd class="list-tag" style="margin-left: 23.00ex;">
+Default <i class="arg">maildir</i>.</dd>
+<dt class="list-tag" style="margin-top: 0.00em;">
+(maildir)/.mailest.sock</dt>
+<dd class="list-tag" style="margin-left: 23.00ex;">
+<span class="unix">UNIX</span>-domain socket used for communication with <a class="link-man">mailestd(8)</a></dd>
+</dl>
+</div>
+<div class="section">
+<h1 id="x53454520414c534f">SEE ALSO</h1> <a class="link-man">mailestd(8)</a>, <a class="link-man">mew-mailest(1)</a></div>
+<div class="section">
+<h1 id="x415554484f5253">AUTHORS</h1> The <b class="name">mailestctl</b> program was written by <span class="author">YASUOKA Masahiko</span> &lt;<a class="link-mail" href="mailto:yasuoka@yasuoka.net">yasuoka@yasuoka.net</a>&gt;.</div>
+<table class="foot">
+<tbody>
+<tr>
+<td class="foot-date">
+April 4, 2015</td>
+<td class="foot-os">
+OpenBSD 5.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>
+

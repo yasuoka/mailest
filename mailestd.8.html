@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+table.head, table.foot { width: 100%; }
+td.head-rtitle, td.foot-os { text-align: right; }
+td.head-vol { text-align: center; }
+table.foot td { width: 50%; }
+table.head td { width: 33%; }
+div.spacer { margin: 1em 0; }
+</style>
+<title>
+MAILESTD(8)</title>
+</head>
+<body>
+<div class="mandoc">
+<table class="head">
+<tbody>
+<tr>
+<td class="head-ltitle">
+MAILESTD(8)</td>
+<td class="head-vol">
+System Manager's Manual</td>
+<td class="head-rtitle">
+MAILESTD(8)</td>
+</tr>
+</tbody>
+</table>
+<div class="section">
+<h1 id="x4e414d45">NAME</h1> <b class="name">mailestd</b> &#8212; <span class="desc">mailest daemon</span></div>
+<div class="section">
+<h1 id="x53594e4f50534953">SYNOPSIS</h1><table class="synopsis">
+<col style="width: 8.00ex;"/>
+<col/>
+<tbody>
+<tr>
+<td>
+mailestd</td>
+<td>
+[<span class="opt"><b class="flag">-dnh</b></span>] [<span class="opt"><b class="flag">-S</b> <i class="arg">suffix</i></span>] [<span class="opt"><b class="flag">-f</b> <i class="arg">file</i></span>] [<span class="opt">maildir</span>]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section">
+<h1 id="x4445534352495054494f4e">DESCRIPTION</h1> The <b class="name">mailestd</b> is a daemon which provides the &#8220;search&#8221; functionality for mail messages using and managing a Hyper Estraier's database. Currently the <b class="name">mailestd</b> can be use as a &#8220;search&#8221; backend of the &#8220;Mew&#8221;. To use the <b class="name">mailest</b> for the search backend for the Mew program, see the <span class="emph">EXAMPLE</span> section in <a class="link-man">mew-mailest(1)</a>.<div class="spacer">
+</div>
+The options are as follows:<dl style="margin-top: 0.00em;margin-bottom: 0.00em;" class="list list-tag">
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">-d</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Increase debug level.  Do not daemonize and log to the <span class="emph">stderr</span>.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">-n</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Do not actually start the daemon. But checks the configuration file.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">-S</b> <i class="arg">suffix</i></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">-f</b> <i class="arg">file</i></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Use the <i class="arg">file</i> as the configuration file instead of the default <i class="file">${HOME}/Mail/mailestd.conf</i>. If the <i class="arg">maildir</i> is specified together, related path <i class="file">mailestd.conf</i> to the <i class="arg">maildir</i> is used.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<i class="arg">maildir</i></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+The base directory instead of the default <i class="file">${HOME}/Mail</i>. The directories below the <i class="arg">maildir</i> are the targets for the search functionality of the <b class="name">mailestd</b>.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">-h</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Show the usage.</dd>
+</dl>
+</div>
+<div class="section">
+<h1 id="x46494c4553">FILES</h1><dl style="margin-top: 0.00em;margin-bottom: 0.00em;" class="list list-tag">
+<dt class="list-tag" style="margin-top: 0.00em;">
+<i class="file">${HOME}/Mail</i></dt>
+<dd class="list-tag" style="margin-left: 24.00ex;">
+The default <i class="arg">maildir</i>.</dd>
+<dt class="list-tag" style="margin-top: 0.00em;">
+<i class="file">(maildir)/mailestd.conf</i></dt>
+<dd class="list-tag" style="margin-left: 24.00ex;">
+The default configuration file. The related path <i class="file">mailestd.conf</i> to the <i class="arg">maildir</i> is used.</dd>
+<dt class="list-tag" style="margin-top: 0.00em;">
+<i class="file">(maildir)/mailestd.log</i></dt>
+<dd class="list-tag" style="margin-left: 24.00ex;">
+The default log file. The related path <i class="file">mailestd.log</i> to the <i class="arg">maildir</i> is used.</dd>
+<dt class="list-tag" style="margin-top: 0.00em;">
+<i class="file">(maildir)/.mailest.sock</i></dt>
+<dd class="list-tag" style="margin-left: 24.00ex;">
+The default <span class="unix">UNIX</span>-domain socket for communication from <a class="link-man">mailectl(1)</a>. The related path <i class="file">.mailestd.sock</i> to the <i class="arg">maildir</i> is used.</dd>
+<dt class="list-tag" style="margin-top: 0.00em;">
+<i class="file">(maildir)/cascket</i></dt>
+<dd class="list-tag" style="margin-left: 24.00ex;">
+The default database directory. The related path <i class="file">cascket</i> to the <i class="arg">maildir</i> is used.</dd>
+</dl>
+</div>
+<div class="section">
+<h1 id="x53454520414c534f">SEE ALSO</h1> <a class="link-man">mailestctl(1)</a>, <a class="link-man">mailestd.conf(5)</a></div>
+<div class="section">
+<h1 id="x415554484f5253">AUTHORS</h1> The <b class="name">mailestd</b> program was written by <span class="author">YASUOKA Masahiko</span> &lt;<a class="link-mail" href="mailto:yasuoka@yasuoka.net">yasuoka@yasuoka.net</a>&gt;.</div>
+<table class="foot">
+<tbody>
+<tr>
+<td class="foot-date">
+April 4, 2015</td>
+<td class="foot-os">
+OpenBSD 5.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>
+
