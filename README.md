@@ -5,7 +5,7 @@ WIP
 
 "mailest" is a "search" backend for [mew](http://mew.org) using
 [Hyper Estraier](fallabs.com/hyperestraier/index.html).  It can replace
-the existing backend "mewest".
+the existing backend `mewest`.
 
 
 Install
@@ -39,18 +39,18 @@ Quick Usage
       (defvar mew-prog-est        "mew-mailest")
       (defvar mew-prog-est-update "mew-mailest")
 
-+ Use "km", "kM", "k/" or "k?" in mew.  See
++ Use `km`, `kM`, `k/` or `k?` in mew.  See
   http://mew.org/en/info/release/mew_6.html#dbsearch for search commands
   in mew.
 
 
-Differences from "mewest"
+Differences from `mewest`
 -------------------------
 
 Backup of the database
 
   "mailest" doesn't create a backup of the database before updating the
-  database which "mewest" does.  Hyper estrairer databases break easyly
+  database which `mewest` does.  Hyper estrairer databases break easyly
   if the program or the system is crashed during updating the database.
 
 
