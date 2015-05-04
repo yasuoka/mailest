@@ -1263,17 +1263,14 @@ task_worker_on_itc_event(int fd, short evmask, void *ctx)
 static void
 task_worker_message_all(struct mailestd *_this, enum MAILESTD_TASK tsk_type)
 {
-	int			 i;
-	struct task		*task;
-	struct task_worker	*workers[] = {
-	    &_this->dbworker, &_this->mainworker
-	};
+	int		 i;
+	struct task	*task;
 
-	for (i = 0; i < (int)nitems(workers); i++) {
+	for (i = 0; _this->workers[i] != NULL; i++) {
 		task = xcalloc(1, sizeof(struct task));
 		task->type = tsk_type;
 		task->highprio = true;
-		task_worker_add_task(workers[i], task);
+		task_worker_add_task(_this->workers[i], task);
 	}
 }
 
