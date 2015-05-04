@@ -123,29 +123,14 @@ keyword, for example:
 .Bd -literal -offset indent
 include "/etc/mailestd.conf"
 .Ed
-.\" The following requests should be uncommented and used where appropriate.
-.\" .Sh CONTEXT
-.\" For section 9 functions only.
-.\" .Sh RETURN VALUES
-.\" For sections 2, 3, and 9 function return values only.
-.\" .Sh ENVIRONMENT
-.\" For sections 1, 6, 7, and 8 only.
-.\" .Sh FILES
-.\" .Sh EXIT STATUS
-.\" For sections 1, 6, and 8 only.
-.\" .Sh EXAMPLES
-.\" .Sh DIAGNOSTICS
-.\" For sections 1, 4, 6, 7, 8, and 9 printf/stderr messages only.
-.\" .Sh ERRORS
-.\" For sections 2, 3, 4, and 9 errno settings only.
 .Sh SEE ALSO
 .Xr mailestd 8
 .Sh FILES
-.Bl -tag -width "mailestd.confXX" -compact
+.Bl -tag -width "(maildir)/mailestd.confXX" -compact
 .It Pa ${HOME}/Mail
 The default
 .Ar maildir .
-.It Pa mailestd.conf
+.It Pa (maildir)/mailestd.conf
 The default configuration file name.
 .Sh AUTHORS
 The

@@ -23,6 +23,7 @@
 .Nm mailestctl
 .Op Fl h
 .Op Fl S Ar suffix
+.Op Fl s Ar socket
 .Op Fl m Ar maildir
 .Ar command
 .Op Ar args ...
@@ -56,6 +57,11 @@ and it doesn't change the suffix configuration of the running
 See the
 .Xr mailestd.conf 5
 to configure in proper way.
+.It Fl s Ar socket
+Use the socket instead of the default
+.Pa (maildir)/.mailest.sock
+to comunicate with
+.Xr mailestd 8 .
 .It Fl m Ar maildir
 The base directory of the mail folders instead of the default
 .Pa ${HOME}/Mail .
@@ -126,11 +132,11 @@ is needed to speparate this command from treating as the
 program's option.
 .El
 .Sh FILES
-.Bl -tag -width "${HOME}/Mail/.mailest.sock" -compact
+.Bl -tag -width "(maildir)/.mailest.sock" -compact
 .It ${HOME}/Mail
 Default
 .Ar maildir .
-.It ${HOME}/Mail/.mailest.sock
+.It (maildir)/.mailest.sock
 .Ux Ns -domain
 socket used for communication with
 .Xr mailestd 8
