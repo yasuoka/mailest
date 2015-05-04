@@ -1,4 +1,5 @@
-MAILESTD_MT=	1
+MAILESTD_MT=	#
+
 PREFIX=		/usr/local
 BINDIR=		${PREFIX}/sbin
 
