@@ -1,0 +1,123 @@
+.\"
+.\" Copyright (c) 2015 YASUOKA Masahiko <yasuoka@yasuoka.net>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd April 4, 2015
+.Dt MAILESTD 8
+.Os
+.Sh NAME
+.Nm mailestd
+.Nd mailest daemon
+.Sh SYNOPSIS
+.Nm
+.Op Fl dnh
+.Op Fl S Ar suffix
+.Op Fl f Ar file
+.Op maildir
+.Sh DESCRIPTION
+The
+.Nm
+is a daemon which provides the
+.Dq search
+functionality for mail messages using and managing a Hyper Estraier's
+database.
+Currently the
+.Nm
+can be use as a
+.Dq search
+backend of the
+.Dq Mew .
+To use the
+.Nm mailest
+for the search backend for the Mew program, see the
+.Em EXAMPLE
+section in
+.Xr mew-mailest 1 .
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl d
+Increase debug level.  Do not daemonize and log to the
+.Em stderr .
+.It Fl n
+Do not actually start the daemon.
+But checks the configuration file.
+.It Fl S Ar suffix
+.It Fl f Ar file
+Use the
+.Ar file
+as the configuration file instead of the default
+.Pa ${HOME}/Mail/mailestd.conf .
+If the
+.Ar maildir
+is specified together, related path
+.Pa mailestd.conf
+to the
+.Ar maildir
+is used.
+.It Ar maildir
+The base directory instead of the default
+.Pa ${HOME}/Mail .
+The directories below the
+.Ar maildir
+are the targets for the search functionality of the
+.Nm .
+.It Fl h
+Show the usage.
+.El
+.Sh FILES
+.Bl -tag -width "mailestd.confXX" -compact
+.It Pa ${HOME}/Mail
+The default
+.Ar maildir .
+.It Pa mailestd.conf
+The default configuration file.
+The related path
+.Pa mailestd.conf
+to the
+.Ar maildir
+is used.
+.It Pa mailestd.log
+The default log file.
+The related path
+.Pa mailestd.log
+to the
+.Ar maildir
+is used.
+.It Pa .mailest.sock
+The default
+.Ux Ns -domain
+socket for communication from
+.Xr mailectl 1 .
+The related path
+.Pa .mailestd.sock
+to the
+.Ar maildir
+is used.
+.It Pa cascket
+The default database directory.
+The related path
+.Pa cascket
+to the
+.Ar maildir
+is used.
+.El
+.Sh SEE ALSO
+.Xr mailestctl 1 ,
+.Xr mailestd.conf 5
+.Sh AUTHORS
+The
+.Nm
+program was written by
+.An YASUOKA Masahiko Aq Mt yasuoka@yasuoka.net .

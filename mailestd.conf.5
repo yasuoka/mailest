@@ -1,0 +1,154 @@
+.\"
+.\" Copyright (c) 2015 YASUOKA Masahiko <yasuoka@yasuoka.net>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.\" The following requests are required for all man pages.
+.\"
+.Dd April 4, 2015
+.Dt MAILESTD.CONF 5
+.Os
+.Sh NAME
+.Nm mailestd.conf
+.Nd
+.Xr mailestd 8
+configuration file
+.Sh DESCRIPTION
+.Nm
+is the configuration file for the
+.Xr mailestd 8
+daemon.
+.Pp
+The following options can be set:
+.Bl -tag -width Ds
+.It Ic maildir Ar directory
+The base directory instead of the default
+.Pa ${HOME}/Mail .
+.Xr mailestd 8
+creates indexes for the mail message in the folders under this directory
+and uses some files under from this directory.
+.It Ic socket Ar path
+The
+.Ux Ns -domain
+socket for communication from
+.Xr mailectl 1 .
+As the default relateve path 
+.Pa .mailestd.sock
+from the
+.Ar maildir
+is used.
+.It Ic tasks Ar number
+The number of tasks allowed to prepare for indexing paralelly.
+The default value is
+.Dq 4 .
+Specifying a large number may improve the peformance,
+but cosumes the memory resource.
+On typical environments,
+since indexing the mail messages and putting them into the datbase will be
+the performance bottle neck,
+this variable is not so important.
+.It Ic suffixes Ar suffix ...
+The file name suffixes of the mail messages gathered for indexing.
+The default is
+.Dq ""
+.Pq none .
+.It Ic folders Ar folder ...
+The folder name patterns
+.Xr emailestd 8
+creates index for.
+An shell pattern
+.Po Qo openbsd-* Qc for example Pc
+is usable.
+If the
+.Ar folder
+starts with
+.Dq \! ,
+matched folders are ignored.
+Folders not matched any are target for indexing.
+The default is
+.Qq !trash !casket !casket_replica Qc .
+.It Ic log Ic path Ar path 
+The log file path.
+As the default,
+the relative path 
+.Pa mailestd.log
+to
+.Ar maildir
+is used.
+.It Ic log Ic rotate Oo Ic count Ar count Oc Oo Ic size Ar size Oc
+The log rotation behaviour.
+As the default,
+.Dq 8
+for the
+.Ar count
+and
+.Do 30720 Dc
+.Pq 30K bytes
+are used.
+.It Ic database Ic path Ar path
+Thd database directory.
+As the default,
+the relative path
+.Pa cascket
+is used.
+.It Ic debug Ic level Ar debug-level
+The debug level instead of the default value
+.Dq 0 .
+.El
+.Pp
+The current line can be extended over multiple lines using a backslash
+.Pq Sq \e .
+Comments can be put anywhere in the file using a hash mark
+.Pq Sq # ,
+and extend to the end of the current line.
+Care should be taken when commenting out multi-line text:
+the comment is effective until the end of the entire block.
+.Pp
+Argument names not beginning with a letter, digit, or underscore
+must be quoted.
+.Pp
+Additional configuration files can be included with the
+.Ic include
+keyword, for example:
+.Bd -literal -offset indent
+include "/etc/mailestd.conf"
+.Ed
+.\" The following requests should be uncommented and used where appropriate.
+.\" .Sh CONTEXT
+.\" For section 9 functions only.
+.\" .Sh RETURN VALUES
+.\" For sections 2, 3, and 9 function return values only.
+.\" .Sh ENVIRONMENT
+.\" For sections 1, 6, 7, and 8 only.
+.\" .Sh FILES
+.\" .Sh EXIT STATUS
+.\" For sections 1, 6, and 8 only.
+.\" .Sh EXAMPLES
+.\" .Sh DIAGNOSTICS
+.\" For sections 1, 4, 6, 7, 8, and 9 printf/stderr messages only.
+.\" .Sh ERRORS
+.\" For sections 2, 3, 4, and 9 errno settings only.
+.Sh SEE ALSO
+.Xr mailestd 8
+.Sh FILES
+.Bl -tag -width "mailestd.confXX" -compact
+.It Pa ${HOME}/Mail
+The default
+.Ar maildir .
+.It Pa mailestd.conf
+The default configuration file name.
+.Sh AUTHORS
+The
+.Nm
+program was written by
+.An YASUOKA Masahiko Aq Mt yasuoka@yasuoka.net .

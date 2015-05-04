@@ -1,0 +1,145 @@
+.\"
+.\" Copyright (c) 2015 YASUOKA Masahiko <yasuoka@yasuoka.net>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd April 4, 2015
+.Dt MAILESTCTL 1
+.Os
+.Sh NAME
+.Nm mailestctl
+.Nd control the mailest
+.Sh SYNOPSIS
+.Nm mailestctl
+.Op Fl h
+.Op Fl S Ar suffix
+.Op Fl m Ar maildir
+.Ar command
+.Op Ar args ...
+.Sh DESCRIPTION
+The
+.Nm
+program controls the
+.Xr mailestd 8
+daemon.
+To use the
+.Nm mailest
+for the search backend for the Mew program, see the
+.Em EXAMPLE
+section in
+.Xr mew-mailest 1 .
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl S Ar suffix
+The suffix of the mail files instead of the default
+.Pa .mew .
+This option is only used only when the
+.Nm
+invoking
+.Xr mailestd 8
+to pass the suffix configuration.
+This option exists to keep the compatibility with the existing
+.Dq mewest ,
+and it doesn't change the suffix configuration of the running
+.Xr mailestd 8 .
+See the
+.Xr mailestd.conf 5
+to configure in proper way.
+.It Fl m Ar maildir
+The base directory of the mail folders instead of the default
+.Pa ${HOME}/Mail .
+.It Fl h
+Show the usage.
+.El
+.Pp
+The following commands are available:
+.Bl -tag -width Ds
+.It Cm start
+Start the
+.Xr mailestd 8
+daemon.
+.It Cm stop
+Stop the running
+.Xr mailestd 8
+daemon.
+.It Cm restart
+Restart the
+.Xr mailestd 8
+daemon.
+.It Cm csearch Oo Fl vu Oc Oo Fl max Ar max Oc Oo Fl ord Ar ord Oc \
+Oo Fl ic Ar ic Oc Oo Fl attr Ar attr Oc phrase
+Search the indexes of the mail messages in
+.Xr estcmd 1
+compatible arguments.
+This command is used by
+.Dq Mew
+though the wrapper program
+.Xr mew-mailest 1
+to search the file names which include the given
+.Ar phrase .
+Specify
+.Fl vu
+always since the other output options are not avaiable.
+The
+.Xr mailestd 8
+daemon will start automatically if it's not running.
+.It Cm update Op Ar folder
+Start the indexes of the messages.
+If the
+.Ar folder
+is specified, the indexing is done in the specified folder,
+otherwise index all folders following the configuration of
+.Xr mailestd .
+A shell globing pattern
+.Pq like Qo openbsd-* Qc
+is usable for the
+.Ar folder .
+The
+.Xr mailestd 8
+daemon will start automatically if it's not running.
+.It Cm suspend
+Suspend the indexing.
+.It Cm resume
+Resume the indexing.
+.It Cm debug
+Increase the debug level of the
+.Xr mailestd 8
+daemon.
+.It Fl - Cm -debug
+Decrease the debug level of the
+.Xr mailestd 8
+daemon.
+.Dq Fl -
+is needed to speparate this command from treating as the
+.Nm
+program's option.
+.El
+.Sh FILES
+.Bl -tag -width "${HOME}/Mail/.mailest.sock" -compact
+.It ${HOME}/Mail
+Default
+.Ar maildir .
+.It ${HOME}/Mail/.mailest.sock
+.Ux Ns -domain
+socket used for communication with
+.Xr mailestd 8
+.El
+.Sh SEE ALSO
+.Xr mailestd 8 ,
+.Xr mew-mailest 1
+.Sh AUTHORS
+The
+.Nm
+program was written by
+.An YASUOKA Masahiko Aq Mt yasuoka@yasuoka.net .
