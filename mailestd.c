@@ -203,7 +203,7 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 	_this->doc_trimsize = conf->trim_size;
 	_this->ignore = conf->ignores;
 	if (conf->ignores == NULL) {
-		_this->ignore = xcalloc(nitems(defignore), sizeof(char *));
+		_this->ignore = xcalloc(nitems(defignore) + 1, sizeof(char *));
 		for (i = 0; i < (int)nitems(defignore); i++)
 			_this->ignore[i] = xstrdup(defignore[i]);
 		_this->ignore[i] = NULL;
@@ -234,7 +234,7 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 
 	memset(&sun, 0, sizeof(sun));
 	sun.sun_family = AF_UNIX;
-	memcpy(sun.sun_path, conf->sock_path, sizeof(sun.sun_path));
+	strlcpy(sun.sun_path, conf->sock_path, sizeof(sun.sun_path));
 
 	_this->sock_ctl = socket(PF_UNIX, SOCK_SEQPACKET, 0);
 	if (_this->sock_ctl < 0)
