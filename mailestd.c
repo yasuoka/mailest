@@ -776,7 +776,7 @@ mailestd_draft(struct mailestd *_this, struct rfc822 *msg)
 		mailestd_log(LOG_WARNING, "fstat(%s): %m", msg->path);
 		goto on_error;
 	}
-	if ((msgs = mmap(0, st.st_size, PROT_READ, MAP_FILE, fd, 0)) ==
+	if ((msgs = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE | MAP_FILE, fd, 0)) ==
 	    MAP_FAILED) {
 		mailestd_log(LOG_WARNING, "mmap(%s): %m", msg->path);
 		goto on_error;
