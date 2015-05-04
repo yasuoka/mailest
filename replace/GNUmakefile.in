@@ -76,8 +76,9 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = libestdraft
+subdir = replace
 DIST_COMMON = $(srcdir)/GNUmakefile.in $(srcdir)/GNUmakefile.am \
+	reallocarray.c strlcat.c strlcpy.c open_memstream.c strtonum.c \
 	$(top_srcdir)/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -94,11 +95,10 @@ AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
-libestdraft_a_AR = $(AR) $(ARFLAGS)
-libestdraft_a_LIBADD =
-am__dirstamp = $(am__leading_dot)dirstamp
-am_libestdraft_a_OBJECTS = ../libestdraft_a-estdraft.$(OBJEXT)
-libestdraft_a_OBJECTS = $(am_libestdraft_a_OBJECTS)
+libreplace_a_AR = $(AR) $(ARFLAGS)
+libreplace_a_DEPENDENCIES = @LIBOBJS@
+am_libreplace_a_OBJECTS =
+libreplace_a_OBJECTS = $(am_libreplace_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -115,10 +115,6 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
@@ -131,8 +127,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libestdraft_a_SOURCES)
-DIST_SOURCES = $(libestdraft_a_SOURCES)
+SOURCES = $(libreplace_a_SOURCES)
+DIST_SOURCES = $(libreplace_a_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -249,9 +245,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libestdraft.a
-libestdraft_a_SOURCES = ../estdraft.c ../estdraft.h
-libestdraft_a_CPPFLAGS = -I..
+noinst_LIBRARIES = libreplace.a
+libreplace_a_SOURCES = replace.h
+libreplace_a_LIBADD = @LIBOBJS@
 all: all-am
 
 .SUFFIXES:
@@ -265,9 +261,9 @@ $(srcdir)/GNUmakefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/GNUmakefile.am  $(am_
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign libestdraft/GNUmakefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign replace/GNUmakefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign libestdraft/GNUmakefile
+	  $(AUTOMAKE) --foreign replace/GNUmakefile
 .PRECIOUS: GNUmakefile
 GNUmakefile: $(srcdir)/GNUmakefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -289,28 +285,23 @@ $(am__aclocal_m4_deps):
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-../$(am__dirstamp):
-	@$(MKDIR_P) ..
-	@: > ../$(am__dirstamp)
-../$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) ../$(DEPDIR)
-	@: > ../$(DEPDIR)/$(am__dirstamp)
-../libestdraft_a-estdraft.$(OBJEXT): ../$(am__dirstamp) \
-	../$(DEPDIR)/$(am__dirstamp)
 
-libestdraft.a: $(libestdraft_a_OBJECTS) $(libestdraft_a_DEPENDENCIES) $(EXTRA_libestdraft_a_DEPENDENCIES) 
-	$(AM_V_at)-rm -f libestdraft.a
-	$(AM_V_AR)$(libestdraft_a_AR) libestdraft.a $(libestdraft_a_OBJECTS) $(libestdraft_a_LIBADD)
-	$(AM_V_at)$(RANLIB) libestdraft.a
+libreplace.a: $(libreplace_a_OBJECTS) $(libreplace_a_DEPENDENCIES) $(EXTRA_libreplace_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libreplace.a
+	$(AM_V_AR)$(libreplace_a_AR) libreplace.a $(libreplace_a_OBJECTS) $(libreplace_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libreplace.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f ../*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@../$(DEPDIR)/libestdraft_a-estdraft.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/open_memstream.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/reallocarray.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/strlcat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/strlcpy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/strtonum.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -327,20 +318,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-../libestdraft_a-estdraft.o: ../estdraft.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libestdraft_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ../libestdraft_a-estdraft.o -MD -MP -MF ../$(DEPDIR)/libestdraft_a-estdraft.Tpo -c -o ../libestdraft_a-estdraft.o `test -f '../estdraft.c' || echo '$(srcdir)/'`../estdraft.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ../$(DEPDIR)/libestdraft_a-estdraft.Tpo ../$(DEPDIR)/libestdraft_a-estdraft.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../estdraft.c' object='../libestdraft_a-estdraft.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libestdraft_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ../libestdraft_a-estdraft.o `test -f '../estdraft.c' || echo '$(srcdir)/'`../estdraft.c
-
-../libestdraft_a-estdraft.obj: ../estdraft.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libestdraft_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ../libestdraft_a-estdraft.obj -MD -MP -MF ../$(DEPDIR)/libestdraft_a-estdraft.Tpo -c -o ../libestdraft_a-estdraft.obj `if test -f '../estdraft.c'; then $(CYGPATH_W) '../estdraft.c'; else $(CYGPATH_W) '$(srcdir)/../estdraft.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ../$(DEPDIR)/libestdraft_a-estdraft.Tpo ../$(DEPDIR)/libestdraft_a-estdraft.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../estdraft.c' object='../libestdraft_a-estdraft.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libestdraft_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ../libestdraft_a-estdraft.obj `if test -f '../estdraft.c'; then $(CYGPATH_W) '../estdraft.c'; else $(CYGPATH_W) '$(srcdir)/../estdraft.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -454,8 +431,6 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f ../$(DEPDIR)/$(am__dirstamp)
-	-rm -f ../$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -464,6 +439,9 @@ clean: clean-am
 
 clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
+distclean: distclean-am
+	-rm -rf $(DEPDIR)
+	-rm -f GNUmakefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
 
@@ -508,7 +486,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ../$(DEPDIR)
+	-rm -rf $(DEPDIR)
 	-rm -f GNUmakefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -541,11 +519,6 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
 	uninstall-am
 
-
-# override "distclean" to workaround an automake's bug?  'distclean' tries
-# to remove ../.dep, but it still has files for ../mailestd.
-distclean: distclean-am
-	-rm -f GNUmakefile
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

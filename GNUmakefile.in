@@ -147,7 +147,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
-DIST_SUBDIRS = libestdraft mailestd
+DIST_SUBDIRS = replace libestdraft mailestd
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -281,8 +281,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = $(am__append_1) mailestd
-EXTRA_DIST = README.md Makefile libestdraft/Makefile mailestd/Makefile
+SUBDIRS = replace $(am__append_1) mailestd
+EXTRA_DIST = README.md Makefile Makefile.inc libestdraft/Makefile \
+	mailestd/Makefile compat.h
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

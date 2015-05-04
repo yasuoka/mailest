@@ -1,10 +1,31 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you have the <estraier.h> header file. */
+#undef HAVE_ESTRAIER_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `estraier' library (-lestraier). */
+#undef HAVE_LIBESTRAIER
+
+/* Define to 1 if you have the `event' library (-levent). */
+#undef HAVE_LIBEVENT
+
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#undef HAVE_LIBPTHREAD
+
+/* Define to 1 if you have the `qdbm' library (-lqdbm). */
+#undef HAVE_LIBQDBM
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `open_memstream' function. */
+#undef HAVE_OPEN_MEMSTREAM
+
+/* Define to 1 if you have the `reallocarray' function. */
+#undef HAVE_REALLOCARRAY
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -20,6 +41,12 @@
 
 /* Define to 1 if you have the `strlcat' function. */
 #undef HAVE_STRLCAT
+
+/* Define to 1 if you have the `strlcpy' function. */
+#undef HAVE_STRLCPY
+
+/* Define to 1 if you have the `strtonum' function. */
+#undef HAVE_STRTONUM
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H

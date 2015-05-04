@@ -79,10 +79,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 sbin_PROGRAMS = mailestd$(EXEEXT)
 @ENABLE_MULTI_THREADS_TRUE@am__append_1 = -DMAILESTD_MT
-@ENABLE_MULTI_THREADS_TRUE@am__append_2 = -lpthread
-@WITH_LIBESTDRAFT_TRUE@am__append_3 = -DHAVE_LIBESTDRAFT
-@WITH_LIBESTDRAFT_TRUE@am__append_4 = -L../libestdraft
-@WITH_LIBESTDRAFT_TRUE@am__append_5 = -lestdraft
+@WITH_LIBESTDRAFT_TRUE@am__append_2 = -DHAVE_LIBESTDRAFT
+@WITH_LIBESTDRAFT_TRUE@am__append_3 = -L../libestdraft
+@WITH_LIBESTDRAFT_TRUE@am__append_4 = -lestdraft
 subdir = mailestd
 DIST_COMMON = $(srcdir)/GNUmakefile.in $(srcdir)/GNUmakefile.am \
 	../parse.c $(top_srcdir)/depcomp $(top_srcdir)/ylwrap
@@ -102,7 +101,7 @@ am_mailestd_OBJECTS = ../mailestd-mailestd.$(OBJEXT) \
 	../mailestd-parser.$(OBJEXT) ../mailestd-bytebuf.$(OBJEXT)
 mailestd_OBJECTS = $(am_mailestd_OBJECTS)
 am__DEPENDENCIES_1 =
-mailestd_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+mailestd_DEPENDENCIES = $(am__DEPENDENCIES_1)
 mailestd_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(mailestd_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -295,11 +294,12 @@ top_srcdir = @top_srcdir@
 mailestd_SOURCES = ../mailestd.c ../mailestctl.c ../parse.y \
 	../parser.c ../bytebuf.c ../bytebuf.h ../defs.h ../mailestd.h \
 	../mailestd_local.h ../parser.h ../thread.h
-mailestd_CPPFLAGS = -I$(top_srcdir) $(am__append_1) $(am__append_3)
-mailestd_LDADD = -lestraier -levent $(am__append_2) $(am__append_5)
-mailestd_LDFLAGS = $(am__append_4)
+mailestd_CPPFLAGS = -iquotedir -I$(top_srcdir)/replace -I$(top_srcdir) \
+	$(am__append_1) $(am__append_2)
+mailestd_LDFLAGS = -L../replace $(am__append_3)
+mailestd_LDADD = -lreplace $(am__append_4)
 bin_SCRIPTS = mew-mailest
-CLEANFILES = mew-mailest
+CLEANFILES = mew-mailest ../parse.c
 EXTRA_DIST = $(top_srcdir)/mew-mailest.sh
 all: all-am
 
