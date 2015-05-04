@@ -1157,18 +1157,12 @@ mailestd_schedule_inform(struct mailestd *_this, uint64_t task_id,
 static void
 task_worker_init(struct task_worker *_this, struct mailestd *mailestd)
 {
+	int	 flags, pairsock[2];
 	memset(_this, 0, sizeof(struct task_worker));
+
 	TAILQ_INIT(&_this->head);
 	_thread_mutex_init(&_this->lock, NULL);
 	_this->mailestd_this = mailestd;
-}
-
-static void
-task_worker_start(struct task_worker *_this)
-{
-	int	 flags, pairsock[2];
-
-	_this->thread = _thread_self();
 	if (socketpair(PF_UNIX, SOCK_SEQPACKET, 0, pairsock) == -1)
 		err(EX_OSERR, "socketpair()");
 	_this->sock = pairsock[1];
@@ -1183,6 +1177,12 @@ task_worker_start(struct task_worker *_this)
 		mailestd_log(LOG_CRIT, "%s: O_NONBLOCK by fcntl(): %m", __func__);
 		abort();
 	}
+}
+
+static void
+task_worker_start(struct task_worker *_this)
+{
+	_this->thread = _thread_self();
 
 	EVENT_SET(&_this->evsock, _this->sock, EV_READ | EV_PERSIST,
 		task_worker_on_itc_event, _this);
