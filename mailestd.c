@@ -86,6 +86,7 @@ main(int argc, char *argv[])
 	char			 pathtmp[PATH_MAX], maildir0[PATH_MAX];
 	struct mailestd_conf	*conf;
 	bool			 noaction = false;
+	struct stat		 st;
 	extern char		*__progname;
 
 	if (strcmp(__progname, "mailestctl") == 0)
@@ -146,6 +147,9 @@ main(int argc, char *argv[])
 		strlcpy(maildir0, pathtmp, sizeof(maildir0));
 		maildir = maildir0;
 	}
+	if (lstat(maildir, &st) == -1)
+		err(EX_USAGE, "%s", maildir);
+
 	if (conf_file == NULL) {
 		strlcpy(pathtmp, maildir, sizeof(pathtmp));
 		strlcat(pathtmp, "/", sizeof(pathtmp));
