@@ -330,8 +330,6 @@ mailestd_stop(struct mailestd *_this)
 
 	/* stop the task threads */
 	task_worker_message_all(_this, MAILESTD_TASK_STOP);
-	close(_this->dbworker.sock_itc);
-	close(_this->mainworker.sock_itc);
 
 	evtimer_del(&_this->evtimer);
 	/* stop signals and receiving controls */
@@ -1230,6 +1228,7 @@ task_worker_stop(struct task_worker *_this)
 	if (_this->sock >= 0) {
 		event_del(&_this->evsock);
 		close(_this->sock);
+		close(_this->sock_itc);
 	}
 	_thread_mutex_destroy(&_this->lock);
 	TAILQ_FOREACH_SAFE(tske, &_this->head, queue, tskt) {
@@ -1350,6 +1349,7 @@ task_worker_on_proc(struct task_worker *_this)
 			stop = true;
 			if (thread_this == mailestd->dbworker.thread)
 				task_dbworker(_this, &dbctx, task);
+			task_worker_stop(_this);
 			break;
 
 		case MAILESTD_TASK_RESUME:
