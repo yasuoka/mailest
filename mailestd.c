@@ -93,7 +93,7 @@ main(int argc, char *argv[])
 		return (mailestctl_main(argc, argv));
 
 	memset(suffix, 0, sizeof(suffix));
-	while ((ch = getopt(argc, argv, "dhs:nf:")) != -1)
+	while ((ch = getopt(argc, argv, "+dhs:nf:")) != -1)
 		switch (ch) {
 		case 's':
 			if (suffixcount + 2 >= (int)nitems(suffix)) {

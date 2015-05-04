@@ -74,7 +74,7 @@ mailestctl_main(int argc, char *argv[])
 		errx(EX_OSERR,
 		    "HOME environment variable is not set");
 
-	while ((ch = getopt(argc, argv, "dhb:s:")) != -1)
+	while ((ch = getopt(argc, argv, "+dhb:s:")) != -1)
 		switch (ch) {
 		case 'b':
 			maildir = optarg;
