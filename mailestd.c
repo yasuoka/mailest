@@ -166,8 +166,10 @@ main(int argc, char *argv[])
 
 	mailestd_init(&mailestd_s, conf, (isnull(suffix[0]))? NULL : suffix);
 	free_config(conf);
-	if (!foreground)
-		daemon(1, 0);
+	if (!foreground) {
+		if (daemon(1, 0) == -1)
+			err(EX_OSERR, "daemon");
+	}
 	mailestd_log_init();
 	EVENT_INIT();
 	mailestd_start(&mailestd_s, foreground);
@@ -1497,7 +1499,10 @@ task_worker_add_task(struct task_worker *_this, struct task *task)
 		TAILQ_INSERT_TAIL(&_this->head, task, queue);
 	_thread_mutex_unlock(&_this->lock);
 
-	write(_this->sock_itc, "A", 1);		/* wakeup */
+	if (write(_this->sock_itc, "A", 1) < 0) {
+		if (errno != EAGAIN)
+			mailestd_log(LOG_WARNING, "%s: write(): %m", __func__);
+	}
 
 	return (id);
 }
