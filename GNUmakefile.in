@@ -283,7 +283,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = replace $(am__append_1) mailestd
 EXTRA_DIST = README.md Makefile Makefile.inc libestdraft/Makefile \
-	mailestd/Makefile compat.h
+	mailestd/Makefile compat.h mailestd.conf
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
