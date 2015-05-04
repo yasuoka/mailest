@@ -81,12 +81,12 @@ main(int argc, char *argv[])
 {
 	int			 ch, suffixcount = 0;
 	struct mailestd		 mailestd_s;
-	const char		*maildir = NULL, *home;
+	const char		*maildir = NULL, *home, *conf_file = NULL,
+				*suffix[11];
 	char			 pathtmp[PATH_MAX], maildir0[PATH_MAX];
-	const char		*conf_file = NULL, *suffix[11];
 	struct mailestd_conf	*conf;
 	bool			 noaction = false;
-	extern char	*__progname;
+	extern char		*__progname;
 
 	if (strcmp(__progname, "mailestctl") == 0)
 		return (mailestctl_main(argc, argv));
