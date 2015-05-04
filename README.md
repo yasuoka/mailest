@@ -28,20 +28,20 @@ On other BSD or Linux
 Quick Usage
 -----------
 
-1. Add the below line to .mew.el to let mew use "Hyper Estrairer" for
-   search.
++ Add the below line to .mew.el to let mew use "Hyper Estrairer" for
+  search.
 
-    ((setq mew-search-method 'est)
+      ((setq mew-search-method 'est)
 
-2. Add the below lines to ~/.emacs use use the "mailest" instead of
-   existing "mewest".
++ Add the below lines to ~/.emacs use use the "mailest" instead of
+  existing "mewest".
 
-    (defvar mew-prog-est        "mew-mailest")
-    (defvar mew-prog-est-update "mew-mailest")
+      (defvar mew-prog-est        "mew-mailest")
+      (defvar mew-prog-est-update "mew-mailest")
 
-3. Use "km", "kM", "k/" or "k?" in mew.  See
-   http://mew.org/en/info/release/mew_6.html#dbsearch for search
-   commands in mew.
++ Use "km", "kM", "k/" or "k?" in mew.  See
+  http://mew.org/en/info/release/mew_6.html#dbsearch for search commands
+  in mew.
 
 
 Differences from "mewest"
