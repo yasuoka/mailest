@@ -23,6 +23,7 @@
  */
 
 %{
+#include "compat.h"
 
 #include <sys/types.h>
 #include <sys/queue.h>
@@ -40,9 +41,9 @@
 #include "mailestd.h"
 #include "defs.h"
 
-void			 mailestd_log(int, const char *, ...)
-			    __attribute__((__format__(__syslog__,2,3)));
-void			 mailestd_vlog(int, const char *, va_list);
+void	 mailestd_log(int, const char *, ...)
+	    __attribute__((__format__(__syslog__,2,3)));
+void	 mailestd_vlog(int, const char *, va_list);
 
 static struct mailestd_conf	*conf;
 

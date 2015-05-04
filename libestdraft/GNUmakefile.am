@@ -1,7 +1,6 @@
 noinst_LIBRARIES = libestdraft.a
 libestdraft_a_SOURCES = ../estdraft.c ../estdraft.h
 libestdraft_a_CPPFLAGS = -I..
-libestdraft_a_LIBOBJS = $(LIBOBJS)
 
 # override "distclean" to workaround an automake's bug?  'distclean' tries
 # to remove ../.dep, but it still has files for ../mailestd.

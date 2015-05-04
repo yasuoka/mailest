@@ -15,6 +15,8 @@ AC_PROG_CC
 AC_PROG_YACC
 AC_PROG_RANLIB
 
+CPPFLAGS="$CPPFLAGS -I/usr/include/qdbm -I/usr/include/estraier"
+
 # Checks for libraries.
 #AX_WITH_CURSES
 #AS_IF([test "x$ax_cv_ncursesw" != xyes],
@@ -37,21 +39,26 @@ AM_CONDITIONAL([ENABLE_MULTI_THREADS], [test x"$enable_multi_threads" != x"no"])
 AM_CONDITIONAL([WITH_LIBESTDRAFT], [test x"$with_libestdraft" != x"no"])
 
 # Checks for header files.
-AC_CHECK_HEADERS([])
+AC_CHECK_HEADERS([estraier.h])
 
+AC_CHECK_LIB([qdbm], [cbmalloc],, [AC_MSG_ERROR([requires qdbm library])])
 AC_CHECK_LIB([estraier], [est_doc_new],,
     [AC_MSG_ERROR([requires estraier library])])
-AC_CHECK_LIB([pthread], [pthread_create])
+
+AS_IF([test x"$enable_multi_threads" != x"no"],
+    AC_CHECK_LIB([pthread], [pthread_create]))
 AC_CHECK_LIB([event], [event_base_loop])
 
 AC_REPLACE_FUNCS([strlcpy])
 AC_REPLACE_FUNCS([strlcat])
+AC_REPLACE_FUNCS([strtonum])
+AC_REPLACE_FUNCS([reallocarray])
 AC_REPLACE_FUNCS([open_memstream])
 
 # Checks for library functions.
 AC_CHECK_FUNCS([strlcat])
 
-AC_CONFIG_FILES([GNUmakefile mailestd/GNUmakefile libestdraft/GNUmakefile])
+AC_CONFIG_FILES([GNUmakefile replace/GNUmakefile mailestd/GNUmakefile libestdraft/GNUmakefile])
 
 AM_MAINTAINER_MODE([disable])
 

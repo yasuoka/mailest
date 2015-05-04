@@ -1,8 +1,9 @@
-SUBDIRS =
+SUBDIRS =	replace
 if WITH_LIBESTDRAFT
 SUBDIRS +=	libestdraft
 endif
 
 SUBDIRS +=	mailestd
 
-EXTRA_DIST = README.md Makefile libestdraft/Makefile mailestd/Makefile
+EXTRA_DIST = README.md Makefile Makefile.inc libestdraft/Makefile mailestd/Makefile
+EXTRA_DIST += compat.h
