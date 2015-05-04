@@ -1,4 +1,4 @@
-CPPFLAGS+=	-I${.CURDIR}/.. -I${.CURDIR}/../replace
+CPPFLAGS+=	-I${.CURDIR}/..
 LIBESTRAIER=	/usr/local/lib/libestraier.a
 
 DEBUG=		-g -O0

@@ -1,6 +1,3 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-
 #define	__syslog__	__printf__
 #define	__used		__attribute__((__used__))
 
@@ -24,5 +21,4 @@ FILE		*open_memstream(char **, size_t *);
 
 #ifndef HAVE_REALLOCARRAY
 void		*reallocarray(void *, size_t, size_t);
-#endif
 #endif
