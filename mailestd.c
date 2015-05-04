@@ -1965,7 +1965,8 @@ static void
 rfc822_free(struct rfc822 *msg)
 {
 	free(msg->path);
-	free(msg->draft);
+	if (msg->draft != NULL)
+		est_doc_delete(msg->draft);
 	free(msg);
 }
 
