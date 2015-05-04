@@ -100,7 +100,7 @@ typedef struct {
 %}
 
 %token	INCLUDE ERROR
-%token	COUNT DATABASE DEBUG IGNORE LEVEL LOG MAILDIR ROTATE PATH
+%token	COUNT DATABASE DEBUG FOLDERS LEVEL LOG MAILDIR ROTATE PATH
 %token	SOCKET SUFFIXES SIZE TASKS TRIMSIZE
 %token	<v.string>	STRING
 %token  <v.number>	NUMBER
@@ -154,8 +154,8 @@ main		: MAILDIR STRING	{
 		| SUFFIXES strings {
 			conf->suffixes = $2;
 		}
-		| IGNORE strings {
-			conf->ignores = $2;
+		| FOLDERS strings {
+			conf->folders = $2;
 		}
 		| LOG log_opts
 		| DATABASE database_opts
@@ -253,7 +253,7 @@ lookup(char *s)
 		{ "count",		COUNT },
 		{ "database",		DATABASE },
 		{ "debug",		DEBUG },
-		{ "ignore",		IGNORE },
+		{ "folders",		FOLDERS },
 		{ "include",		INCLUDE },
 		{ "level",		LEVEL },
 		{ "log",		LOG },
@@ -674,11 +674,11 @@ free_config(struct mailestd_conf *c)
 {
 	int	 i;
 
-	if (c->ignores != NULL) {
-		for (i = 0; c->ignores[i] != NULL; i++)
-			free(c->ignores[i]);
+	if (c->folders != NULL) {
+		for (i = 0; c->folders[i] != NULL; i++)
+			free(c->folders[i]);
 	}
-	free(c->ignores);
+	free(c->folders);
 	if (c->suffixes != NULL) {
 		for (i = 0; c->suffixes[i] != NULL; i++)
 			free(c->suffixes[i]);

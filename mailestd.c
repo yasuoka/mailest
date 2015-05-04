@@ -191,7 +191,7 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 	mode_t			 oumask;
 	struct sockaddr_un	 sun;
 	extern char		*__progname;
-	const char		*defignore[] = { MAILESTD_DEFAULT_IGNORES };
+	const char		*deffolder[] = { MAILESTD_DEFAULT_FOLDERS };
 
 	memset(_this, 0, sizeof(struct mailestd));
 
@@ -210,14 +210,15 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 	_this->logsiz = conf->log_size;
 	_this->logmax = conf->log_count;
 	_this->doc_trimsize = conf->trim_size;
-	_this->ignore = conf->ignores;
-	if (conf->ignores == NULL) {
-		_this->ignore = xcalloc(nitems(defignore) + 1, sizeof(char *));
-		for (i = 0; i < (int)nitems(defignore); i++)
-			_this->ignore[i] = xstrdup(defignore[i]);
-		_this->ignore[i] = NULL;
+	if (conf->folders == NULL) {
+		_this->folder = xcalloc(nitems(deffolder) + 1, sizeof(char *));
+		for (i = 0; i < (int)nitems(deffolder); i++)
+			_this->folder[i] = xstrdup(deffolder[i]);
+		_this->folder[i] = NULL;
+	} else {
+		_this->folder = conf->folders;
+		conf->folders = NULL;
 	}
-	conf->ignores = NULL;
 
 	for (i = 0; suffix != NULL && !isnull(suffix[i]); i++)
 		/* nothing */;
@@ -379,11 +380,11 @@ mailestd_fini(struct mailestd *_this)
 			free(_this->suffix[i]);
 	}
 	free(_this->suffix);
-	if (_this->ignore != NULL) {
-		for (i = 0; !isnull(_this->ignore[i]); i++)
-			free(_this->ignore[i]);
+	if (_this->folder != NULL) {
+		for (i = 0; !isnull(_this->folder[i]); i++)
+			free(_this->folder[i]);
 	}
-	free(_this->ignore);
+	free(_this->folder);
 	free(_this->sync_prev);
 
 	_thread_spin_destroy(&_this->id_seq_lock);
@@ -963,15 +964,18 @@ mailestd_schedule_gather0(struct mailestd *_this, struct gather *ctx,
 	const char		*pat;
 	bool			 neg;
 
-	for (i = 0; _this->ignore != NULL && !isnull(_this->ignore[i]); i++) {
+	for (i = 0; _this->folder != NULL && !isnull(_this->folder[i]); i++) {
 		neg = false;
-		pat = _this->ignore[i];
+		pat = _this->folder[i];
 		if (*pat == '!') {
 			pat++;
 			neg = true;
 		}
-		if ((fnmatch(pat, folder, 0) == 0)? !neg : neg)
-			return (0);
+		if (fnmatch(pat, folder, 0) == 0) {
+			if (neg)
+				return (0);
+			break;
+		}
 	}
 	task = xcalloc(1, sizeof(struct task_gather));
 	task->type = MAILESTD_TASK_GATHER;

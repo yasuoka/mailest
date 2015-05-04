@@ -24,7 +24,7 @@
 #define MAILESTD_TRIMSIZE		(128 * 1024)
 #define MAILESTD_DBFLUSHSIZ		1024
 #define MAILESTD_DEFAULT_SUFFIX		".mew"
-#define MAILESTD_DEFAULT_IGNORES	"trash", "casket", "casket_replica"
+#define MAILESTD_DEFAULT_FOLDERS	"!trash", "!casket", "!casket_replica"
 #define MAILESTD_DBSYNC_NITER		4000
 
 struct mailestd_conf {
@@ -38,5 +38,5 @@ struct mailestd_conf {
 	int	  tasks;
 	char	 *maildir;
 	char	**suffixes;
-	char	**ignores;
+	char	**folders;
 };

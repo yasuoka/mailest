@@ -51,7 +51,7 @@ struct mailestd {
 	int			  logsiz;
 	int			  logmax;
 	char			**suffix;
-	char			**ignore;
+	char			**folder;
 	int			  doc_trimsize;
 	int			  rfc822_task_max;
 	ESTDB			 *db;
