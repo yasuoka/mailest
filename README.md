@@ -13,13 +13,13 @@ Install
 
 On OpenBSD
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.2.tar.gz
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.3.tar.gz
     % make
     % sudo make install
 
 On other BSD or Linux
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.2.tar.gz
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.3.tar.gz
     % ./configure
     % gmake (or make)
     % sudo make install
