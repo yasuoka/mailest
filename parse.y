@@ -37,6 +37,8 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "mailestd.h"
 #include "defs.h"
@@ -98,7 +100,7 @@ typedef struct {
 %}
 
 %token	INCLUDE ERROR
-%token	COUNT DATABASE DEBUG IGNORE INCLUDE LEVEL LOG MAILDIR ROTATE PATH
+%token	COUNT DATABASE DEBUG IGNORE LEVEL LOG MAILDIR ROTATE PATH
 %token	SOCKET SUFFIXES SIZE TASKS TRIMSIZE
 %token	<v.string>	STRING
 %token  <v.number>	NUMBER
@@ -110,6 +112,7 @@ grammar		: /* empty */
 		| grammar include '\n'
 		| grammar '\n'
 		| grammar main '\n'
+		| grammar varset '\n'		{ file->errors++; }
 		| grammar error '\n'		{ file->errors++; }
 		;
 
