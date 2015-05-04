@@ -175,6 +175,7 @@ main(int argc, char *argv[])
 	mailestd_start(&mailestd_s, foreground);
 
 	EVENT_LOOP(0);
+	EVENT_BASE_FREE();
 
 	mailestd_fini(&mailestd_s);
 	mailestd_log_fini();
@@ -385,6 +386,7 @@ mailestd_fini(struct mailestd *_this)
 			free(_this->ignore[i]);
 	}
 	free(_this->ignore);
+	free(_this->sync_prev);
 
 	_thread_spin_destroy(&_this->id_seq_lock);
 }
@@ -567,8 +569,8 @@ mailestd_syncdb(struct mailestd *_this)
 		}
 		est_doc_delete(doc);
 	}
-	_this->sync_prev = NULL;
 	free(_this->sync_prev);
+	_this->sync_prev = NULL;
 
 	mailestd_log(LOG_INFO, "Database cache updated");
 	return (0);
@@ -1206,6 +1208,7 @@ task_worker_start0(void *ctx)
 	EVENT_INIT();
 	task_worker_start(_this);
 	EVENT_LOOP(0);
+	EVENT_BASE_FREE();
 	return (NULL);
 }
 #endif
@@ -1221,12 +1224,17 @@ task_worker_run(struct task_worker *_this)
 static void
 task_worker_stop(struct task_worker *_this)
 {
+	struct task	*tske, *tskt;
+
 	MAILESTD_ASSERT(_thread_self() == _this->thread);
 	if (_this->sock >= 0) {
 		event_del(&_this->evsock);
 		close(_this->sock);
 	}
 	_thread_mutex_destroy(&_this->lock);
+	TAILQ_FOREACH_SAFE(tske, &_this->head, queue, tskt) {
+		free(tske);
+	}
 }
 
 static void

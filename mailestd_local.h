@@ -312,6 +312,10 @@ static int		 evbase_key_initialized = 0;
 		event_base_loop(pthread_getspecific(evbase_key),	\
 		    (_flags));						\
 	} while (0 /* CONSTCOND */)
+#define EVENT_BASE_FREE()						\
+	do {								\
+		event_base_free(pthread_getspecific(evbase_key));	\
+	} while (0 /* CONSTCOND */)
 #define BUFFEREVENT_ENABLE(_bufev, _event)				\
 	do {								\
 		bufferevent_base_set(pthread_getspecific(evbase_key),	\
@@ -322,5 +326,6 @@ static int		 evbase_key_initialized = 0;
 #define EVENT_INIT		event_init
 #define EVENT_SET		event_set
 #define EVENT_LOOP		event_loop
+#define EVENT_BASE_FREE
 #define BUFFEREVENT_ENABLE	bufferevent_enable
 #endif

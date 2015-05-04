@@ -686,6 +686,7 @@ free_config(struct mailestd_conf *c)
 	free(c->suffixes);
 	free(c->log_path);
 	free(c->db_path);
+	free(c->sock_path);
 	free(c->maildir);
 	free(c);
 }
