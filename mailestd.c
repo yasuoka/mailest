@@ -1922,6 +1922,7 @@ mailestd_log_rotation(const char *logfn, int siz, int max)
 	struct stat	 st;
 	char		*fn = NULL, *ofn = NULL, fn0[PATH_MAX], fn1[PATH_MAX];
 	bool		 turnover = false;
+	mode_t		 oumask;
 
 	if (foreground)
 		return;
@@ -1943,7 +1944,9 @@ mailestd_log_rotation(const char *logfn, int siz, int max)
 	_thread_spin_lock(&mailestd_log_spin);
 	if (mailestd_log_fp != NULL)
 		fclose(mailestd_log_fp);
+	oumask = umask(077);
 	mailestd_log_fp = fopen(logfn, "a");
+	umask(oumask);
 	_thread_spin_unlock(&mailestd_log_spin);
 	if (turnover)
 		mailestd_log(LOG_INFO, "logfile turned over");
