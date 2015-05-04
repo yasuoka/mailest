@@ -53,8 +53,8 @@ usage(void)
 	extern char *__progname;
 
 	fprintf(stderr,
-	    "usage: %s [-h] [-s suffix] [-b basedir] command [args...]\n",
-	    __progname);
+	    "usage: %s [-h] [-s socket] [-S suffix] [-m maildir] command "
+	    "[args...]\n", __progname);
 }
 
 int
@@ -74,14 +74,18 @@ mailestctl_main(int argc, char *argv[])
 		errx(EX_OSERR,
 		    "HOME environment variable is not set");
 
-	while ((ch = getopt(argc, argv, "+dhb:s:")) != -1)
+	while ((ch = getopt(argc, argv, "+m:s:S:h")) != -1)
 		switch (ch) {
-		case 'b':
+		case 'm':
 			maildir = optarg;
 			break;
 
 		case 's':
-			cmdv[cmdc++] = "-s";
+			mailestc_path = optarg;
+			break;
+
+		case 'S':
+			cmdv[cmdc++] = "-S";
 			cmdv[cmdc++] = optarg;
 			break;
 

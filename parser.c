@@ -304,7 +304,7 @@ show_valid_args(const struct token table[])
 			fprintf(stderr, "  <attr>\n");
 			break;
 		case SEARCH_PHRASE:
-			fprintf(stderr, "  <search phrase>\n");
+			fprintf(stderr, "  <phrase>\n");
 			break;
 		case ENDTOKEN:
 			break;

@@ -4,19 +4,24 @@
 #
 MAILESTCTL=${MAILESTCTL:-mailestctl}
 
+update() {
+	while getopts '+s:b:' ch $@; do
+		case $ch in
+		s)	echo -S; echo "\"$OPTARG\"" ;;
+		b)	echo -m; echo "\"$OPTARG\"" ;;
+		esac
+	done
+	shift $(expr $OPTIND - 1)
+	echo update
+	for _a in "$@"; do echo "\"$1\""; done
+}
+
 if [ "$1" = "search" ]; then
 	shift
 	eval set -- \
 	    $(while [ $# -gt 2 ]; do echo "\"$1\""; shift; done; echo "\"$2\"")
 	exec $MAILESTCTL csearch "$@"
 else
-	while getopts "+s:b:" ch $@; do :; done
-	if [ $(expr $# - $OPTIND) -eq 0 ]; then
-		eval set -- \
-		    $(while [ $# -gt 1 ]; do echo "$1"; shift; done; \
-			echo "update \"$1\"")
-	else
-		eval set -- "$@" update
-	fi
+	eval set -- $(update "$@")
 	exec $MAILESTCTL "$@"
 fi

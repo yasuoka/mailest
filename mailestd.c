@@ -73,7 +73,8 @@ usage(void)
 {
 	extern char	*__progname;
 
-	fprintf(stderr, "usage: %s [-dh] [-s suffix] [maildir]\n", __progname);
+	fprintf(stderr, "usage: %s [-dnh] [-S suffix] [-f file] [maildir]\n",
+	    __progname);
 }
 
 int
@@ -93,9 +94,9 @@ main(int argc, char *argv[])
 		return (mailestctl_main(argc, argv));
 
 	memset(suffix, 0, sizeof(suffix));
-	while ((ch = getopt(argc, argv, "+dhs:nf:")) != -1)
+	while ((ch = getopt(argc, argv, "+dhS:nf:")) != -1)
 		switch (ch) {
-		case 's':
+		case 'S':
 			if (suffixcount + 2 >= (int)nitems(suffix)) {
 				errx(EX_USAGE, "too many suffixes.  "
 				    "limited %d", (int)nitems(suffix) - 1);
