@@ -7,23 +7,12 @@ AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 
 AC_CONFIG_HEADERS([config.h])
 
-# wcwidth requires _XOPEN_SOURCE
-#AC_GNU_SOURCE
-
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_YACC
 AC_PROG_RANLIB
 
 CPPFLAGS="$CPPFLAGS -I/usr/include/qdbm -I/usr/include/estraier"
-
-# Checks for libraries.
-#AX_WITH_CURSES
-#AS_IF([test "x$ax_cv_ncursesw" != xyes],
-#    # does curses support wide char? then use it
-#    AC_CHECK_LIB(curses, addnwstr,
-#	[CURSES_LIB="-lcurses"],
-#	[AC_MSG_ERROR([requires NcursesW library])]))
 
 AC_ARG_ENABLE([multi-threads],
     [AS_HELP_STRING(
