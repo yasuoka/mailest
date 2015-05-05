@@ -925,7 +925,8 @@ mailestd_search(struct mailestd *_this, ESTDB *db, uint64_t task_id,
 			}
 		}
 		fclose(out);
-		mailestd_schedule_inform(_this, task_id, bufp, bufsiz);
+		mailestd_schedule_inform(_this, task_id, (u_char *)bufp,
+		    bufsiz);
 		free(bufp);
 	}
 }
@@ -1778,7 +1779,8 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
 		else if (del_compl)
 			msg = "old messages...done\n";
 		if (msg != NULL)
-			mailestc_send_message(_this, msg, strlen(msg));
+			mailestc_send_message(_this, (u_char *)msg,
+			    strlen(msg));
 	    }
 		break;
 	}
