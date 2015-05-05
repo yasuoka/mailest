@@ -667,10 +667,8 @@ mailestd_gather_inform(struct mailestd *_this, struct task_rfc822 *task,
 	struct gather	*gather = gat;
 
 	if (task != NULL) {
-		if (gather == NULL)
-			gather = mailestd_get_gather(_this,
-			    task->msg->gather_id);
-		if (gather == NULL)
+		if (gather == NULL && (gather = mailestd_get_gather(_this,
+		    task->msg->gather_id)) == NULL)
 			return;
 		switch (task->type) {
 		default:
@@ -998,9 +996,11 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 	struct dirent	*de;
 	ssize_t		 lmaildir;
 	struct gather	*ctx;
+	uint64_t	 ctx_id;
 
 	ctx = xcalloc(1, sizeof(struct gather));
 	ctx->id = mailestd_new_id(_this);
+	ctx_id = ctx->id;	/* need this backup */
 	TAILQ_INSERT_TAIL(&_this->gathers, ctx, queue);
 
 	if (folder[0] != '\0') {
@@ -1053,10 +1053,10 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 	}
 	if (nfolders == 0) {
 		strlcpy(ctx->errmsg, "grabing folders", sizeof(ctx->errmsg));
-		mailestd_gather_inform(_this, NULL, ctx);
+		mailestd_gather_inform(_this, NULL, ctx); /* ctx is freed */
 	}
 
-	return (ctx->id);
+	return (ctx_id);
 }
 
 static uint64_t
