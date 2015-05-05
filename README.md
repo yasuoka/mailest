@@ -9,18 +9,25 @@ the existing backend `mewest`.
 Install
 -------
 
-On OpenBSD
+OpenBSD:
 
     % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.4.tar.gz
+    % tar xzf mailest-0.9.4.tar.gz
+    % cd mailest-mailest-0.9.4
     % make
     % sudo make install
 
-On other BSD or Linux
+Other:
 
     % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.4.tar.gz
+    % tar xzf mailest-0.9.4.tar.gz
+    % cd mailest-mailest-0.9.4
     % ./configure
-    % gmake (or make)
+    % make
     % sudo make install
+
+On BSD other than OpenBSD, you may need to use "gmake" instead of "make"
+to use GNUmakefile since Makefiles are for OpenBSD.
 
 
 Quick Usage
