@@ -1170,26 +1170,20 @@ mailestd_schedule_inform(struct mailestd *_this, uint64_t task_id,
 static void
 task_worker_init(struct task_worker *_this, struct mailestd *mailestd)
 {
-	int	 flags, pairsock[2];
-	memset(_this, 0, sizeof(struct task_worker));
+	int	 pairsock[2];
 
+	memset(_this, 0, sizeof(struct task_worker));
 	TAILQ_INIT(&_this->head);
 	_thread_mutex_init(&_this->lock, NULL);
 	_this->mailestd_this = mailestd;
 	if (socketpair(PF_UNIX, SOCK_SEQPACKET, 0, pairsock) == -1)
 		err(EX_OSERR, "socketpair()");
+	if (setnonblock(pairsock[0]) == -1)
+		err(EX_OSERR, "setnonblock()");
+	if (setnonblock(pairsock[1]) == -1)
+		err(EX_OSERR, "setnonblock()");
 	_this->sock = pairsock[1];
 	_this->sock_itc = pairsock[0];
-	if ((flags = fcntl(_this->sock, F_GETFL)) == -1 ||
-	    fcntl(_this->sock, F_SETFL, flags | O_NONBLOCK) == -1) {
-		mailestd_log(LOG_CRIT, "%s: O_NONBLOCK by fcntl(): %m", __func__);
-		abort();
-	}
-	if ((flags = fcntl(_this->sock_itc, F_GETFL)) == -1 ||
-	    fcntl(_this->sock_itc, F_SETFL, flags | O_NONBLOCK) == -1) {
-		mailestd_log(LOG_CRIT, "%s: O_NONBLOCK by fcntl(): %m", __func__);
-		abort();
-	}
 }
 
 static void
@@ -1972,6 +1966,17 @@ rfc822_free(struct rfc822 *msg)
 	free(msg);
 }
 
+static int
+setnonblock(int sock)
+{
+	int flags;
+
+	if ((flags = fcntl(sock, F_GETFL)) == -1 ||
+	    (flags = fcntl(sock, F_SETFL, flags | O_NONBLOCK)) == -1)
+		return (-1);
+
+	return (0);
+}
 static void *
 xcalloc(size_t nmemb, size_t size)
 {
