@@ -175,8 +175,10 @@ struct gather {
 	uint64_t		 id;
 	u_int			 puts;
 	u_int			 dels;
+	u_int			 folders;
 	u_int			 puts_done;
 	u_int			 dels_done;
+	u_int			 folders_done;
 	char			 errmsg[80];
 	TAILQ_ENTRY(gather)	 queue;
 };
@@ -215,8 +217,8 @@ static ESTDB	*mailestd_db_open_wr(struct mailestd *);
 static void	 mailestd_db_close(struct mailestd *);
 static int	 mailestd_syncdb(struct mailestd *);
 static int	 mailestd_gather(struct mailestd *, struct task_gather *);
-static void	 mailestd_gather_inform(struct mailestd *,
-		    struct task_rfc822 *, struct gather *);
+static void	 mailestd_gather_inform(struct mailestd *, struct task *,
+		    struct gather *);
 static int	 mailestd_fts(struct mailestd *, struct gather *, time_t,
 		    FTS *, FTSENT *);
 static void	 mailestd_draft(struct mailestd *, struct rfc822 *msg);
@@ -268,6 +270,7 @@ void		 mailestd_log(int, const char *, ...)
 		    __attribute__((__format__(__syslog__,2,3)));
 void		 mailestd_vlog(int, const char *, va_list);
 
+static int	 setnonblock(int);
 static int	 rfc822_compar(struct rfc822 *, struct rfc822 *);
 static void	 rfc822_free(struct rfc822 *msg);
 static void	*xcalloc(size_t, size_t);

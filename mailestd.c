@@ -603,7 +603,7 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 
 	if ((fts = fts_open(paths, FTS_LOGICAL, NULL)) == NULL) {
 		mailestd_log(LOG_ERR, "fts_open(%s): %m", folder);
-		return (-1);
+		goto on_error;
 	}
 	curr_time = _this->curr_time;
 	update = mailestd_fts(_this, ctx, curr_time, fts, fts_read(fts));
@@ -639,28 +639,28 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 	mailestd_log(LOG_INFO,
 	    "Gathered %s%s (Total: %d Remove: %d Update: %d)",
 	    (folder[0] != '/')? "+" : "", folder, total, delete, update);
-
+on_error:
 	if (ctx != NULL) {
 		if (ctx->puts == ctx->puts_done &&
-		    ctx->dels == ctx->dels_done) {
-			if (update > 0 || delete > 0)
-				strlcpy(ctx->errmsg,
-				    "other task is running",
-				    sizeof(ctx->errmsg));
+		    ctx->dels == ctx->dels_done &&
+		    (update > 0 || delete > 0)) {
+			strlcpy(ctx->errmsg, "other task is running",
+			    sizeof(ctx->errmsg));
 			mailestd_gather_inform(_this, NULL, ctx);
 		} else if (_this->dbworker.suspend) {
 			strlcpy(ctx->errmsg,
 			    "database tasks are suspended",
 			    sizeof(ctx->errmsg));
 			mailestd_gather_inform(_this, NULL, ctx);
-		}
+		} else
+			mailestd_gather_inform(_this, (struct task *)task, ctx);
 	}
 
 	return (0);
 }
 
 static void
-mailestd_gather_inform(struct mailestd *_this, struct task_rfc822 *task,
+mailestd_gather_inform(struct mailestd *_this, struct task *task,
     struct gather *gat)
 {
 	int		 notice = 0;
@@ -668,26 +668,36 @@ mailestd_gather_inform(struct mailestd *_this, struct task_rfc822 *task,
 
 	if (task != NULL) {
 		if (gather == NULL && (gather = mailestd_get_gather(_this,
-		    task->msg->gather_id)) == NULL)
+		    ((struct task_rfc822 *)task)->msg->gather_id)) == NULL)
 			return;
 		switch (task->type) {
 		default:
 			break;
 
+		case MAILESTD_TASK_GATHER:
+			if (++gather->folders_done == gather->folders && (
+			    gather->dels_done == gather->dels ||
+			    gather->puts_done == gather->puts))
+				notice++;
+			break;
+
 		case MAILESTD_TASK_RFC822_DELDB:
-			if (++gather->dels_done == gather->dels)
+			if (++gather->dels_done == gather->dels &&
+			    gather->folders_done == gather->folders)
 				notice++;
 			break;
 
 		case MAILESTD_TASK_RFC822_PUTDB:
-			if (++gather->puts_done == gather->puts)
+			if (++gather->puts_done == gather->puts &&
+			    gather->folders_done == gather->folders)
 				notice++;
 			break;
 		}
 		if (notice > 0)
 			mailestd_schedule_inform(_this, gather->id,
 			    (u_char *)gather, sizeof(struct gather));
-		if (gather->dels_done != gather->dels ||
+		if (gather->folders_done != gather->folders ||
+		    gather->dels_done != gather->dels ||
 		    gather->puts_done != gather->puts)
 			return;
 	}
@@ -980,6 +990,7 @@ mailestd_schedule_gather0(struct mailestd *_this, struct gather *ctx,
 	task->type = MAILESTD_TASK_GATHER;
 	task->highprio = true;
 	task->gather_id = ctx->id;
+	ctx->folders++;
 	strlcpy(task->folder, folder, sizeof(task->folder));
 
 	return (task_worker_add_task(&_this->dbworker, (struct task *)task));
@@ -988,7 +999,7 @@ mailestd_schedule_gather0(struct mailestd *_this, struct gather *ctx,
 static uint64_t
 mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 {
-	int		 i, nfolders = 0;
+	int		 i;
 	char		 path[PATH_MAX];
 	glob_t		 gl;
 	struct stat	 st;
@@ -1020,7 +1031,6 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 						continue;
 					mailestd_schedule_gather0(_this, ctx,
 					    gl.gl_pathv[i] + lmaildir);
-					nfolders++;
 				}
 				globfree(&gl);
 			}
@@ -1030,10 +1040,8 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 			else if (!S_ISDIR(st.st_mode))
 				mailestd_log(LOG_ERR, "%s: Not a directory",
 				    folder);
-			else {
+			else
 				mailestd_schedule_gather0(_this, ctx, folder);
-				nfolders++;
-			}
 		}
 	} else {
 		if ((dp = opendir(_this->maildir)) == NULL)
@@ -1046,12 +1054,11 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 					continue;
 				mailestd_schedule_gather0(_this, ctx,
 				    de->d_name);
-				nfolders++;
 			}
 			closedir(dp);
 		}
 	}
-	if (nfolders == 0) {
+	if (ctx->folders == 0) {
 		strlcpy(ctx->errmsg, "grabing folders", sizeof(ctx->errmsg));
 		mailestd_gather_inform(_this, NULL, ctx); /* ctx is freed */
 	}
@@ -1401,8 +1408,7 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 		ctx->resche++;
 		if (msg->draft != NULL)
 			mailestd_putdb(mailestd, db, msg);
-		mailestd_gather_inform(mailestd, (struct task_rfc822 *)task,
-		    NULL);
+		mailestd_gather_inform(mailestd, task, NULL);
 		msg->ontask = false;
 		TAILQ_INSERT_TAIL(&mailestd->rfc822_tasks, task, queue);
 		mailestd->rfc822_ntask--;
@@ -1413,8 +1419,7 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 		if ((db = mailestd_db_open_wr(mailestd)) == NULL)
 			break;
 		ctx->dels++;
-		mailestd_gather_inform(mailestd, (struct task_rfc822 *)task,
-		    NULL);
+		mailestd_gather_inform(mailestd, task, NULL);
 		mailestd_deldb(mailestd, db, msg);
 		rfc822_free(msg);
 		break;
