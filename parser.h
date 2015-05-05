@@ -36,7 +36,7 @@ struct parse_result {
 #define SEARCH_FLAG_MAX		0x04
 #define SEARCH_FLAG_ORD		0x08
 #define SEARCH_FLAG_ATTR	0x10
-		u_int	  flags;
+		u_char	  flags;
 		int	  max;
 		char	 *ord;
 		char	 *ic;
