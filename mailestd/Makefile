@@ -14,10 +14,10 @@ DPADD=		${LIBESTRAIER} ${LIBEVENT}
 MAN=		mailestctl.1 mailestd.8 mailestd.conf.5 mew-mailest.1
 
 .ifdef DEBUG
-CPPFLAGS+=	-DMAILESTD_DEBUG
+CFLAGS+=	-DMAILESTD_DEBUG
 .endif
 .ifdef MAILESTD_MT
-CPPFLAGS+=	-DMAILESTD_MT
+CFLAGS+=	-DMAILESTD_MT
 LDADD+=		-lpthread
 DPADD+=		${LIBPTHREAD}
 .endif
