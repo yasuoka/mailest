@@ -1,6 +1,3 @@
-#define	__syslog__	__printf__
-#define	__used		__attribute__((__used__))
-
 #include <sys/types.h>
 
 #ifndef HAVE_STRLCPY

@@ -26,14 +26,23 @@ beforeinstall:
 	${INSTALL} ${INSTALL_COPY} -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} \
 	    ${.CURDIR}/../mew-mailest.sh ${DESTDIR}${PREFIX}/bin/mew-mailest
 
-.include <bsd.obj.mk>
+.ifdef .FreeBSD
+LIBESTDRAFTOBJ!=cd ${.CURDIR}/../libestdraft; ${MAKE} whereobj
 
-.if exists(${.CURDIR}/../libestdraft/${__objdir})
-LDADD+=         -L${.CURDIR}/../libestdraft/${__objdir} -lestdraft
-DPADD+=         ${.CURDIR}/../libestdraft/${__objdir}/libestdraft.a
+# __FreeBSD_version < 1100072 doesn't have reallocarray()
+SRCS+=		reallocarray.c
+.PATH:		${.CURDIR}/../replace
+
 .else
-LDADD+=         -L${.CURDIR}/../libestdraft -lestdraft
-DPADD+=         ${.CURDIR}/../libestdraft/libestdraft.a
+.include <bsd.obj.mk>
+.if exists(${.CURDIR}/../libestdraft/${__objdir})
+LIBESTDRAFTOBJ=	${.CURDIR}/../libestdraft/${__objdir}
+.else
+LIBESTDRAFTOBJ=	${.CURDIR}/../libestdraft
 .endif
+.endif
+
+LDADD+=         -L${LIBESTDRAFTOBJ} -lestdraft
+DPADD+=         -L${LIBESTDRAFTOBJ}/libestdraft.a
 
 .include <bsd.prog.mk>
