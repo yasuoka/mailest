@@ -15,7 +15,7 @@ Prerequirement:
 - "libevent" and "libiconv" are required
 
 
-OpenBSD, FreeBSD or NetBSD:
+OpenBSD:
 
     % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.5.tar.gz
     % tar xzf mailest-0.9.5.tar.gz
