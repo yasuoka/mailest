@@ -9,7 +9,13 @@ the existing backend `mewest`.
 Install
 -------
 
-OpenBSD:
+Prerequirement:
+
+- "hyperestraier" and "qdbm" installed
+- "libevent" and "libiconv" are required
+
+
+OpenBSD, FreeBSD or NetBSD:
 
     % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.4.tar.gz
     % tar xzf mailest-0.9.4.tar.gz
@@ -26,8 +32,7 @@ Other:
     % make
     % sudo make install
 
-On BSD other than OpenBSD, you may need to use "gmake" instead of "make"
-to use GNUmakefile since Makefiles are for OpenBSD.
+ On BSD, You may need to use "gmake" instead of "make" to use GNUmakefile
 
 
 Quick Usage
@@ -49,7 +54,15 @@ Quick Usage
   in Mew.
 
 
-Manpages
+ChangeLog
+---------
+
+0.9.5
+
+-  2015-05-06: yasuoka
+  -  Support build on FreeBSD and NetBSD
+
+Man page
 --------
 
 - [mailestctl(1)](http://yasuoka.github.io/mailest/mailestctl.1.html)
