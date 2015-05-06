@@ -7,6 +7,9 @@ NOLINT=			# for NetBSD
 MKLINKLIB=	no	# for NetBSD
 MKPIC=		no	# for NetBSD
 
+_whereobj:
+	@echo ${.OBJDIR}
+
 install:
 	@echo -n
 
