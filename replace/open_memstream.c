@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "local.h"
 
 #define	MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
 
@@ -72,8 +71,8 @@ memstream_write(void *v, const char *b, int l)
 	return (i);
 }
 
-static fpos_t
-memstream_seek(void *v, fpos_t off, int whence)
+static off_t
+memstream_seek(void *v, off_t off, int whence)
 {
 	struct state	*st = v;
 	ssize_t		 base = 0;
@@ -124,11 +123,6 @@ open_memstream(char **pbuf, size_t *psize)
 	if ((st = malloc(sizeof(*st))) == NULL)
 		return (NULL);
 
-	if ((fp = __sfp()) == NULL) {
-		free(st);
-		return (NULL);
-	}
-
 	st->size = BUFSIZ;
 	if ((st->string = calloc(1, st->size)) == NULL) {
 		free(st);
@@ -145,14 +139,10 @@ open_memstream(char **pbuf, size_t *psize)
 	*pbuf = st->string;
 	*psize = st->len;
 
-	fp->_flags = __SWR;
-	fp->_file = -1;
-	fp->_cookie = st;
-	fp->_read = NULL;
-	fp->_write = memstream_write;
-	fp->_seek = memstream_seek;
-	fp->_close = memstream_close;
-	_SET_ORIENTATION(fp, -1);
+	if ((fp = funopen(st, NULL, memstream_write, memstream_seek,
+	    memstream_close)) == NULL) {
+		free(st);
+	}
 
 	return (fp);
 }
