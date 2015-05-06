@@ -1347,7 +1347,14 @@ task_worker_on_proc(struct task_worker *_this)
 		_thread_mutex_lock(&_this->lock);
 		task = TAILQ_FIRST_ITEM(&_this->head);
 		if (task != NULL) {
-			if (!_this->suspend || task->highprio)
+			if (_this->suspend && mailestd->syncdb_time == 0 &&
+			    task->type == MAILESTD_TASK_GATHER)
+				/*
+				 * gathering before the first syncdb
+				 * requires the database is working.
+				 */
+				task = NULL;
+			else if (!_this->suspend || task->highprio)
 				TAILQ_REMOVE(&_this->head, task, queue);
 			else
 				task = NULL;
