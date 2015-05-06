@@ -12,7 +12,9 @@ AC_PROG_CC
 AC_PROG_YACC
 AC_PROG_RANLIB
 
-CPPFLAGS="$CPPFLAGS -I/usr/include/qdbm -I/usr/include/estraier"
+CFLAGS="$CFLAGS -I/usr/local/include"
+CFLAGS="$CFLAGS -I/usr/include/qdbm -I/usr/include/estraier"
+LDFLAGS="$LDFLAGS -L/usr/local/lib"
 
 AC_ARG_ENABLE([multi-threads],
     [AS_HELP_STRING(
