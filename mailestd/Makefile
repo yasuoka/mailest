@@ -43,6 +43,6 @@ LIBESTDRAFTOBJ=	${.CURDIR}/../libestdraft
 .endif
 
 LDADD+=         -L${LIBESTDRAFTOBJ} -lestdraft
-DPADD+=         -L${LIBESTDRAFTOBJ}/libestdraft.a
+DPADD+=         ${LIBESTDRAFTOBJ}/libestdraft.a
 
 .include <bsd.prog.mk>
