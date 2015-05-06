@@ -1401,7 +1401,8 @@ task_worker_on_proc(struct task_worker *_this)
 
 		case MAILESTD_TASK_SUSPEND:
 			_this->suspend = true;
-			/* FALLTHROUGH */
+			break;
+
 		case MAILESTD_TASK_STOP:
 			stop = true;
 			if (thread_this == mailestd->dbworker.thread)
