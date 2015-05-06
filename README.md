@@ -17,17 +17,17 @@ Prerequirement:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.6.tar.gz
-    % tar xzf mailest-0.9.6.tar.gz
-    % cd mailest-mailest-0.9.6
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.7.tar.gz
+    % tar xzf mailest-0.9.7.tar.gz
+    % cd mailest-mailest-0.9.7
     % make
     % sudo make install
 
 Other:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.6.tar.gz
-    % tar xzf mailest-0.9.6.tar.gz
-    % cd mailest-mailest-0.9.6
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.7.tar.gz
+    % tar xzf mailest-0.9.7.tar.gz
+    % cd mailest-mailest-0.9.7
     % ./configure
     % make
     % sudo make install
@@ -56,6 +56,14 @@ Quick Usage
 
 ChangeLog
 ---------
+
+0.9.7
+
+-  2015-05-06: yasuoka
+  - Fix: When the database doesn't exists, the database thread stopps
+    forever.
+  - Fix: When the database is error, the first update causes a lot
+    of errors.
 
 0.9.6
 
