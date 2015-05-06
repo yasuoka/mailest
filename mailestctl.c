@@ -320,7 +320,6 @@ ic_strlcpy(char *output, const char *input, size_t output_siz,
 {
 	iconv_t		 cd;
 	size_t		 isiz, osiz;
-	char		*in = (char *)input;
 
 	if (input_encoding == NULL)
 		return (strlcpy(output, input, output_siz));
@@ -328,7 +327,7 @@ ic_strlcpy(char *output, const char *input, size_t output_siz,
 		err(1, "iconv_open(\"UTF-8\", \"%s\")", input_encoding);
 	isiz = strlen(input) + 1;
 	osiz = output_siz;
-	iconv(cd, &in, &isiz, &output, &osiz);
+	iconv(cd, &input, &isiz, &output, &osiz);
 	iconv_close(cd);
 	if (isiz != 0)
 		return ((size_t)-1);
