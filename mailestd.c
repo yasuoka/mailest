@@ -571,6 +571,7 @@ mailestd_syncdb(struct mailestd *_this)
 	}
 	free(_this->sync_prev);
 	_this->sync_prev = NULL;
+	_this->syncdb_time = _this->curr_time;
 
 	mailestd_log(LOG_INFO, "Database cache updated");
 	return (0);
@@ -715,10 +716,15 @@ mailestd_fts(struct mailestd *_this, struct gather *ctx, time_t curr_time,
     FTS *fts, FTSENT *ftse)
 {
 	int		 i, j, update = 0;
-	const char	*bn;
+	const char	*bn, *errstr;
 	struct rfc822	*msg, msg0;
 	bool		 needupdate = false;
+	char		 uri[PATH_MAX + 128];
+	struct tm	 tm;
+	ESTDOC		*doc;
+	int		 db_id;
 
+	strlcpy(uri, "file://", sizeof(uri));
 	do {
 		needupdate = false;
 		if (ftse == NULL)
@@ -747,13 +753,26 @@ mailestd_fts(struct mailestd *_this, struct gather *ctx, time_t curr_time,
 			msg = xcalloc(1, sizeof(struct rfc822));
 			msg->path = xstrdup(ftse->fts_path);
 			RB_INSERT(rfc822_tree, &_this->root, msg);
-			needupdate = true;
-		} else {
-			if (msg->db_id == 0 ||
-			    msg->mtime != ftse->fts_statp->st_mtime ||
-			    msg->size != ftse->fts_statp->st_size)
-				needupdate = true;
+			strlcpy(uri + 7, ftse->fts_path, sizeof(uri) - 7);
+			if (_this->syncdb_time == 0 &&
+			    mailestd_db_open_rd(_this) != NULL &&
+			    (db_id = est_db_uri_to_id(_this->db, uri)) != -1 &&
+			    (doc = est_db_get_doc(_this->db, db_id,
+				    ESTGDNOKWD)) != NULL) {
+				strptime(est_doc_attr(doc, ESTDATTRMDATE),
+				    MAILESTD_TIMEFMT, &tm);
+				msg->db_id = db_id;
+				msg->mtime = timegm(&tm);
+				msg->size = strtonum(est_doc_attr(doc,
+				    ESTDATTRSIZE), 0, INT64_MAX, &errstr);
+				est_doc_delete(doc);
+			}
 		}
+		if (msg->db_id == 0 ||
+		    msg->mtime != ftse->fts_statp->st_mtime ||
+		    msg->size != ftse->fts_statp->st_size)
+			needupdate = true;
+
 		msg->fstime = curr_time;
 		msg->mtime = ftse->fts_statp->st_mtime;
 		msg->size = ftse->fts_statp->st_size;
@@ -961,7 +980,6 @@ mailestd_schedule_syncdb(struct mailestd *_this)
 
 	task = xcalloc(1, sizeof(struct task));
 	task->type = MAILESTD_TASK_SYNCDB;
-	task->highprio = true;
 
 	return (task_worker_add_task(&_this->dbworker, task));
 }
@@ -1497,16 +1515,9 @@ task_worker_add_task(struct task_worker *_this, struct task *task)
 	id = task->id;
 
 	_thread_mutex_lock(&_this->lock);
-	if (task->highprio) {
-		TAILQ_FOREACH(tske, &_this->head, queue) {
-			if (task_compar(tske, task) < 0)
-				break;
-		}
-		if (tske == NULL)
-			TAILQ_INSERT_TAIL(&_this->head, task, queue);
-		else
-			TAILQ_INSERT_BEFORE(tske, task, queue);
-	} else
+	if (task->highprio)
+		TAILQ_INSERT_HEAD(&_this->head, task, queue);
+	else
 		TAILQ_INSERT_TAIL(&_this->head, task, queue);
 	_thread_mutex_unlock(&_this->lock);
 
@@ -1516,18 +1527,6 @@ task_worker_add_task(struct task_worker *_this, struct task *task)
 	}
 
 	return (id);
-}
-
-static int
-task_compar(struct task *a, struct task *b)
-{
-	int  cmp;
-
-	cmp = (a->highprio - b->highprio);
-	if (cmp)
-		return (cmp);
-
-	return (b->type - a->type);
 }
 
 /***********************************************************************

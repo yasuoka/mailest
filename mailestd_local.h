@@ -59,6 +59,7 @@ struct mailestd {
 	char			 *sync_prev;
 
 	time_t			  curr_time;
+	time_t			  syncdb_time;
 	struct event		  evsigterm;
 	struct event		  evsigint;
 	struct event		  evtimer;
@@ -93,15 +94,14 @@ struct rfc822 {
 };
 
 enum MAILESTD_TASK {
-	/* order is matter if highprio */
 	MAILESTD_TASK_NONE = 0,
 	MAILESTD_TASK_STOP,
 	MAILESTD_TASK_SUSPEND,
 	MAILESTD_TASK_RESUME,
 	MAILESTD_TASK_INFORM,
 	MAILESTD_TASK_SEARCH,
-	MAILESTD_TASK_SYNCDB,
 	MAILESTD_TASK_GATHER,
+	MAILESTD_TASK_SYNCDB,
 	MAILESTD_TASK_RFC822_DRAFT,
 	MAILESTD_TASK_RFC822_PUTDB,
 	MAILESTD_TASK_RFC822_DELDB
@@ -251,7 +251,6 @@ static uint64_t	 task_worker_add_task(struct task_worker *, struct task *);
 static void	 task_worker_message_all(struct mailestd *, enum MAILESTD_TASK);
 static bool	 task_dbworker(struct task_worker *,
 		    struct task_dbworker_context *, struct task *task);
-static int	 task_compar(struct task *, struct task *);
 
 static void	 mailestc_on_event(int, short, void *);
 static void	 mailestd_ctl_sock_reset_event(struct mailestd *);
