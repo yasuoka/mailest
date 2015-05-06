@@ -1,6 +1,5 @@
 LIB=		estdraft
 SRCS=		estdraft.c
-CFLAGS+=	-I/usr/local/include
 NOMAN=		#
 NOPIC=		yes
 
