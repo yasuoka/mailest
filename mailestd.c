@@ -365,11 +365,11 @@ mailestd_fini(struct mailestd *_this)
 		TAILQ_REMOVE(&_this->gathers, gate, queue);
 		free(gate);
 	}
-	TAILQ_FOREACH_SAFE(tske, &_this->rfc822_tasks, queue, tskt) {
-		TAILQ_REMOVE(&_this->rfc822_tasks, tske, queue);
+	TAILQ_FOREACH_SAFE(tske, &_this->gather_pendings, queue, tskt) {
+		TAILQ_REMOVE(&_this->gather_pendings, tske, queue);
 		free(tske);
 	}
-	TAILQ_FOREACH_SAFE(tske, &_this->gather_pendings, queue, tskt) {
+	TAILQ_FOREACH_SAFE(tske, &_this->rfc822_tasks, queue, tskt) {
 		TAILQ_REMOVE(&_this->rfc822_tasks, tske, queue);
 		free(tske);
 	}
