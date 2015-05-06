@@ -535,6 +535,7 @@ mailestd_syncdb(struct mailestd *_this)
 	if (lstat(_this->dbpath, &st) == -1 && errno == ENOENT) {
 		mailestd_log(LOG_INFO, "Database %s doesn't exist",
 		    _this->dbpath);
+		_this->syncdb_time = _this->curr_time;
 		return (0);
 	}
 
