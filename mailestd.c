@@ -840,8 +840,8 @@ mailestd_draft(struct mailestd *_this, struct rfc822 *msg)
 		mailestd_log(LOG_WARNING, "mmap(%s): %m", msg->path);
 		goto on_error;
 	}
-	msg->draft = est_doc_new_from_mime(msgs, st.st_size, "UTF-8",
-	    ESTLANGEN, 0);
+	msg->draft = est_doc_new_from_mime(
+	    msgs, st.st_size, NULL, ESTLANGEN, 0);
 	if (msg->draft == NULL) {
 		mailestd_log(LOG_WARNING, "est_doc_new_from_mime(%s) failed",
 		    msg->path);
