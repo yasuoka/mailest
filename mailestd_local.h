@@ -163,6 +163,7 @@ struct mailestc {
 	struct mailestd		*mailestd_this;
 	enum MAILESTCTL_CMD	 monitoring_cmd;
 	uint64_t		 monitoring_id;
+	bool			 monitoring_stop;
 };
 
 struct task_dbworker_context {

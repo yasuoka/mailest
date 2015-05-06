@@ -696,17 +696,18 @@ mailestd_gather_inform(struct mailestd *_this, struct task *task,
 		if (notice > 0)
 			mailestd_schedule_inform(_this, gather->id,
 			    (u_char *)gather, sizeof(struct gather));
-		if (gather->folders_done != gather->folders ||
-		    gather->dels_done != gather->dels ||
-		    gather->puts_done != gather->puts)
-			return;
+		if (gather->folders_done == gather->folders &&
+		    gather->dels_done == gather->dels &&
+		    gather->puts_done == gather->puts) {
+			TAILQ_REMOVE(&_this->gathers, gather, queue);
+			free(gather);
+		}
+	} else {
+		mailestd_schedule_inform(_this, gather->id,
+		    (u_char *)gather, sizeof(struct gather));
+		TAILQ_REMOVE(&_this->gathers, gather, queue);
+		free(gather);
 	}
-
-	mailestd_schedule_inform(_this, gather->id,
-	    (u_char *)gather, sizeof(struct gather));
-
-	TAILQ_REMOVE(&_this->gathers, gather, queue);
-	free(gather);
 }
 
 static int
@@ -1680,7 +1681,8 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 			if (siz <= 0)
 				goto on_error;
 			_this->wready = false;
-			if (!bytebuffer_has_remaining(_this->wbuf)) {
+			if (_this->monitoring_stop &&
+			    !bytebuffer_has_remaining(_this->wbuf)) {
 				mailestc_stop(_this);
 				return;
 			}
@@ -1761,6 +1763,7 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
 			mailestc_stop(_this);
 		else
 			mailestc_send_message(_this, inform, informsiz);
+		_this->monitoring_stop = true;
 		break;
 	case MAILESTCTL_CMD_UPDATE:
 	    {
@@ -1776,11 +1779,15 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
 			msg = msg0;
 		} else if (put_compl && del_compl)
 			msg = "new messages...done\n";
-		else if (del_compl)
+		else if (del_compl && result->dels > 0)
 			msg = "old messages...done\n";
-		if (msg != NULL)
+		if (msg != NULL) {
 			mailestc_send_message(_this, (u_char *)msg,
 			    strlen(msg));
+		}
+		if (del_compl && put_compl &&
+		    result->folders == result->folders_done)
+			_this->monitoring_stop = true;
 	    }
 		break;
 	}
