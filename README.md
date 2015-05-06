@@ -17,17 +17,17 @@ Prerequirement:
 
 OpenBSD, FreeBSD or NetBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.4.tar.gz
-    % tar xzf mailest-0.9.4.tar.gz
-    % cd mailest-mailest-0.9.4
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.5.tar.gz
+    % tar xzf mailest-0.9.5.tar.gz
+    % cd mailest-mailest-0.9.5
     % make
     % sudo make install
 
 Other:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.4.tar.gz
-    % tar xzf mailest-0.9.4.tar.gz
-    % cd mailest-mailest-0.9.4
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.5.tar.gz
+    % tar xzf mailest-0.9.5.tar.gz
+    % cd mailest-mailest-0.9.5
     % ./configure
     % make
     % sudo make install
@@ -60,6 +60,9 @@ ChangeLog
 0.9.5
 
 -  2015-05-06: yasuoka
+  -  First "update" to huge database taked long time.  Fix it not to wait
+     database cache updating before update starts.
+  -  Fix the results of "update" to be passed correctly.
   -  Support build on FreeBSD and NetBSD
 
 Man page
