@@ -7,6 +7,4 @@ LIBESTRAIER=	/usr/local/lib/libestraier.a
 
 .include "${.CURDIR}/../compat.mk"
 
-DEBUG=		-g -O0
-
 .PATH: ${.CURDIR}/..
