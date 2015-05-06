@@ -202,6 +202,7 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 		debug = conf->debug;
 	RB_INIT(&_this->root);
 	TAILQ_INIT(&_this->rfc822_pendings);
+	TAILQ_INIT(&_this->gather_pendings);
 	TAILQ_INIT(&_this->rfc822_tasks);
 	_this->rfc822_task_max = conf->tasks;
 	TAILQ_INIT(&_this->ctls);
@@ -368,6 +369,10 @@ mailestd_fini(struct mailestd *_this)
 		TAILQ_REMOVE(&_this->rfc822_tasks, tske, queue);
 		free(tske);
 	}
+	TAILQ_FOREACH_SAFE(tske, &_this->gather_pendings, queue, tskt) {
+		TAILQ_REMOVE(&_this->rfc822_tasks, tske, queue);
+		free(tske);
+	}
 	TAILQ_FOREACH_SAFE(msge, &_this->rfc822_pendings, queue, msgt) {
 		TAILQ_REMOVE(&_this->rfc822_pendings, msge, queue);
 	}
@@ -515,12 +520,14 @@ static int
 mailestd_syncdb(struct mailestd *_this)
 {
 	ESTDB		*db;
-	int		 i, id;
-	const char	*prev, *fn, *uri, *errstr;
+	int		 i, id, ldir, delete;
+	char		 dir[PATH_MAX + 128];
+	const char	*prev, *fn, *uri, *errstr, *folder;
 	ESTDOC		*doc;
 	struct rfc822	*msg, msg0;
 	struct tm	 tm;
 	struct stat	 st;
+	struct task	*tske, *tskt;
 
 	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 	MAILESTD_DBG((LOG_DEBUG, "START %s()", __func__));
@@ -553,12 +560,14 @@ mailestd_syncdb(struct mailestd *_this)
 			msg->path = xstrdup(fn);
 			RB_INSERT(rfc822_tree, &_this->root, msg);
 		}
-		strptime(est_doc_attr(doc, ESTDATTRMDATE), MAILESTD_TIMEFMT,
-		    &tm);
-		msg->db_id = id;
-		msg->mtime = timegm(&tm);
-		msg->size = strtonum(est_doc_attr(doc, ESTDATTRSIZE), 0,
-		    INT64_MAX, &errstr);
+		if (!msg->ontask && msg->db_id == 0) {
+			strptime(est_doc_attr(doc, ESTDATTRMDATE),
+			    MAILESTD_TIMEFMT, &tm);
+			msg->db_id = id;
+			msg->mtime = timegm(&tm);
+			msg->size = strtonum(est_doc_attr(doc, ESTDATTRSIZE), 0,
+			    INT64_MAX, &errstr);
+		}
 
 		if (i >= MAILESTD_DBSYNC_NITER) {
 			free(_this->sync_prev);
@@ -571,9 +580,35 @@ mailestd_syncdb(struct mailestd *_this)
 	}
 	free(_this->sync_prev);
 	_this->sync_prev = NULL;
-	_this->syncdb_time = _this->curr_time;
 
 	mailestd_log(LOG_INFO, "Database cache updated");
+
+	TAILQ_FOREACH_SAFE(tske, &_this->gather_pendings, queue, tskt) {
+		TAILQ_REMOVE(&_this->gather_pendings, tske, queue);
+		delete = 0;
+		folder = ((struct task_gather *)tske)->folder;
+		strlcpy(dir, _this->maildir, sizeof(dir));
+		strlcat(dir, "/", sizeof(dir));
+		strlcat(dir, folder, sizeof(dir));
+		strlcat(dir, "/", sizeof(dir));
+		ldir = strlen(dir);
+		msg0.path = dir;
+		for (msg = RB_NFIND(rfc822_tree, &_this->root, &msg0);
+		    msg != NULL; msg = RB_NEXT(rfc822_tree, &_this->root, msg)){
+			if (strncmp(msg->path, dir, ldir) != 0)
+				break;
+			if (msg->fstime == 0 && !msg->ontask) {
+				mailestd_schedule_deldb(_this, msg);
+				delete++;
+			}
+		}
+		if (delete > 0)
+			mailestd_log(LOG_INFO, "Cleanup %s%s (Remove: %d)",
+			    (folder[0] != '/')? "+" : "", folder, delete);
+		free(tske);
+	}
+	_this->syncdb_time = _this->curr_time;
+
 	return (0);
 }
 
@@ -585,7 +620,7 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 	const char	*folder = task->folder;
 	struct gather	*ctx;
 	FTS		*fts;
-	struct rfc822	*msge, *msgt, msg0;
+	struct rfc822	*msge, msg0;
 	time_t		 curr_time;
 
 	ctx = mailestd_get_gather(_this, task->gather_id);
@@ -616,24 +651,18 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 
 	msg0.path = rdir;
 	for (msge = RB_NFIND(rfc822_tree, &_this->root, &msg0);
-	    msge != NULL; msge = msgt) {
-		msgt = RB_NEXT(rfc822_tree, &_this->root, msge);
-
+	    msge != NULL; msge = RB_NEXT(rfc822_tree, &_this->root, msge)) {
 		if (strncmp(msge->path, rdir, lrdir) != 0)
 			break;
-
 		total++;
-		if (msge->fstime != curr_time) {
-			RB_REMOVE(rfc822_tree, &_this->root, msge);
+		if (msge->fstime != curr_time && !msge->ontask) {
 			delete++;
-			if (!msge->ontask) {
-				if (msge->db_id != 0) {
-					if (ctx != NULL)
-						ctx->dels++;
-					mailestd_schedule_deldb(_this, msge);
-				} else
-					rfc822_free(msge);
+			MAILESTD_ASSERT(msge->db_id != 0);
+			if (ctx != NULL) {
+				ctx->dels++;
+				msge->gather_id = ctx->id;
 			}
+			mailestd_schedule_deldb(_this, msge);
 		}
 	}
 
@@ -645,7 +674,7 @@ on_error:
 		if (ctx->puts == ctx->puts_done &&
 		    ctx->dels == ctx->dels_done &&
 		    (update > 0 || delete > 0)) {
-			strlcpy(ctx->errmsg, "other task is running",
+			strlcpy(ctx->errmsg, "other task exists",
 			    sizeof(ctx->errmsg));
 			mailestd_gather_inform(_this, NULL, ctx);
 		} else if (_this->dbworker.suspend) {
@@ -1363,6 +1392,11 @@ task_worker_on_proc(struct task_worker *_this)
 
 		case MAILESTD_TASK_GATHER:
 			mailestd_gather(mailestd, (struct task_gather *)task);
+			if (mailestd->syncdb_time == 0) {
+				TAILQ_INSERT_TAIL(&mailestd->gather_pendings,
+				    task, queue);
+				task = NULL;
+			}
 			break;
 
 		case MAILESTD_TASK_SUSPEND:
@@ -1441,6 +1475,7 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 		ctx->dels++;
 		mailestd_gather_inform(mailestd, task, NULL);
 		mailestd_deldb(mailestd, db, msg);
+		RB_REMOVE(rfc822_tree, &mailestd->root, msg);
 		rfc822_free(msg);
 		break;
 
@@ -1778,14 +1813,15 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
 			msg = msg0;
 		} else if (put_compl && del_compl)
 			msg = "new messages...done\n";
-		else if (del_compl && result->dels > 0)
+		else if (del_compl && result->dels_done > 0)
 			msg = "old messages...done\n";
 		if (msg != NULL) {
 			mailestc_send_message(_this, (u_char *)msg,
 			    strlen(msg));
 		}
-		if (del_compl && put_compl &&
-		    result->folders == result->folders_done)
+		if (result->errmsg[0] != '\0' || (
+		    del_compl && put_compl &&
+		    result->folders == result->folders_done))
 			_this->monitoring_stop = true;
 	    }
 		break;

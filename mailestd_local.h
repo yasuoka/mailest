@@ -74,6 +74,7 @@ struct mailestd {
 	struct task_worker	  mainworker;
 	struct task_worker	 *workers[3];
 	struct gather_queue	  gathers;
+	struct task_queue	  gather_pendings;
 
 	int			  sock_ctl;
 	struct event		  evsock_ctl;
