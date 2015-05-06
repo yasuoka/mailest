@@ -17,17 +17,17 @@ Prerequirement:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.5.tar.gz
-    % tar xzf mailest-0.9.5.tar.gz
-    % cd mailest-mailest-0.9.5
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.6.tar.gz
+    % tar xzf mailest-0.9.6.tar.gz
+    % cd mailest-mailest-0.9.6
     % make
     % sudo make install
 
 Other:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.5.tar.gz
-    % tar xzf mailest-0.9.5.tar.gz
-    % cd mailest-mailest-0.9.5
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.6.tar.gz
+    % tar xzf mailest-0.9.6.tar.gz
+    % cd mailest-mailest-0.9.6
     % ./configure
     % make
     % sudo make install
@@ -56,6 +56,14 @@ Quick Usage
 
 ChangeLog
 ---------
+
+0.9.6
+
+-  2015-05-06: yasuoka
+  -  Fix: cannot search non ASCII/UTF-8 mails
+  -  Fix: mailestd exits abnormally sometimes when it is stopped during
+     syncing DB.
+
 
 0.9.5
 
