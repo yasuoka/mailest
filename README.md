@@ -100,6 +100,14 @@ Backup of the database
   if the program or the system crashes during updating the database.
 
 
+TODO
+----
+
+- Monitor the inodes the directories (by kevent and inotify) and start
+  update automatically.
+- Implement `cmew` internally and provide a `smew` compatible command.
+
+
 Copyright
 ---------
 
