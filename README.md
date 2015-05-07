@@ -103,9 +103,14 @@ Backup of the database
 TODO
 ----
 
+- Specify ESTODCLEAN when deleting the documents since it's recommended.
 - Monitor the inodes the directories (by kevent and inotify) and start
   update automatically.
 - Implement `cmew` internally and provide a `smew` compatible command.
+- Delete the index phsically
+- Automatically create a backup for the database when closing the
+  writable DB connection.  Also recover the database automatically
+  when it's broken.
 
 
 Copyright
