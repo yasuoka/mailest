@@ -19,11 +19,12 @@
 .Dt MEW-MAILEST 1
 .Os
 .Sh NAME
-.Nm mew-mailest
-.Nd mailest wrapper program for Mew
+.Nm mew-mailest ,
+.Nm cmew-mailest
+.Nm smew-mailest
+.Nd mailest wrapper programs for Mew
 .Sh SYNOPSIS
-.\" For a program:  program [-abc] file ...
-.Nm
+.Nm mew-mailest
 search
 .Op Fl vu
 .Op Fl max Ar max
@@ -31,33 +32,32 @@ search
 .Op Fl ic Ar ic
 .Op Fl attr Ar attr
 .Ar phrase
-.Nm
+.Nm mew-mailest
 .Op Fl s Ar suffix
 .Op Fl m Ar maildir
 .Op Ar folder
+.Nm cmew-mailest
+.Nm smew-mailest
+.Ar message-id
+.Op Ar db
+.Op Ar mydir
 .Sh DESCRIPTION
 The
-.Nm
-provides the same functionalities of the existing Mew search
-backend programs
+.Nm mew-mailest ,
+.Nm cmew-mailest ,
+and
+.Nm smew-mailest
+provide the same functionalities of the existing Mew programs
 .Po
-.Dq Pa mewest
-or
+.Dq Pa mewest ,
 .Do Pa estcmd search Dc
+.Dq Pa cmew
+or
+.Dq Pa smew
 .Pc
-using the
+by using
 .Xr mailestctl 1
 program as the backend program.
-.\" The following requests should be uncommented and used where appropriate.
-.\" .Sh CONTEXT
-.\" For section 9 functions only.
-.\" .Sh RETURN VALUES
-.\" For sections 2, 3, and 9 function return values only.
-.\" .Sh ENVIRONMENT
-.\" For sections 1, 6, 7, and 8 only.
-.\" .Sh FILES
-.\" .Sh EXIT STATUS
-.\" For sections 1, 6, and 8 only.
 .Sh EXAMPLES
 To use the
 .Nm
@@ -67,6 +67,9 @@ add following lines to
 .Bd -literal -ofset "XXXX"
 (defvar mew-prog-est        "mew-mailest")
 (defvar mew-prog-est-update "mew-mailest")
+(defvar mew-prog-cmew       "cmew-mailest")
+(defvar mew-prog-smew       "smew-mailest")
+(defvar mew-id-db-file      ".mailest.sock")
 .Ed
 .\" .Sh DIAGNOSTICS
 .\" For sections 1, 4, 6, 7, 8, and 9 printf/stderr messages only.
@@ -74,11 +77,6 @@ add following lines to
 .\" For sections 2, 3, 4, and 9 errno settings only.
 .Sh SEE ALSO
 .Xr mailestctl 1
-.\" .Sh STANDARDS
-.\" .Sh HISTORY
-.\" .Sh AUTHORS
-.\" .Sh CAVEATS
-.\" .Sh BUGS
 .Sh AUTHORS
 The
 .Nm

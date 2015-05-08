@@ -38,20 +38,23 @@ Other:
 Quick Usage
 -----------
 
-+ Add the below line to .mew.el to let Mew use "Hyper Estrairer" for
-  search.
++  Add the below line to .mew.el to let Mew use "Hyper Estrairer" for
+   search.
 
       ((setq mew-search-method 'est)
 
-+ Add the below lines to ~/.emacs use use the "mailest" instead of
-  existing "mewest".
++  Add the below lines to ~/.emacs use use the "mailest" instead of
+   existing "mewest".
 
       (defvar mew-prog-est        "mew-mailest")
       (defvar mew-prog-est-update "mew-mailest")
+      (defvar mew-prog-cmew       "cmew-mailest")
+      (defvar mew-prog-smew       "smew-mailest")
+      (defvar mew-id-db-file      ".mailest.sock")
 
-+ Use `km`, `kM`, `k/` or `k?` in Mew.  See
-  http://mew.org/en/info/release/mew_6.html#dbsearch for search commands
-  in Mew.
++  Use `km`, `kM`, `k/` or `k?` in Mew.  See
+   http://mew.org/en/info/release/mew_6.html#dbsearch for search commands
+   in Mew.
 
 
 ChangeLog
@@ -60,15 +63,25 @@ ChangeLog
 0.9.8
 
 -  2015-05-08: yasuoka
-  -  Add 'message-id' command to mailestdctl(1).
+  -  Add 'smew' functionality.  Add `smew` command to mailestctl(1).
+     To use 'smew' of 'mailestd', add below lines:
+
+        (defvar mew-prog-cmew       "cmew-mailest")
+        (defvar mew-prog-smew       "smew-mailest")
+        (defvar mew-id-db-file      ".mailest.sock")
+
+     and delete the existing database and create the database again.
+  -  Made the 'message-id' attribute indexed.
+  -  Create `x-mew-parid` indexed attribute for each message.
+  -  Add `message-id` command to mailestdctl(1).
 
 0.9.7
 
 -  2015-05-06: yasuoka
-  - Fix: When the database doesn't exists, the database thread stopps
-    forever.
-  - Fix: When the database is error, the first update causes a lot
-    of errors.
+  -  Fix: When the database doesn't exists, the database thread stopps
+     forever.
+  -  Fix: When the database is error, the first update causes a lot
+     of errors.
 
 0.9.6
 
@@ -111,7 +124,6 @@ TODO
 - Specify ESTODCLEAN when deleting the documents since it's recommended.
 - Monitor the inodes the directories (by kevent and inotify) and start
   update automatically.
-- Implement `cmew` internally and provide a `smew` compatible command.
 - Delete the index phsically
 - Automatically create a backup for the database when closing the
   writable DB connection.  Also recover the database automatically

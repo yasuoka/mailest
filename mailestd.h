@@ -34,8 +34,12 @@ enum MAILESTCTL_CMD {
 	MAILESTCTL_CMD_UPDATE,
 	MAILESTCTL_CMD_SUSPEND,
 	MAILESTCTL_CMD_RESUME,
-	MAILESTCTL_CMD_SEARCH
+	MAILESTCTL_CMD_SEARCH,
+	MAILESTCTL_CMD_SMEW
 };
+
+#define	ATTR_MSGID	"message-id"
+#define	ATTR_PARID	"x-mew-parid"
 
 struct mailestctl {
 	enum MAILESTCTL_CMD	 command;
@@ -51,6 +55,11 @@ struct mailestctl_search {
 	char			 attrs[8][80];
 	char			 order[80];
 	char			 phrase[BUFSIZ];
+};
+struct mailestctl_smew {
+	enum MAILESTCTL_CMD	 command;
+	char			 msgid[80];
+	char			 folder[PATH_MAX];
 };
 
 __BEGIN_DECLS

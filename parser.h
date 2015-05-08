@@ -25,7 +25,8 @@ enum actions {
 	SUSPEND,
 	RESUME,
 	CSEARCH,	/* estcmd search compatibile search command */
-	MESSAGE_ID
+	MESSAGE_ID,
+	SEARCH_SMEW
 };
 
 struct parse_result {

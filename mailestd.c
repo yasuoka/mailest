@@ -310,6 +310,7 @@ mailestd_start(struct mailestd *_this, bool fg)
 
 	mailestd_log(LOG_INFO, "Started mailestd.  Process-Id=%d",
 	    (int)getpid());
+	mailestd_db_add_msgid_index(_this);
 	mailestd_schedule_syncdb(_this);
 }
 
@@ -516,6 +517,48 @@ mailestd_db_close(struct mailestd *_this)
 	}
 }
 
+static void
+mailestd_db_add_msgid_index(struct mailestd *_this)
+{
+	int	 i;
+	CBLIST	*exprs;
+	ESTDB	*db;
+	bool	 msgid_found = false, parid_found = false;
+	struct stat	 st;
+
+	if (lstat(_this->dbpath, &st) == -1 && errno == ENOENT)
+		goto db_noent;
+	if ((db = mailestd_db_open_rd(_this)) == NULL)
+		return;
+	if ((exprs = est_db_attr_index_exprs(db)) != NULL) {
+		for (i = 0; i < cblistnum(exprs); i++) {
+			if (!strncasecmp(ATTR_MSGID "=",
+			    cblistval(exprs, i, NULL), sizeof(ATTR_MSGID)))
+				msgid_found = true;
+			if (!strncasecmp(ATTR_PARID "=",
+			    cblistval(exprs, i, NULL), sizeof(ATTR_PARID)))
+				parid_found = true;
+			if (msgid_found && parid_found)
+				break;
+		}
+		cblistclose(exprs);
+	}
+db_noent:
+	if (!msgid_found || !parid_found) {
+		if ((db = mailestd_db_open_wr(_this)) == NULL)
+			return;
+		if (!msgid_found) {
+			mailestd_log(LOG_INFO, "Adding \""ATTR_MSGID"\" index");
+			est_db_add_attr_index(db, ATTR_MSGID, ESTIDXATTRSTR);
+		}
+		if (!parid_found) {
+			mailestd_log(LOG_INFO, "Adding \""ATTR_PARID"\" index");
+			est_db_add_attr_index(db, ATTR_PARID, ESTIDXATTRSTR);
+		}
+		mailestd_db_close(_this);
+	}
+}
+
 static int
 mailestd_syncdb(struct mailestd *_this)
 {
@@ -526,18 +569,10 @@ mailestd_syncdb(struct mailestd *_this)
 	ESTDOC		*doc;
 	struct rfc822	*msg, msg0;
 	struct tm	 tm;
-	struct stat	 st;
 	struct task	*tske, *tskt;
 
 	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 	MAILESTD_DBG((LOG_DEBUG, "START %s()", __func__));
-
-	if (lstat(_this->dbpath, &st) == -1 && errno == ENOENT) {
-		mailestd_log(LOG_INFO, "Database %s doesn't exist",
-		    _this->dbpath);
-		_this->syncdb_time = _this->curr_time;
-		return (0);
-	}
 
 	if ((db = mailestd_db_open_rd(_this)) == NULL)
 		return (-1);
@@ -545,7 +580,7 @@ mailestd_syncdb(struct mailestd *_this)
 	prev = _this->sync_prev;
 	est_db_iter_init(db, prev);
 	for (i = 0; (id = est_db_iter_next(db)) > 0; i++) {
-		doc = est_db_get_doc(db, id, ESTGDNOTEXT | ESTGDNOTEXT);
+		doc = est_db_get_doc(db, id, ESTGDNOTEXT);
 		if (doc == NULL)
 			continue;
 
@@ -938,6 +973,140 @@ mailestd_deldb(struct mailestd *_this, ESTDB *db, struct rfc822 *msg)
 }
 
 static void
+mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
+{
+	int		 i, cnt = 0, *res, rnum, lmaildir, lfolder;
+	const char	*uri, *msgid;
+	char		 buf[BUFSIZ], *bufp = NULL;
+	bool		 keepthis;
+	size_t		 bufsiz = 0;
+	FILE		*out;
+	ESTDB		*db;
+	ESTCOND		*cond;
+	ESTDOC		*doc;
+	struct doclist {
+		ESTDOC			*doc;
+		const char		*msgid;
+		const char		*uri;
+		TAILQ_ENTRY(doclist)	 queue;
+	}		*doce, *docc, *doct;
+	TAILQ_HEAD(, doclist)	 children, ancestors;
+
+	lfolder = (isnull(smew->folder))? -1 : (int)strlen(smew->folder);
+
+	if ((out = open_memstream(&bufp, &bufsiz)) == NULL)
+		abort();
+
+	if ((db = mailestd_db_open_rd(_this)) == NULL)
+		goto out;
+
+	lmaildir = strlen(_this->maildir);
+	TAILQ_INIT(&children);
+	TAILQ_INIT(&ancestors);
+	/* search ancestors */
+	for (i = 0, msgid = smew->msgid; msgid != NULL; i++) {
+		strlcpy(buf, ATTR_MSGID	" " ESTOPSTREQ " ", sizeof(buf));
+		strlcat(buf, msgid, sizeof(buf));
+		if ((cond = est_cond_new()) == NULL)
+			break;
+		est_cond_add_attr(cond, buf);
+		res = est_db_search(db, cond, &rnum, NULL);
+		est_cond_delete(cond);
+		msgid = NULL;
+		if (rnum > 0) {
+			if ((doc = est_db_get_doc(db, res[0], ESTGDNOTEXT))
+			    == NULL)
+				continue;
+			doce = xcalloc(1, sizeof(struct doclist));
+			doce->doc = doc;
+			doce->msgid = est_doc_attr(doc, ATTR_MSGID);
+			if (i == 0)
+				TAILQ_INSERT_TAIL(&children, doce, queue);
+			else
+				TAILQ_INSERT_HEAD(&ancestors, doce, queue);
+			msgid = est_doc_attr(doc, ATTR_PARID);
+		}
+	}
+
+	/* search descendants */
+	while ((doce = TAILQ_FIRST(&children)) != NULL) {
+		TAILQ_REMOVE(&children, doce, queue);
+		TAILQ_INSERT_TAIL(&ancestors, doce, queue);
+		msgid = est_doc_attr(doce->doc, ATTR_MSGID);
+		strlcpy(buf, ATTR_PARID	" " ESTOPSTREQ " ", sizeof(buf));
+		strlcat(buf, msgid, sizeof(buf));
+		if ((cond = est_cond_new()) == NULL)
+			break;
+		est_cond_add_attr(cond, buf);
+		res = est_db_search(db, cond, &rnum, NULL);
+		est_cond_delete(cond);
+		for (i = 0; i < rnum; i++) {
+			if ((doc = est_db_get_doc(db, res[i], ESTGDNOTEXT))
+			    == NULL)
+				continue;
+			docc = xcalloc(1, sizeof(struct doclist));
+			docc->doc = doc;
+			docc->msgid = est_doc_attr(doc, ATTR_MSGID);
+			TAILQ_INSERT_HEAD(&children, docc, queue);
+		}
+	}
+
+	/* make the list unique */
+	TAILQ_FOREACH_SAFE(doce, &ancestors, queue, doct) {
+		keepthis = false;
+		uri = est_doc_attr(doce->doc, ESTDATTRURI);
+		if (uri != NULL) {
+			if (strncmp(uri + 7, _this->maildir, lmaildir)
+			    == 0 && uri[lmaildir + 7] == '/') {
+				doce->uri = uri + lmaildir + 8;
+				if (lfolder > 0 &&
+				    !strncmp(doce->uri, smew->folder, lfolder)
+				    && doce->uri[lfolder] == '/')
+					/*
+					 * When removing the duplcated
+					 * messages, keep the messages in the
+					 * folder specified.
+					 */
+					keepthis = true;
+			} else
+				doce->uri = uri + 7;
+		}
+
+		/* removing duplicated messges */
+		TAILQ_FOREACH(docc, &ancestors, queue) {
+			if (doce == docc)
+				break;
+			if (strcmp(doce->msgid, docc->msgid) == 0) {
+				if (!keepthis) {
+					TAILQ_REMOVE(&ancestors, doce, queue);
+					est_doc_delete(doce->doc);
+					free(doce);
+				} else {
+					TAILQ_REMOVE(&ancestors, docc, queue);
+					est_doc_delete(docc->doc);
+					free(docc);
+				}
+			}
+		}
+	}
+
+	TAILQ_FOREACH_SAFE(doce, &ancestors, queue, doct) {
+		TAILQ_REMOVE(&ancestors, doce, queue);
+		fprintf(out, "%s\n", doce->uri);
+		est_doc_delete(doce->doc);
+		free(doce);
+		cnt++;
+	}
+out:
+	mailestd_log(LOG_INFO, "smew (%s%s%s) done.  Hit %d",
+	    smew->msgid, (lfolder > 0)? ", +" : "",
+	    (lfolder > 0)? smew->folder : "", cnt);
+	fclose(out);
+	mailestd_schedule_inform(_this, smew->id, (u_char *)bufp, bufsiz);
+	free(bufp);
+}
+
+static void
 mailestd_search(struct mailestd *_this, ESTDB *db, uint64_t task_id,
     ESTCOND *cond, enum SEARCH_OUTFORM outform)
 {
@@ -1205,6 +1374,21 @@ mailestd_schedule_search(struct mailestd *_this, ESTCOND *cond)
 }
 
 static uint64_t
+mailestd_schedule_smew(struct mailestd *_this, const char *msgid,
+    const char *folder)
+{
+	struct task_smew	*task;
+
+	task = xcalloc(1, sizeof(struct task_smew));
+	task->type = MAILESTD_TASK_SMEW;
+	strlcpy(task->msgid, msgid, sizeof(task->msgid));
+	strlcpy(task->folder, folder, sizeof(task->folder));
+	task->highprio = true;
+
+	return (task_worker_add_task(&_this->dbworker, (struct task *)task));
+}
+
+static uint64_t
 mailestd_schedule_inform(struct mailestd *_this, uint64_t task_id,
     u_char *inform, size_t informsiz)
 {
@@ -1373,6 +1557,8 @@ task_worker_on_proc(struct task_worker *_this)
 			msg = ((struct task_rfc822 *)task)->msg;
 			MAILESTD_ASSERT(msg->draft == NULL);
 			mailestd_draft(mailestd, msg);
+			if (msg->draft != NULL)
+				estdoc_add_parid(msg->draft);
 			/*
 			 * This thread can't return the task even if creating
 			 * a draft failed.  (since it's not dbworker)
@@ -1388,6 +1574,7 @@ task_worker_on_proc(struct task_worker *_this)
 			task = NULL;	/* recycled */
 			break;
 		case MAILESTD_TASK_SEARCH:
+		case MAILESTD_TASK_SMEW:
 		case MAILESTD_TASK_RFC822_DELDB:
 			MAILESTD_ASSERT(thread_this ==
 			    mailestd->dbworker.thread);
@@ -1494,6 +1681,10 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 			break;
 		mailestd_search(mailestd, db, task->id, search->cond,
 		    search->outform);
+		break;
+
+	case MAILESTD_TASK_SMEW:
+		mailestd_db_smew(mailestd, (struct task_smew *)task);
 		break;
 
 	case MAILESTD_TASK_NONE:
@@ -1651,7 +1842,9 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 		enum MAILESTCTL_CMD	 command;
 		char			 space[BUFSIZ];
 	} cmd;
-	struct mailestctl_update *update = (struct mailestctl_update *)&cmd;
+	struct mailestctl_smew	*smew = (struct mailestctl_smew *)&cmd;
+	struct mailestctl_update
+				*update = (struct mailestctl_update *)&cmd;
 
 	nev = EV_READ | EV_TIMEOUT;	/* next event */
 	if (evmask & EV_READ) {
@@ -1700,6 +1893,15 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 		case MAILESTCTL_CMD_SEARCH:
 			if (mailestc_cmd_search(_this,
 			    (struct mailestctl_search *)&cmd) != 0)
+				goto on_error;
+			break;
+
+		case MAILESTCTL_CMD_SMEW:
+			_this->monitoring_cmd = MAILESTCTL_CMD_SMEW;
+			_this->monitoring_id =
+			    mailestd_schedule_smew(mailestd,
+				    smew->msgid, smew->folder);
+			if (_this->monitoring_id == 0)
 				goto on_error;
 			break;
 
@@ -1802,6 +2004,7 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
 	switch (_this->monitoring_cmd) {
 	default:
 		break;
+	case MAILESTCTL_CMD_SMEW:
 	case MAILESTCTL_CMD_SEARCH:
 		if (informsiz == 0)
 			mailestc_stop(_this);
@@ -2062,6 +2265,73 @@ xstrdup(const char *str)
 	}
 
 	return (ret);
+}
+
+static void
+estdoc_add_parid(ESTDOC *doc)
+{
+	int		 cinrp = 0;
+	const char	*inrp0, *refs0;
+	char		*t, *sp, *inrp = NULL, *refs = NULL, *parid = NULL;
+
+	/*
+	 * In cmew:
+	 * > (1) The In-Reply-To contains one ID, use it.
+	 * > (2) The References contains one or more IDs, use the last one.
+	 * > (3) The In-Reply-To contains two or more IDs, use the first one.
+	 */
+	if ((inrp0 = est_doc_attr(doc, "in-reply-to")) != NULL) {
+		inrp = xstrdup(inrp0);
+		sp = inrp;
+		while ((t = strsep(&sp, " \t")) != NULL) {
+			if (valid_msgid(t)) {
+				if (cinrp == 0)
+					parid = t;
+				cinrp++;
+			}
+		}
+	}
+	if (cinrp != 1) {
+		if ((refs0 = est_doc_attr(doc, "references")) != NULL) {
+			refs = xstrdup(refs0);
+			sp = refs;
+			while ((t = strsep(&sp, " \t")) != NULL) {
+				if (valid_msgid(t))
+					parid = t;
+			}
+		}
+	}
+	if (parid != NULL)
+		est_doc_add_attr(doc, ATTR_PARID, parid);
+
+	free(inrp);
+	free(refs);
+}
+
+/* -a-zA-Z0-9!#$%&\'*+/=?^_`{}|~.@ is valid chars for Message-Id */
+static int msgid_chars[] = {
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, /*  !"#$%&'()*+,-./ */
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, /* 0123456789:;<=>? */
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /* @ABCDEFGHIJKLMNO */
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, /* PQRSTUVWXYZ[\]^_ */
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /* `abcdefghijklmno */
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0  /* pqrstuvwxyz{|}~  */
+};
+
+static bool
+valid_msgid(const char *str)
+{
+	if (*(str++) != '<')
+		return (false);
+
+	for (;*str != '\0' && *str != '>'; str++) {
+		if ((unsigned)(*str) >= 128 || msgid_chars[(int)*str] == 0)
+			break;
+	}
+
+	return ((*str == '>')? true : false);
 }
 
 RB_GENERATE_STATIC(rfc822_tree, rfc822, tree, rfc822_compar);

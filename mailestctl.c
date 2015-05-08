@@ -67,6 +67,7 @@ mailestctl_main(int argc, char *argv[])
 	char			*cmdv[64], msgbuf[MAILESTD_SOCK_MSGSIZ],
 				 path0[PATH_MAX], *maildir = NULL;
 	struct mailestctl_search search;
+	struct mailestctl_smew	 smew;
 	struct mailestctl_update update;
 
 	cmd = argv[0];
@@ -220,6 +221,18 @@ wait_resp:
 			fwrite(msgbuf, 1, sz, stdout);
 		close(mailestc_sock);
 		break;
+
+	case SEARCH_SMEW:
+		run_daemon(cmd, cmdv);
+		memset(&smew, 0, sizeof(smew));
+		smew.command = MAILESTCTL_CMD_SMEW;
+		strlcpy(smew.msgid, result->msgid, sizeof(smew.msgid));
+		if (result->folder)
+			strlcpy(smew.folder, result->folder,
+			    sizeof(smew.folder));
+		if (write(mailestc_sock, &smew, sizeof(smew)) < 0)
+			err(1, "write");
+		goto wait_resp;
 
 	case MESSAGE_ID:
 		run_daemon(cmd, cmdv);

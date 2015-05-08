@@ -10,7 +10,6 @@ mailestd_CPPFLAGS =  -iquotedir -I$(top_srcdir)/replace -I$(top_srcdir)
 mailestd_LDFLAGS = -L../replace
 mailestd_LDADD = -lreplace
 dist_man_MANS = ../mailestctl.1 ../mailestd.8 ../mailestd.conf.5 
-dist_man_MANS += ../mew-mailest.1
 
 if ENABLE_MULTI_THREADS
 mailestd_CPPFLAGS += -DMAILESTD_MT
@@ -22,16 +21,34 @@ mailestd_LDFLAGS += -L../libestdraft
 mailestd_LDADD += -lestdraft
 endif
 
-bin_SCRIPTS = mew-mailest
-CLEANFILES = mew-mailest ../parse.c
+bin_SCRIPTS = mew-mailest cmew-mailest smew-mailest
+CLEANFILES = mew-mailest cmew-mailest smew-mailest ../parse.c
 EXTRA_DIST = $(top_srcdir)/mew-mailest.sh
+EXTRA_DIST += $(top_srcdir)/cmew-mailest.sh $(top_srcdir)/smew-mailest.sh
 
 mew-mailest: $(top_srcdir)/mew-mailest.sh
 	cp $(top_srcdir)/mew-mailest.sh mew-mailest
 	chmod +x mew-mailest
 
+cmew-mailest: $(top_srcdir)/cmew-mailest.sh
+	cp $(top_srcdir)/cmew-mailest.sh cmew-mailest
+	chmod +x cmew-mailest
+
+smew-mailest: $(top_srcdir)/smew-mailest.sh
+	cp $(top_srcdir)/smew-mailest.sh smew-mailest
+	chmod +x smew-mailest
+
 install-exec-hook:
 	ln -f $(DESTDIR)$(sbindir)/mailestd$(EXEEXT) \
 		$(DESTDIR)$(bindir)/mailestctl$(EXEEXT)
-uninstall-hook:
+
+install-data-hook:
+	ln -sf mew-mailest.1 $(DESTDIR)$(mandir)/man1/cmew-mailest.1
+	ln -sf mew-mailest.1 $(DESTDIR)$(mandir)/man1/smew-mailest.1
+
+uninstall-exec-hook:
 	rm $(DESTDIR)$(bindir)/mailestctl$(EXEEXT)
+
+uninstall-data-hook:
+	rm $(DESTDIR)$(mandir)/man1/cmew-mailest.1
+	rm $(DESTDIR)$(mandir)/man1/smew-mailest.1

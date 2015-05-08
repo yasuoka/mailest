@@ -56,6 +56,7 @@ static const struct token t_search_max[];
 static const struct token t_search_ord[];
 static const struct token t_search_ic[];
 static const struct token t_search_attr[];
+static const struct token t_smew[];
 static const struct token t_msgid[];
 
 static const struct token t_main[] = {
@@ -63,6 +64,7 @@ static const struct token t_main[] = {
 	{KEYWORD,	"stop",		STOP,		NULL},
 	{KEYWORD,	"restart",	RESTART,	NULL},
 	{KEYWORD,	"csearch",	CSEARCH,	t_search},
+	{KEYWORD,	"smew",		SEARCH_SMEW,	t_smew},
 	{KEYWORD,	"message-id",	MESSAGE_ID,	t_msgid},
 	{KEYWORD,	"update",	UPDATE,		t_folder},
 	{KEYWORD,	"suspend",	SUSPEND,	NULL},
@@ -99,6 +101,10 @@ static const struct token t_search_ic[] = {
 };
 static const struct token t_search_attr[] = {
 	{SEARCH_ATTR,	"",		NONE,		t_search},
+	{ENDTOKEN,	"",		NONE,		NULL}
+};
+static const struct token t_smew[] = {
+	{MSGID,		"",		NONE,		t_folder},
 	{ENDTOKEN,	"",		NONE,		NULL}
 };
 static const struct token t_msgid[] = {

@@ -101,6 +101,7 @@ enum MAILESTD_TASK {
 	MAILESTD_TASK_RESUME,
 	MAILESTD_TASK_INFORM,
 	MAILESTD_TASK_SEARCH,
+	MAILESTD_TASK_SMEW,
 	MAILESTD_TASK_GATHER,
 	MAILESTD_TASK_SYNCDB,
 	MAILESTD_TASK_RFC822_DRAFT,
@@ -143,6 +144,15 @@ struct task_search {
 	bool			 highprio;
 	enum SEARCH_OUTFORM	 outform;
 	ESTCOND			*cond;
+};
+
+struct task_smew {
+	uint64_t		 id;
+	enum MAILESTD_TASK	 type;
+	TAILQ_ENTRY(task)	 queue;
+	bool			 highprio;
+	char			 msgid[512];
+	char			 folder[PATH_MAX];
 };
 
 struct task_inform {
@@ -217,6 +227,7 @@ static void	 mailestd_on_sigint(int, short, void *);
 static ESTDB	*mailestd_db_open_rd(struct mailestd *);
 static ESTDB	*mailestd_db_open_wr(struct mailestd *);
 static void	 mailestd_db_close(struct mailestd *);
+static void	 mailestd_db_add_msgid_index(struct mailestd *);
 static int	 mailestd_syncdb(struct mailestd *);
 static int	 mailestd_gather(struct mailestd *, struct task_gather *);
 static void	 mailestd_gather_inform(struct mailestd *, struct task *,
@@ -276,6 +287,8 @@ static int	 rfc822_compar(struct rfc822 *, struct rfc822 *);
 static void	 rfc822_free(struct rfc822 *msg);
 static void	*xcalloc(size_t, size_t);
 static char	*xstrdup(const char *);
+static void	 estdoc_add_parid(ESTDOC *);
+static bool	 valid_msgid(const char *);
 
 #ifndef	nitems
 #define nitems(_n)	(sizeof((_n)) / sizeof((_n)[0]))
