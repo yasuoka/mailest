@@ -1553,7 +1553,6 @@ static uint64_t
 task_worker_add_task(struct task_worker *_this, struct task *task)
 {
 	uint64_t	 id;
-	struct task	*tske;
 
 	task->id = mailestd_new_id(_this->mailestd_this);
 	id = task->id;
@@ -2037,6 +2036,7 @@ setnonblock(int sock)
 
 	return (0);
 }
+
 static void *
 xcalloc(size_t nmemb, size_t size)
 {
