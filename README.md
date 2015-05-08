@@ -65,7 +65,7 @@ ChangeLog
 - 2015-05-08: yasuoka
   - Optimize database when many documents are put or deleted.  As the
     Hyper Estrairer's documet is recomended.
-
+  - Unlimit the resource limit of the data size when process startup.
 
 0.9.8
 

@@ -17,6 +17,7 @@
 
 #include <sys/types.h>
 #include <sys/queue.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/tree.h>
@@ -89,6 +90,8 @@ main(int argc, char *argv[])
 	bool			 noaction = false;
 	struct stat		 st;
 	extern char		*__progname;
+	rlim_t			 olim;
+	struct rlimit		 rl;
 
 	if (strcmp(__progname, "mailestctl") == 0)
 		return (mailestctl_main(argc, argv));
@@ -171,7 +174,21 @@ main(int argc, char *argv[])
 		if (daemon(1, 0) == -1)
 			err(EX_OSERR, "daemon");
 	}
+
+	if (getrlimit(RLIMIT_DATA, &rl) == -1)
+		err(EX_OSERR, "getrlimit(RLIMIT_DATA)");
+	olim = rl.rlim_cur;
+	rl.rlim_cur = rl.rlim_max;
+	if (setrlimit(RLIMIT_DATA, &rl) == -1)
+		err(EX_OSERR, "setrlimit(RLIMIT_DATA)");
+	if (getrlimit(RLIMIT_DATA, &rl) == -1)
+		err(EX_OSERR, "getrlimit(RLIMIT_DATA)");
+
 	mailestd_log_init();
+
+	mailestd_log(LOG_INFO, "Unlimited datasize %dMB -> %dMB",
+	    (int)(olim / 1024 / 1024), (int)(rl.rlim_cur / 1024 / 1024));
+
 	EVENT_INIT();
 	mailestd_start(&mailestd_s, foreground);
 
