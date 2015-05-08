@@ -181,6 +181,7 @@ struct task_dbworker_context {
 	int	 puts;
 	int	 resche;
 	int	 dels;
+	bool	 optimized;
 };
 
 struct gather {

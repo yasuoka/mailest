@@ -60,6 +60,13 @@ Quick Usage
 ChangeLog
 ---------
 
+0.9.9
+
+- 2015-05-08: yasuoka
+  - Optimize database when many documents are put or deleted.  As the
+    Hyper Estrairer's documet is recomended.
+
+
 0.9.8
 
 - 2015-05-08: yasuoka
@@ -114,14 +121,13 @@ Differences from `mewest`
 Backup of the database
 
   "mailest" doesn't create a backup of the database before updating the
-  database which `mewest` does.  Hyper estrairer databases break easyly
+  database which `mewest` does.  Hyper Estrairer databases break easyly
   if the program or the system crashes during updating the database.
 
 
 TODO
 ----
 
-- Specify ESTODCLEAN when deleting the documents since it's recommended.
 - Monitor the inodes the directories (by kevent and inotify) and start
   update automatically.
 - Delete the index phsically

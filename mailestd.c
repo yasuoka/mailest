@@ -1719,6 +1719,14 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 			return (false);		/* check the other tasks
 						   then call me again */
 		}
+		if (!ctx->optimized && ctx->puts + ctx->dels > 800) {
+			mailestd_log(LOG_INFO, "Optimizing DB");
+			est_db_optimize(mailestd->db,
+			    ESTOPTNOPURGE | ESTOPTNODBOPT);
+			mailestd_log(LOG_INFO, "Optimized DB");
+			ctx->optimized = true;
+			return (false);
+		}
 		/* Then close the DB */
 		/* FALLTHROUGH */
 
