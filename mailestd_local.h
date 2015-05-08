@@ -59,7 +59,7 @@ struct mailestd {
 	char			 *sync_prev;
 
 	time_t			  curr_time;
-	time_t			  syncdb_time;
+	time_t			  db_sync_time;
 	struct event		  evsigterm;
 	struct event		  evsigint;
 	struct event		  evtimer;
@@ -136,7 +136,6 @@ struct task_gather {
 enum SEARCH_OUTFORM {
 	SEARCH_OUTFORM_COMPAT_VU
 };
-
 struct task_search {
 	uint64_t		 id;
 	enum MAILESTD_TASK	 type;
@@ -224,12 +223,14 @@ static void	 mailestd_fini(struct mailestd *);
 static void	 mailestd_on_timer(int, short, void *);
 static void	 mailestd_on_sigterm(int, short, void *);
 static void	 mailestd_on_sigint(int, short, void *);
+static void	 mailestc_on_ctl_event(int, short, void *);
+static void	 mailestc_reset_ctl_event(struct mailestd *);
 
 static ESTDB	*mailestd_db_open_rd(struct mailestd *);
 static ESTDB	*mailestd_db_open_wr(struct mailestd *);
 static void	 mailestd_db_close(struct mailestd *);
 static void	 mailestd_db_add_msgid_index(struct mailestd *);
-static int	 mailestd_syncdb(struct mailestd *);
+static int	 mailestd_db_sync(struct mailestd *);
 static int	 mailestd_gather(struct mailestd *, struct task_gather *);
 static void	 mailestd_gather_inform(struct mailestd *, struct task *,
 		    struct gather *);
@@ -243,7 +244,7 @@ static void	 mailestd_search(struct mailestd *, uint64_t,
 static void	 mailestd_db_informer(const char *, void *);
 static void	 mailestd_db_error(struct mailestd *);
 
-static uint64_t	 mailestd_schedule_syncdb(struct mailestd *);
+static uint64_t	 mailestd_schedule_db_sync(struct mailestd *);
 static uint64_t  mailestd_schedule_gather(struct mailestd *, const char *);
 static uint64_t	 mailestd_schedule_draft(struct mailestd *, struct gather *,
 		    struct rfc822 *);
@@ -253,23 +254,22 @@ static uint64_t	 mailestd_schedule_deldb(struct mailestd *, struct rfc822 *);
 static uint64_t	 mailestd_schedule_search(struct mailestd *, ESTCOND *);
 static uint64_t	 mailestd_schedule_inform(struct mailestd *, uint64_t,
 		    u_char *, size_t);
+static void	 mailestd_schedule_message_all(struct mailestd *,
+		    enum MAILESTD_TASK);
 
 static void	 task_worker_init(struct task_worker *, struct mailestd *);
 static void	 task_worker_start(struct task_worker *);
-static void	 task_worker_run(struct task_worker *) __used;
 static void	 task_worker_stop(struct task_worker *);
+static void	 task_worker_run(struct task_worker *) __used;
+static uint64_t	 task_worker_add_task(struct task_worker *, struct task *);
 static void	 task_worker_on_itc_event(int, short, void *);
 static void	 task_worker_on_proc(struct task_worker *_this);
-static uint64_t	 task_worker_add_task(struct task_worker *, struct task *);
-static void	 task_worker_message_all(struct mailestd *, enum MAILESTD_TASK);
-static bool	 task_dbworker(struct task_worker *,
+static bool	 task_worker_on_proc_db(struct task_worker *,
 		    struct task_dbworker_context *, struct task *task);
 
 static void	 mailestc_on_event(int, short, void *);
-static void	 mailestd_ctl_sock_reset_event(struct mailestd *);
 static void	 mailestc_start(struct mailestc *, struct mailestd *, int);
 static void	 mailestc_stop(struct mailestc *);
-static void	 mailestd_ctl_on_event(int, short, void *);
 static int	 mailestc_cmd_search(struct mailestc *,
 		    struct mailestctl_search *);
 static void	 mailestc_send_message(struct mailestc *, u_char *, size_t);

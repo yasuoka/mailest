@@ -323,12 +323,12 @@ mailestd_start(struct mailestd *_this, bool fg)
 
 	if (listen(_this->sock_ctl, 5) == -1)
 		mailestd_log(LOG_ERR, "listen(): %m");
-	mailestd_ctl_sock_reset_event(_this);
+	mailestc_reset_ctl_event(_this);
 
 	mailestd_log(LOG_INFO, "Started mailestd.  Process-Id=%d",
 	    (int)getpid());
 	mailestd_db_add_msgid_index(_this);
-	mailestd_schedule_syncdb(_this);
+	mailestd_schedule_db_sync(_this);
 }
 
 static uint64_t
@@ -350,7 +350,7 @@ mailestd_stop(struct mailestd *_this)
 	int		 i;
 
 	/* stop the task threads */
-	task_worker_message_all(_this, MAILESTD_TASK_STOP);
+	mailestd_schedule_message_all(_this, MAILESTD_TASK_STOP);
 
 	evtimer_del(&_this->evtimer);
 	/* stop signals and receiving controls */
@@ -466,6 +466,41 @@ mailestd_on_sigint(int fd, short evmask, void *ctx)
 	mailestd_stop(_this);
 }
 
+static void
+mailestc_on_ctl_event(int fd, short evmask, void *ctx)
+{
+	int			 sock;
+	struct sockaddr_un	 sun;
+	socklen_t		 slen;
+	struct mailestd		*_this = ctx;
+	struct mailestc		*ctl;
+
+	MAILESTD_DBG((LOG_DEBUG, "%s()", __func__));
+	if (evmask & EV_READ) {
+		slen = sizeof(sun);
+		if ((sock = accept(_this->sock_ctl, (struct sockaddr *)&sun,
+		    &slen)) < 0) {
+			mailestd_log(LOG_ERR, "accept(): %m");
+			goto out_read;
+		}
+		ctl = xcalloc(1, sizeof(struct mailestc));
+		mailestc_start(ctl, _this, sock);
+	}
+out_read:
+	mailestc_reset_ctl_event(_this);
+	return;
+}
+
+static void
+mailestc_reset_ctl_event(struct mailestd *_this)
+{
+	MAILESTD_ASSERT(_this->sock_ctl >= 0);
+
+	EVENT_SET(&_this->evsock_ctl, _this->sock_ctl, EV_READ,
+	    mailestc_on_ctl_event, _this);
+	event_add(&_this->evsock_ctl, NULL);
+}
+
 /***********************************************************************
  * Database operations, gathering messages from file system
  ***********************************************************************/
@@ -577,7 +612,7 @@ db_noent:
 }
 
 static int
-mailestd_syncdb(struct mailestd *_this)
+mailestd_db_sync(struct mailestd *_this)
 {
 	ESTDB		*db;
 	int		 i, id, ldir, delete;
@@ -626,7 +661,7 @@ mailestd_syncdb(struct mailestd *_this)
 			free(_this->sync_prev);
 			_this->sync_prev = xstrdup(uri);
 			est_doc_delete(doc);
-			mailestd_schedule_syncdb(_this); /* schedule again */
+			mailestd_schedule_db_sync(_this); /* schedule again */
 			return (0);
 		}
 		est_doc_delete(doc);
@@ -660,7 +695,7 @@ mailestd_syncdb(struct mailestd *_this)
 			    (folder[0] != '/')? "+" : "", folder, delete);
 		free(tske);
 	}
-	_this->syncdb_time = _this->curr_time;
+	_this->db_sync_time = _this->curr_time;
 
 	return (0);
 }
@@ -836,7 +871,7 @@ mailestd_fts(struct mailestd *_this, struct gather *ctx, time_t curr_time,
 			msg->path = xstrdup(ftse->fts_path);
 			RB_INSERT(rfc822_tree, &_this->root, msg);
 			strlcpy(uri + 7, ftse->fts_path, sizeof(uri) - 7);
-			if (_this->syncdb_time == 0 &&
+			if (_this->db_sync_time == 0 &&
 			    mailestd_db_open_rd(_this) != NULL &&
 			    (db_id = est_db_uri_to_id(_this->db, uri)) != -1 &&
 			    (doc = est_db_get_doc(_this->db, db_id,
@@ -1191,11 +1226,11 @@ mailestd_db_error(struct mailestd *_this)
 	    "the datatabase will be suspended.  Try \"estcmd repair -rst %s\", "
 	    "then \"mailestctl resume\".  If the error continues, you may "
 	    "need to recreate the database", _this->dbpath);
-	task_worker_message_all(_this, MAILESTD_TASK_SUSPEND);
+	mailestd_schedule_message_all(_this, MAILESTD_TASK_SUSPEND);
 }
 
 static uint64_t
-mailestd_schedule_syncdb(struct mailestd *_this)
+mailestd_schedule_db_sync(struct mailestd *_this)
 {
 	struct task	*task;
 
@@ -1427,6 +1462,21 @@ mailestd_schedule_inform(struct mailestd *_this, uint64_t task_id,
 	return (task_worker_add_task(&_this->mainworker, (struct task *)task));
 }
 
+static void
+mailestd_schedule_message_all(struct mailestd *_this,
+    enum MAILESTD_TASK tsk_type)
+{
+	int		 i;
+	struct task	*task;
+
+	for (i = 0; _this->workers[i] != NULL; i++) {
+		task = xcalloc(1, sizeof(struct task));
+		task->type = tsk_type;
+		task->highprio = true;
+		task_worker_add_task(_this->workers[i], task);
+	}
+}
+
 /***********************************************************************
  * Tasks
  ***********************************************************************/
@@ -1498,6 +1548,29 @@ task_worker_stop(struct task_worker *_this)
 	}
 }
 
+static uint64_t
+task_worker_add_task(struct task_worker *_this, struct task *task)
+{
+	uint64_t	 id;
+
+	task->id = mailestd_new_id(_this->mailestd_this);
+	id = task->id;
+
+	_thread_mutex_lock(&_this->lock);
+	if (task->highprio)
+		TAILQ_INSERT_HEAD(&_this->head, task, queue);
+	else
+		TAILQ_INSERT_TAIL(&_this->head, task, queue);
+	_thread_mutex_unlock(&_this->lock);
+
+	if (write(_this->sock_itc, "A", 1) < 0) {
+		if (errno != EAGAIN)
+			mailestd_log(LOG_WARNING, "%s: write(): %m", __func__);
+	}
+
+	return (id);
+}
+
 static void
 task_worker_on_itc_event(int fd, short evmask, void *ctx)
 {
@@ -1523,20 +1596,6 @@ task_worker_on_itc_event(int fd, short evmask, void *ctx)
 }
 
 static void
-task_worker_message_all(struct mailestd *_this, enum MAILESTD_TASK tsk_type)
-{
-	int		 i;
-	struct task	*task;
-
-	for (i = 0; _this->workers[i] != NULL; i++) {
-		task = xcalloc(1, sizeof(struct task));
-		task->type = tsk_type;
-		task->highprio = true;
-		task_worker_add_task(_this->workers[i], task);
-	}
-}
-
-static void
 task_worker_on_proc(struct task_worker *_this)
 {
 	struct task			*task;
@@ -1547,16 +1606,17 @@ task_worker_on_proc(struct task_worker *_this)
 	_thread_t			 thread_this = _thread_self();
 	struct task_dbworker_context	 dbctx;
 	struct mailestc			*ce, *ct;
+	enum MAILESTD_TASK		 task_type;
 
 	memset(&dbctx, 0, sizeof(dbctx));
 	while (!stop) {
 		_thread_mutex_lock(&_this->lock);
 		task = TAILQ_FIRST_ITEM(&_this->head);
 		if (task != NULL) {
-			if (_this->suspend && mailestd->syncdb_time == 0 &&
+			if (_this->suspend && mailestd->db_sync_time == 0 &&
 			    task->type == MAILESTD_TASK_GATHER)
 				/*
-				 * gathering before the first syncdb
+				 * gathering before the first db_sync
 				 * requires the database is working.
 				 */
 				task = NULL;
@@ -1567,14 +1627,14 @@ task_worker_on_proc(struct task_worker *_this)
 		}
 		_thread_mutex_unlock(&_this->lock);
 		if (task == NULL) {
-			if (!stop && thread_this == mailestd->dbworker.thread) {
-				if (!task_dbworker(_this, &dbctx, NULL))
-					continue;
-			}
+			if (!stop && thread_this == mailestd->dbworker.thread &&
+			    !task_worker_on_proc_db(_this, &dbctx, NULL))
+				continue;
 			break;
 		}
 
-		switch (task->type) {
+		task_type = task->type;
+		switch (task_type) {
 		case MAILESTD_TASK_RFC822_DRAFT:
 			msg = ((struct task_rfc822 *)task)->msg;
 			MAILESTD_ASSERT(msg->draft == NULL);
@@ -1590,26 +1650,23 @@ task_worker_on_proc(struct task_worker *_this)
 			break;
 
 		case MAILESTD_TASK_RFC822_PUTDB:
-			MAILESTD_ASSERT(thread_this ==
-			    mailestd->dbworker.thread);
-			task_dbworker(_this, &dbctx, task);
-			task = NULL;	/* recycled */
-			break;
+		case MAILESTD_TASK_RFC822_DELDB:
 		case MAILESTD_TASK_SEARCH:
 		case MAILESTD_TASK_SMEW:
-		case MAILESTD_TASK_RFC822_DELDB:
 			MAILESTD_ASSERT(thread_this ==
 			    mailestd->dbworker.thread);
-			task_dbworker(_this, &dbctx, task);
+			task_worker_on_proc_db(_this, &dbctx, task);
+			if (task_type == MAILESTD_TASK_RFC822_PUTDB)
+				task = NULL;	/* recycled */
 			break;
 
 		case MAILESTD_TASK_SYNCDB:
-			mailestd_syncdb(mailestd);
+			mailestd_db_sync(mailestd);
 			break;
 
 		case MAILESTD_TASK_GATHER:
 			mailestd_gather(mailestd, (struct task_gather *)task);
-			if (mailestd->syncdb_time == 0) {
+			if (mailestd->db_sync_time == 0) {
 				TAILQ_INSERT_TAIL(&mailestd->gather_pendings,
 				    task, queue);
 				task = NULL;
@@ -1623,7 +1680,7 @@ task_worker_on_proc(struct task_worker *_this)
 		case MAILESTD_TASK_STOP:
 			stop = true;
 			if (thread_this == mailestd->dbworker.thread)
-				task_dbworker(_this, &dbctx, task);
+				task_worker_on_proc_db(_this, &dbctx, task);
 			task_worker_stop(_this);
 			break;
 
@@ -1653,8 +1710,8 @@ task_worker_on_proc(struct task_worker *_this)
 }
 
 static bool
-task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
-    struct task *task)
+task_worker_on_proc_db(struct task_worker *_this,
+    struct task_dbworker_context *ctx, struct task *task)
 {
 	struct rfc822		*msg;
 	enum MAILESTD_TASK	 task_type;
@@ -1769,68 +1826,10 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 	return (true);
 }
 
-static uint64_t
-task_worker_add_task(struct task_worker *_this, struct task *task)
-{
-	uint64_t	 id;
-
-	task->id = mailestd_new_id(_this->mailestd_this);
-	id = task->id;
-
-	_thread_mutex_lock(&_this->lock);
-	if (task->highprio)
-		TAILQ_INSERT_HEAD(&_this->head, task, queue);
-	else
-		TAILQ_INSERT_TAIL(&_this->head, task, queue);
-	_thread_mutex_unlock(&_this->lock);
-
-	if (write(_this->sock_itc, "A", 1) < 0) {
-		if (errno != EAGAIN)
-			mailestd_log(LOG_WARNING, "%s: write(): %m", __func__);
-	}
-
-	return (id);
-}
-
 /***********************************************************************
  * mailestc
  ***********************************************************************/
 static struct timeval mailestc_timeout = { MAILESTCTL_IDLE_TIMEOUT, 0 };
-
-static void
-mailestd_ctl_sock_reset_event(struct mailestd *_this)
-{
-	MAILESTD_ASSERT(_this->sock_ctl >= 0);
-
-	EVENT_SET(&_this->evsock_ctl, _this->sock_ctl, EV_READ,
-	    mailestd_ctl_on_event, _this);
-	event_add(&_this->evsock_ctl, NULL);
-}
-
-static void
-mailestd_ctl_on_event(int fd, short evmask, void *ctx)
-{
-	int			 sock;
-	struct sockaddr_un	 sun;
-	socklen_t		 slen;
-	struct mailestd		*_this = ctx;
-	struct mailestc		*ctl;
-
-	MAILESTD_DBG((LOG_DEBUG, "%s()", __func__));
-	if (evmask & EV_READ) {
-		slen = sizeof(sun);
-		if ((sock = accept(_this->sock_ctl, (struct sockaddr *)&sun,
-		    &slen)) < 0) {
-			mailestd_log(LOG_ERR, "accept(): %m");
-			goto out_read;
-		}
-		ctl = xcalloc(1, sizeof(struct mailestc));
-		mailestc_start(ctl, _this, sock);
-	}
-out_read:
-	mailestd_ctl_sock_reset_event(_this);
-	return;
-}
 
 static void
 mailestc_start(struct mailestc *_this, struct mailestd *mailestd, int sock)
@@ -1904,13 +1903,14 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 
 		case MAILESTCTL_CMD_SUSPEND:
 			mailestd_log(LOG_INFO, "suspend requested");
-			task_worker_message_all(mailestd,
+			mailestd_schedule_message_all(mailestd,
 			    MAILESTD_TASK_SUSPEND);
 			break;
 
 		case MAILESTCTL_CMD_RESUME:
 			mailestd_log(LOG_INFO, "resume requested");
-			task_worker_message_all(mailestd, MAILESTD_TASK_RESUME);
+			mailestd_schedule_message_all(mailestd,
+			    MAILESTD_TASK_RESUME);
 			break;
 
 		case MAILESTCTL_CMD_STOP:
