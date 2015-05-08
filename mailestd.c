@@ -1759,9 +1759,11 @@ mailestc_cmd_search(struct mailestc *_this, struct mailestctl_search *search)
 	int		 i;
 
 	cond = est_cond_new();
-	while (*phrase == '\t' || *phrase == ' ')
-		phrase++;
-	est_cond_set_phrase(cond, phrase);
+	if (phrase[0] != '\0') {
+		while (*phrase == '\t' || *phrase == ' ')
+			phrase++;
+		est_cond_set_phrase(cond, phrase);
+	}
 	for (i = 0; i < (int)nitems(search->attrs) && search->attrs[i] != '\0';
 	    i++)
 		est_cond_add_attr(cond, search->attrs[i]);

@@ -57,6 +57,11 @@ Quick Usage
 ChangeLog
 ---------
 
+0.9.8
+
+-  2015-05-08: yasuoka
+  -  Add 'message-id' command to mailestdctl(1).
+
 0.9.7
 
 -  2015-05-06: yasuoka

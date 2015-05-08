@@ -178,10 +178,8 @@ do_common:
 		}
 		if (write(mailestc_sock, &update, sizeof(update)) < 0)
 			err(1, "write");
-		while ((sz = read(mailestc_sock, msgbuf, sizeof(msgbuf))) > 0)
-			fwrite(msgbuf, 1, sz, stdout);
-		close(mailestc_sock);
 	    }
+		goto wait_resp;
 		break;
 
 	case CSEARCH:
@@ -213,10 +211,12 @@ do_common:
 					    result->search.attrs[i]);
 			}
 		}
-		if (ic_strlcpy(search.phrase, result->search.phrase,
-		    sizeof(search.phrase), result->search.ic)
-		    >= sizeof(search.phrase))
-			err(EX_USAGE, "<phrase>");
+		if (search.phrase != NULL) {
+			if (ic_strlcpy(search.phrase, result->search.phrase,
+			    sizeof(search.phrase), result->search.ic)
+			    >= sizeof(search.phrase))
+				err(EX_USAGE, "<phrase>");
+		}
 		if (result->search.ord != NULL) {
 			if (strlcpy(search.order, result->search.ord,
 			    sizeof(search.order)) >= sizeof(search.order))
@@ -229,10 +229,24 @@ do_common:
 		}
 		if (write(mailestc_sock, &search, sizeof(search)) < 0)
 			err(1, "write");
+wait_resp:
 		while ((sz = read(mailestc_sock, msgbuf, sizeof(msgbuf))) > 0)
 			fwrite(msgbuf, 1, sz, stdout);
 		close(mailestc_sock);
 	    }
+		break;
+
+	case MESSAGE_ID:
+		run_daemon(cmd, cmdv);
+		memset(&search, 0, sizeof(search));
+		search.command = MAILESTCTL_CMD_SEARCH;
+		strlcpy(search.attrs[0], ATTR_MSGID " STREQ ",
+		    sizeof(search.attrs[0]));
+		strlcat(search.attrs[0], result->msgid,
+		    sizeof(search.attrs[0]));
+		if (write(mailestc_sock, &search, sizeof(search)) < 0)
+			err(1, "write");
+		goto wait_resp;
 
 	case NONE:
 		break;

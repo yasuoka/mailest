@@ -24,12 +24,14 @@ enum actions {
 	UPDATE,
 	SUSPEND,
 	RESUME,
-	CSEARCH		/* estcmd search compatibile search command */
+	CSEARCH,	/* estcmd search compatibile search command */
+	MESSAGE_ID
 };
 
 struct parse_result {
 	enum actions	  action;
 	char		 *folder;
+	char		 *msgid;
 	struct {
 #define SEARCH_FLAG_VU		0x01
 #define SEARCH_FLAG_IC		0x02
