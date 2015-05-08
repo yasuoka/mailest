@@ -235,9 +235,9 @@ static void	 mailestd_gather_inform(struct mailestd *, struct task *,
 static int	 mailestd_fts(struct mailestd *, struct gather *, time_t,
 		    FTS *, FTSENT *);
 static void	 mailestd_draft(struct mailestd *, struct rfc822 *msg);
-static void	 mailestd_putdb(struct mailestd *, ESTDB *, struct rfc822 *);
-static void	 mailestd_deldb(struct mailestd *, ESTDB *, struct rfc822 *);
-static void	 mailestd_search(struct mailestd *, ESTDB *, uint64_t,
+static void	 mailestd_putdb(struct mailestd *, struct rfc822 *);
+static void	 mailestd_deldb(struct mailestd *, struct rfc822 *);
+static void	 mailestd_search(struct mailestd *, uint64_t,
 		    ESTCOND *, enum SEARCH_OUTFORM);
 static void	 mailestd_db_informer(const char *, void *);
 static void	 mailestd_db_error(struct mailestd *);

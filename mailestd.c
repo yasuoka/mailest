@@ -930,20 +930,21 @@ on_error:
 }
 
 static void
-mailestd_putdb(struct mailestd *_this, ESTDB *db, struct rfc822 *msg)
+mailestd_putdb(struct mailestd *_this, struct rfc822 *msg)
 {
 	int		 ecode;
 
 	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 	MAILESTD_ASSERT(msg->draft != NULL);
+	MAILESTD_ASSERT(_this->db != NULL);
 
-	if (est_db_put_doc(db, msg->draft, 0)) {
+	if (est_db_put_doc(_this->db, msg->draft, 0)) {
 		msg->db_id = est_doc_id(msg->draft);
 		if (debug > 2)
 			mailestd_log(LOG_DEBUG, "put %s successfully.  id=%d",
 			    msg->path, msg->db_id);
 	} else {
-		ecode = est_db_error(db);
+		ecode = est_db_error(_this->db);
 		mailestd_log(LOG_WARNING,
 		    "putting %s failed: %s", msg->path, est_err_msg(ecode));
 		mailestd_db_error(_this);
@@ -954,18 +955,20 @@ mailestd_putdb(struct mailestd *_this, ESTDB *db, struct rfc822 *msg)
 }
 
 static void
-mailestd_deldb(struct mailestd *_this, ESTDB *db, struct rfc822 *msg)
+mailestd_deldb(struct mailestd *_this, struct rfc822 *msg)
 {
 	int		 ecode;
 
 	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 	MAILESTD_ASSERT(msg->db_id != 0);
-	if (est_db_out_doc(db, msg->db_id, 0)) {
+	MAILESTD_ASSERT(_this->db != NULL);
+
+	if (est_db_out_doc(_this->db, msg->db_id, 0)) {
 		if (debug > 2)
 			mailestd_log(LOG_DEBUG, "delete %s(%d) successfully",
 			    msg->path, msg->db_id);
 	} else {
-		ecode = est_db_error(db);
+		ecode = est_db_error(_this->db);
 		mailestd_log(LOG_WARNING, "deleting %s(%d) failed: %s",
 		    msg->path, msg->db_id, est_err_msg(ecode));
 		mailestd_db_error(_this);
@@ -1107,8 +1110,8 @@ out:
 }
 
 static void
-mailestd_search(struct mailestd *_this, ESTDB *db, uint64_t task_id,
-    ESTCOND *cond, enum SEARCH_OUTFORM outform)
+mailestd_search(struct mailestd *_this, uint64_t task_id, ESTCOND *cond,
+    enum SEARCH_OUTFORM outform)
 {
 	int	 i, rnum, *res, ecode;
 	char	*bufp = NULL;
@@ -1116,11 +1119,13 @@ mailestd_search(struct mailestd *_this, ESTDB *db, uint64_t task_id,
 	ESTDOC	*doc;
 	FILE	*out;
 
+	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
+	MAILESTD_ASSERT(_this->db != NULL);
 	if ((out = open_memstream(&bufp, &bufsiz)) == NULL)
 		abort();
-	res = est_db_search(db, cond, &rnum, NULL);
+	res = est_db_search(_this->db, cond, &rnum, NULL);
 	if (res == NULL) {
-		ecode = est_db_error(db);
+		ecode = est_db_error(_this->db);
 		mailestd_log(LOG_INFO,
 		    "Search(%s) failed: %s", cond->phrase, est_err_msg(ecode));
 		mailestd_schedule_inform(_this, task_id, NULL, 0);
@@ -1128,9 +1133,9 @@ mailestd_search(struct mailestd *_this, ESTDB *db, uint64_t task_id,
 		mailestd_log(LOG_INFO,
 		    "Searched(%s) successfully.  Hit %d", cond->phrase, rnum);
 		for (i = 0; i < rnum; i++) {
-			doc = est_db_get_doc(db, res[i], ESTGDNOKWD);
+			doc = est_db_get_doc(_this->db, res[i], ESTGDNOKWD);
 			if (doc == NULL) {
-				ecode = est_db_error(db);
+				ecode = est_db_error(_this->db);
 				mailestd_log(LOG_WARNING,
 				    "est_db_get_doc(id=%d) failed: %s",
 				    res[i], est_err_msg(ecode));
@@ -1635,7 +1640,6 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
     struct task *task)
 {
 	struct rfc822		*msg;
-	ESTDB			*db = NULL;
 	enum MAILESTD_TASK	 task_type;
 	struct mailestd		*mailestd = _this->mailestd_this;
 	struct task_search	*search;
@@ -1652,12 +1656,12 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 
 	case MAILESTD_TASK_RFC822_PUTDB:
 		msg = ((struct task_rfc822 *)task)->msg;
-		if ((db = mailestd_db_open_wr(mailestd)) == NULL)
+		if (mailestd_db_open_wr(mailestd) == NULL)
 			break;
 		ctx->puts++;
 		ctx->resche++;
 		if (msg->draft != NULL)
-			mailestd_putdb(mailestd, db, msg);
+			mailestd_putdb(mailestd, msg);
 		mailestd_gather_inform(mailestd, task, NULL);
 		msg->ontask = false;
 		TAILQ_INSERT_TAIL(&mailestd->rfc822_tasks, task, queue);
@@ -1666,20 +1670,20 @@ task_dbworker(struct task_worker *_this, struct task_dbworker_context *ctx,
 
 	case MAILESTD_TASK_RFC822_DELDB:
 		msg = ((struct task_rfc822 *)task)->msg;
-		if ((db = mailestd_db_open_wr(mailestd)) == NULL)
+		if (mailestd_db_open_wr(mailestd) == NULL)
 			break;
 		ctx->dels++;
 		mailestd_gather_inform(mailestd, task, NULL);
-		mailestd_deldb(mailestd, db, msg);
+		mailestd_deldb(mailestd, msg);
 		RB_REMOVE(rfc822_tree, &mailestd->root, msg);
 		rfc822_free(msg);
 		break;
 
 	case MAILESTD_TASK_SEARCH:
 		search = (struct task_search *)task;
-		if ((db = mailestd_db_open_rd(mailestd)) == NULL)
+		if (mailestd_db_open_rd(mailestd) == NULL)
 			break;
-		mailestd_search(mailestd, db, task->id, search->cond,
+		mailestd_search(mailestd, task->id, search->cond,
 		    search->outform);
 		break;
 
