@@ -66,6 +66,8 @@ mailestctl_main(int argc, char *argv[])
 	const char		*home, *cmd;
 	char			*cmdv[64], msgbuf[MAILESTD_SOCK_MSGSIZ],
 				 path0[PATH_MAX], *maildir = NULL;
+	struct mailestctl_search search;
+	struct mailestctl_update update;
 
 	cmd = argv[0];
 	cmdv[cmdc++] = "mailestd";
@@ -162,30 +164,18 @@ do_common:
 		goto do_common;
 
 	case UPDATE:
-	    {
-		struct mailestctl_update	 update;
-
 		run_daemon(cmd, cmdv);
 		memset(&update, 0, sizeof(update));
 		update.command = MAILESTCTL_CMD_UPDATE;
 		if (result->folder != NULL)
 			strlcpy(update.folder, result->folder,
 			    sizeof(update.folder));
-
-		if (!mailestc_check_connection()) {
-			warnx("could not connect to mailestd.  not running?");
-			break;
-		}
 		if (write(mailestc_sock, &update, sizeof(update)) < 0)
 			err(1, "write");
-	    }
 		goto wait_resp;
 		break;
 
 	case CSEARCH:
-	    {
-		struct mailestctl_search	 search;
-
 		run_daemon(cmd, cmdv);
 		memset(&search, 0, sizeof(search));
 		search.command = MAILESTCTL_CMD_SEARCH;
@@ -223,17 +213,12 @@ do_common:
 				err(EX_USAGE, "-ord");
 		}
 
-		if (!mailestc_check_connection()) {
-			warnx("could not connect to mailestd.  not running?");
-			break;
-		}
 		if (write(mailestc_sock, &search, sizeof(search)) < 0)
 			err(1, "write");
 wait_resp:
 		while ((sz = read(mailestc_sock, msgbuf, sizeof(msgbuf))) > 0)
 			fwrite(msgbuf, 1, sz, stdout);
 		close(mailestc_sock);
-	    }
 		break;
 
 	case MESSAGE_ID:
