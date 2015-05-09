@@ -32,6 +32,7 @@ RB_HEAD(rfc822_tree, rfc822);
 TAILQ_HEAD(rfc822_queue, rfc822);
 TAILQ_HEAD(mailestc_queue, mailestc);
 TAILQ_HEAD(gather_queue, gather);
+RB_HEAD(folder_tree, folder);
 
 struct task_worker {
 	struct mailestd		*mailestd_this;
@@ -195,6 +196,13 @@ struct gather {
 	TAILQ_ENTRY(gather)	 queue;
 };
 
+struct folder {
+	int			 fd;
+	char			*path;
+	struct timespec		 mtime;
+	RB_ENTRY(folder)	 tree;
+};
+
 #ifdef	MAILESTD_DEBUG
 #define MAILESTD_DBG(_msg)	 mailestd_log _msg;
 #define MAILESTD_ASSERT(_cond)						\
@@ -212,6 +220,7 @@ struct gather {
 #endif
 
 RB_PROTOTYPE_STATIC(rfc822_tree, rfc822, tree, rfc822_compar);
+RB_PROTOTYPE_STATIC(folder_tree, folder, tree, folder_compar);
 
 static void	 mailestd_init(struct mailestd *, struct mailestd_conf *,
 		    const char **);
@@ -225,6 +234,8 @@ static void	 mailestd_on_sigterm(int, short, void *);
 static void	 mailestd_on_sigint(int, short, void *);
 static void	 mailestc_on_ctl_event(int, short, void *);
 static void	 mailestc_reset_ctl_event(struct mailestd *);
+static void	 mailestd_get_all_folders(struct mailestd *,
+		    struct folder_tree *);
 
 static ESTDB	*mailestd_db_open_rd(struct mailestd *);
 static ESTDB	*mailestd_db_open_wr(struct mailestd *);
@@ -291,8 +302,11 @@ static char	*xstrdup(const char *);
 static int	 unlimit_data(void);
 static int	 unlimit_nofile(void);
 
+static int	 folder_compar(struct folder *, struct folder *);
+static void	 folder_free(struct folder *);
 static void	 estdoc_add_parid(ESTDOC *);
 static bool	 valid_msgid(const char *);
+static bool	 is_parent_dir(const char *, const char *);
 
 #ifndef	nitems
 #define nitems(_n)	(sizeof((_n)) / sizeof((_n)[0]))
