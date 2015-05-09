@@ -288,6 +288,9 @@ static int	 rfc822_compar(struct rfc822 *, struct rfc822 *);
 static void	 rfc822_free(struct rfc822 *msg);
 static void	*xcalloc(size_t, size_t);
 static char	*xstrdup(const char *);
+static int	 unlimit_data(void);
+static int	 unlimit_nofile(void);
+
 static void	 estdoc_add_parid(ESTDOC *);
 static bool	 valid_msgid(const char *);
 

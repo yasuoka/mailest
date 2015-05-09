@@ -175,20 +175,11 @@ main(int argc, char *argv[])
 			err(EX_OSERR, "daemon");
 	}
 
-	if (getrlimit(RLIMIT_DATA, &rl) == -1)
-		err(EX_OSERR, "getrlimit(RLIMIT_DATA)");
-	olim = rl.rlim_cur;
-	rl.rlim_cur = rl.rlim_max;
-	if (setrlimit(RLIMIT_DATA, &rl) == -1)
-		err(EX_OSERR, "setrlimit(RLIMIT_DATA)");
-	if (getrlimit(RLIMIT_DATA, &rl) == -1)
-		err(EX_OSERR, "getrlimit(RLIMIT_DATA)");
-
 	mailestd_log_init();
-
-	mailestd_log(LOG_INFO, "Unlimited datasize %dMB -> %dMB",
-	    (int)(olim / 1024 / 1024), (int)(rl.rlim_cur / 1024 / 1024));
-
+	if (unlimit_data() == -1)
+		mailestd_log(LOG_ERR, "unlimit_data: %m");
+	if (unlimit_nofile() == -1)
+		mailestd_log(LOG_ERR, "unlimit_nofile: %m");
 	EVENT_INIT();
 	mailestd_start(&mailestd_s, foreground);
 
@@ -2294,6 +2285,50 @@ xstrdup(const char *str)
 	}
 
 	return (ret);
+}
+
+static int
+unlimit_data(void)
+{
+	rlim_t		 olim;
+	struct rlimit	 rl;
+
+	if (getrlimit(RLIMIT_DATA, &rl) == -1)
+		return (-1);
+
+	olim = rl.rlim_cur;
+	rl.rlim_cur = rl.rlim_max;
+	if (setrlimit(RLIMIT_DATA, &rl) == -1)
+		return (-1);
+	if (getrlimit(RLIMIT_DATA, &rl) == -1)
+		return (-1);
+
+	mailestd_log(LOG_DEBUG, "Unlimited datasize %dMB -> %dMB",
+	    (int)(olim / 1024 / 1024), (int)(rl.rlim_cur / 1024 / 1024));
+
+	return (0);
+}
+
+static int
+unlimit_nofile(void)
+{
+	rlim_t		 olim;
+	struct rlimit	 rl;
+
+	if (getrlimit(RLIMIT_NOFILE, &rl) == -1)
+		return (-1);
+
+	olim = rl.rlim_cur;
+	rl.rlim_cur = rl.rlim_max;
+	if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
+		return (-1);
+	if (getrlimit(RLIMIT_NOFILE, &rl) == -1)
+		return (-1);
+
+	mailestd_log(LOG_DEBUG, "Unlimited nofile %d -> %d",
+	    (int)olim, (int)rl.rlim_cur);
+
+	return (0);
 }
 
 static void
