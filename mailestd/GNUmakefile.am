@@ -46,9 +46,7 @@ install-data-hook:
 	ln -sf mew-mailest.1 $(DESTDIR)$(mandir)/man1/cmew-mailest.1
 	ln -sf mew-mailest.1 $(DESTDIR)$(mandir)/man1/smew-mailest.1
 
-uninstall-exec-hook:
+uninstall-hook:
 	rm $(DESTDIR)$(bindir)/mailestctl$(EXEEXT)
-
-uninstall-data-hook:
 	rm $(DESTDIR)$(mandir)/man1/cmew-mailest.1
 	rm $(DESTDIR)$(mandir)/man1/smew-mailest.1
