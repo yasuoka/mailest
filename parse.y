@@ -169,7 +169,7 @@ strings		: strings STRING {
 			char **strings;
 			for (n = 0; $1[n] != NULL; n++)
 				;
-			strings = reallocarray($1, n + 1, sizeof(char *));
+			strings = reallocarray($1, n + 2, sizeof(char *));
 			if (strings == NULL)
 				fatal("out of memory");
 			$$ = strings;
