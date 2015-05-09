@@ -29,9 +29,29 @@ void		*reallocarray(void *, size_t, size_t);
 #define	__used		__attribute__((__used__))
 #endif
 
+#ifdef HAVE_SYS_TREE_H
+#include <sys/tree.h>
+
 #ifndef RB_FOREACH_SAFE
 #define RB_FOREACH_SAFE(x, name, head, y)			\
 	for ((x) = RB_MIN(name, head);				\
 	     (x) != NULL && ((y) = name##_RB_NEXT(x), 1);	\
 	     (x) = (y))
+#endif
+#endif
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
+#ifndef timespeccmp
+#define timespeccmp(_tsa, _tsb, _cmp)			\
+	(((_tsa)->tv_sec == (_tsb)->tv_sec)		\
+	    ? ((_tsa)->tv_nsec _cmp (_tsb)->tv_nsec)	\
+	    : ((_tsa)->tv_sec _cmp (_tsb)->tv_sec))
+#endif
+
+#ifndef timespecclear
+#define timespecclear(_ts)			\
+	(_ts)->tv_sec = (_ts)->tv_nsec = 0
 #endif
