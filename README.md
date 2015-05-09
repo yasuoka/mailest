@@ -62,6 +62,9 @@ ChangeLog
 
 0.9.9
 
+- 2015-05-09: yasuoka
+  - Monitor the inodes the directories (by kevent and inotify) and start
+    update automatically.
 - 2015-05-08: yasuoka
   - Optimize database when many documents are put or deleted.  As the
     Hyper Estrairer's documet is recomended.
@@ -128,8 +131,6 @@ Backup of the database
 TODO
 ----
 
-- Monitor the inodes the directories (by kevent and inotify) and start
-  update automatically.
 - Delete the index phsically
 - Automatically create a backup for the database when closing the
   writable DB connection.  Also recover the database automatically

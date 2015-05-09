@@ -26,6 +26,7 @@
 #define MAILESTD_DEFAULT_SUFFIX		".mew"
 #define MAILESTD_DEFAULT_FOLDERS	"!trash", "!casket", "!casket_replica"
 #define MAILESTD_DBSYNC_NITER		4000
+#define	MAILESTD_MONITOR_DELAY		1500
 
 struct mailestd_conf {
 	int	  debug;
@@ -39,4 +40,6 @@ struct mailestd_conf {
 	char	 *maildir;
 	char	**suffixes;
 	char	**folders;
+	int	  monitor;
+	long	  monitor_delay;	/* millisec */
 };

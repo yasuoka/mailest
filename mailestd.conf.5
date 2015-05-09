@@ -57,6 +57,16 @@ On typical environments,
 since indexing the mail messages and putting them into the datbase will be
 the performance bottle neck,
 this variable is not so important.
+.It Ic monitor Oo Ic delay Ar delay Oc
+When the monitoring is enabled,
+.Nm mailestd
+will start indexing automatically when changes are made on the folder
+already indexed.
+Specify
+.Ar delay
+in milli seconds instead of the default value 1500 which the
+.Nm mailestd
+waits for until it starts indexing.
 .It Ic suffixes Ar suffix ...
 The file name suffixes of the mail messages gathered for indexing.
 The default is

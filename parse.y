@@ -100,8 +100,8 @@ typedef struct {
 %}
 
 %token	INCLUDE ERROR
-%token	COUNT DATABASE DEBUG FOLDERS LEVEL LOG MAILDIR ROTATE PATH
-%token	SOCKET SUFFIXES SIZE TASKS TRIMSIZE
+%token	COUNT DATABASE DEBUG DELAY FOLDERS LEVEL LOG MAILDIR MONITOR ROTATE
+%token	PATH SOCKET SUFFIXES SIZE TASKS TRIMSIZE
 %token	<v.string>	STRING
 %token  <v.number>	NUMBER
 %type	<v.strings>	strings
@@ -144,6 +144,13 @@ main		: MAILDIR STRING	{
 		}
 		| SOCKET STRING {
 			conf->sock_path = $2;
+		}
+		| MONITOR {
+			conf->monitor = 1;
+		}
+		| MONITOR DELAY NUMBER {
+			conf->monitor = 1;
+			conf->monitor_delay = $3;
 		}
 		| TASKS NUMBER {
 			conf->tasks = $2;
@@ -253,11 +260,13 @@ lookup(char *s)
 		{ "count",		COUNT },
 		{ "database",		DATABASE },
 		{ "debug",		DEBUG },
+		{ "delay",		DELAY },
 		{ "folders",		FOLDERS },
 		{ "include",		INCLUDE },
 		{ "level",		LEVEL },
 		{ "log",		LOG },
 		{ "maildir",		MAILDIR },
+		{ "monitor",		MONITOR },
 		{ "path",		PATH },
 		{ "rotate",		ROTATE },
 		{ "size",		SIZE },
@@ -704,6 +713,7 @@ parse_config(const char *filename, const char *maildir)
 	conf->log_size = MAILESTD_LOGSIZ;
 	conf->log_count = MAILESTD_LOGROTMAX;
 	conf->trim_size = MAILESTD_TRIMSIZE;
+	conf->monitor_delay = MAILESTD_MONITOR_DELAY;
 
 	if (stat(filename, &st) == 0) {
 		if ((file = pushfile(filename, 0)) == NULL) {
