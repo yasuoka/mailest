@@ -680,9 +680,9 @@ mailestd_db_sync(struct mailestd *_this)
 			continue;
 
 		uri = est_doc_attr(doc, ESTDATTRURI);
-		if (uri == NULL || strncmp(uri, "file:///", 8) != 0)
+		if (uri == NULL || strncmp(uri, URIFILE "/", 8) != 0)
 			continue;
-		fn = uri + 7;
+		fn = URI2PATH(uri);
 
 		msg0.path = (char *)fn;
 		msg = RB_FIND(rfc822_tree, &_this->root, &msg0);
@@ -905,7 +905,7 @@ mailestd_fts(struct mailestd *_this, struct gather *ctx, time_t curr_time,
 	int		 db_id;
 	struct folder	*fld;
 
-	strlcpy(uri, "file://", sizeof(uri));
+	strlcpy(uri, URIFILE, sizeof(uri));
 	do {
 		needupdate = false;
 		if (ftse == NULL)
@@ -1005,7 +1005,7 @@ mailestd_draft(struct mailestd *_this, struct rfc822 *msg)
 		goto on_error;
 	}
 	est_doc_slim(msg->draft, MAILESTD_TRIMSIZE);
-	strlcpy(buf, "file://", sizeof(buf));
+	strlcpy(buf, URIFILE, sizeof(buf));
 	strlcat(buf, msg->path, sizeof(buf));
 	est_doc_add_attr(msg->draft, ESTDATTRURI, buf);
 	gmtime_r(&msg->mtime, &tm);
@@ -1181,8 +1181,7 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 		keepthis = false;
 		uri = est_doc_attr(doce->doc, ESTDATTRURI);
 		if (uri != NULL) {
-			if (strncmp(uri + 7, _this->maildir, lmaildir)
-			    == 0 && uri[lmaildir + 7] == '/') {
+			if (is_parent_dir(_this->maildir, URI2PATH(uri))) {
 				doce->uri = uri + lmaildir + 8;
 				if (lfolder > 0 &&
 				    !strncmp(doce->uri, smew->folder, lfolder)
@@ -1194,7 +1193,7 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 					 */
 					keepthis = true;
 			} else
-				doce->uri = uri + 7;
+				doce->uri = URI2PATH(uri);
 		}
 
 		/* removing duplicated messges */

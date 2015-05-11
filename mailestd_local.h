@@ -356,6 +356,9 @@ static bool	 is_parent_dir(const char *, const char *);
 #define TAILQ_FIRST_ITEM(_head) \
     ((TAILQ_EMPTY((_head)))? NULL : TAILQ_FIRST((_head)))
 
+#define URIFILE		"file://"
+#define URI2PATH(_uri)	((_uri) + 7)
+
 #ifdef MAILESTD_MT
 /*
  * Per thread event(4) base helper.  It makes events sure they happen always
