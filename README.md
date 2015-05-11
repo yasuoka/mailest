@@ -1,10 +1,15 @@
 mailest - search mail messages with Hyper Estrairer
 ===================================================
 
-"mailest" is a "search" backend for [Mew](http://mew.org) using
-[Hyper Estraier](fallabs.com/hyperestraier/index.html).  It can replace
-the existing backend `mewest`.  Also it can replace the id index database
-(`id.db`, `cnew` or `smew`).
+"mailest" provides a search backend and id index database for Mew using
+[Hyper Estraier](fallabs.com/hyperestraier/index.html).
+
+- `V`, `k/` or other related commands for newly received/refiled mails
+  become avaiable very soon (it's in one breathe almostly).
+
+- You don't need to start indexing implicitly
+  - "mailestd" daemon (mailestd) does it automatically.  It monitors
+    changes on the mail folders by kqueue or inotify.
 
 
 Install
@@ -36,8 +41,16 @@ Other:
  On BSD, You may need to use "gmake" instead of "make" to use GNUmakefile
 
 
-Quick Usage
------------
+How to start
+------------
+
++ For existing `mewest` user, backup and/or delete the database
+  (`~/Mail/casket`)
+
+  - Since "mailestd" can work with the old database, so OK to skip deleting
+    `~/Mail/casket`, but remark that 'V' will not work against the mails
+    which are indexed by `mewest`.   To make 'V' work against them, delete
+    the database in advance.
 
 + Add the below line to .mew.el to let Mew use "Hyper Estrairer" for
   search.
@@ -53,9 +66,21 @@ Quick Usage
       (defvar mew-prog-smew       "smew-mailest")
       (defvar mew-id-db-file      ".mailest.sock")
 
-+ Use `km`, `kM`, `k/` or `k?` in Mew.  See
++ Try `km`, `kM`, `k/`, `k?`, `V` in Mew.  See
   http://mew.org/en/info/release/mew_6.html#dbsearch for search commands
   in Mew.
+
+
+Usage
+-----
+
+"mailest" monitors the changes on:
+
+- the folder which is already indexed
+- the folder which you did `km` on
+- all folders below `~/Mail` if you did `kM`
+
+Also see (man pages)[#man-pages].
 
 
 ChangeLog
