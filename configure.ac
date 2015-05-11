@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([mailest], [0.9.9], [https://github.com/yasuoka/mailest/issues])
+AC_INIT([mailest], [0.9.10], [https://github.com/yasuoka/mailest/issues])
 AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 
 AC_CONFIG_HEADERS([config.h])

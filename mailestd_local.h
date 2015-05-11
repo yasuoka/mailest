@@ -85,7 +85,7 @@ struct mailestd {
 	struct event		  monitor_inev;
 	struct event		  monitor_intimerev;
 #endif
-#ifdef DIRMON_KQ
+#ifdef MONITOR_KQUEUE
 	int			  monitor_kq;
 	struct kevent		 *monitor_kev;
 	int			  monitor_kev_siz;

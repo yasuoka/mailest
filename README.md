@@ -18,17 +18,17 @@ Prerequirement:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.7.tar.gz
-    % tar xzf mailest-0.9.7.tar.gz
-    % cd mailest-mailest-0.9.7
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.10.tar.gz
+    % tar xzf mailest-0.9.10.tar.gz
+    % cd mailest-mailest-0.9.10
     % make
     % sudo make install
 
 Other:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.7.tar.gz
-    % tar xzf mailest-0.9.7.tar.gz
-    % cd mailest-mailest-0.9.7
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.10.tar.gz
+    % tar xzf mailest-0.9.10.tar.gz
+    % cd mailest-mailest-0.9.10
     % ./configure
     % make
     % sudo make install
@@ -60,6 +60,11 @@ Quick Usage
 
 ChangeLog
 ---------
+
+0.9.10
+
+- 2015-05-11: yasuoka
+  - Fix build on operating system which use kqueue for monitor.
 
 0.9.9
 
