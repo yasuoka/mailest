@@ -163,7 +163,7 @@ main		: MAILDIR STRING	{
 			conf->debug = $3;
 		}
 		| MONITOR		{
-			conf->monitor = 0;
+			conf->monitor = 1;
 		}
 		| MONITOR monitor_opts
 		;
