@@ -57,8 +57,11 @@ On typical environments,
 since indexing the mail messages and putting them into the datbase will be
 the performance bottle neck,
 this variable is not so important.
-.It Ic monitor Oo Ic delay Ar delay Oc
-When the monitoring is enabled,
+.It Ic monitor Oo Ic disable Oc Oo Ic delay Ar delay Oc
+The monitor is enabled unless
+.Ic disable
+is specified.
+When the monitor is enabled,
 .Nm mailestd
 will start indexing automatically when changes are made on the folder
 already indexed.

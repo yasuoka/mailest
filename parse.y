@@ -100,8 +100,8 @@ typedef struct {
 %}
 
 %token	INCLUDE ERROR
-%token	COUNT DATABASE DEBUG DELAY FOLDERS LEVEL LOG MAILDIR MONITOR ROTATE
-%token	PATH SOCKET SUFFIXES SIZE TASKS TRIMSIZE
+%token	COUNT DATABASE DEBUG DELAY DISABLE FOLDERS LEVEL LOG MAILDIR MONITOR
+%token	ROTATE PATH SOCKET SUFFIXES SIZE TASKS TRIMSIZE
 %token	<v.string>	STRING
 %token  <v.number>	NUMBER
 %type	<v.strings>	strings
@@ -145,13 +145,6 @@ main		: MAILDIR STRING	{
 		| SOCKET STRING {
 			conf->sock_path = $2;
 		}
-		| MONITOR {
-			conf->monitor = 1;
-		}
-		| MONITOR DELAY NUMBER {
-			conf->monitor = 1;
-			conf->monitor_delay = $3;
-		}
 		| TASKS NUMBER {
 			conf->tasks = $2;
 		}
@@ -169,6 +162,7 @@ main		: MAILDIR STRING	{
 		| DEBUG LEVEL NUMBER {
 			conf->debug = $3;
 		}
+		| MONITOR monitor_opts
 		;
 
 strings		: strings STRING {
@@ -223,6 +217,15 @@ database_opts	: database_opts database_opt
 		| database_opt
 		;
 
+monitor_opt	: DISABLE {
+			conf->monitor = 0;
+		}
+		| DELAY NUMBER {
+			conf->monitor_delay = $2;
+		}
+monitor_opts	: monitor_opts monitor_opt
+		| monitor_otp
+		;
 %%
 
 struct keywords {
@@ -261,6 +264,7 @@ lookup(char *s)
 		{ "database",		DATABASE },
 		{ "debug",		DEBUG },
 		{ "delay",		DELAY },
+		{ "disable",		DISABLE },
 		{ "folders",		FOLDERS },
 		{ "include",		INCLUDE },
 		{ "level",		LEVEL },
@@ -713,6 +717,7 @@ parse_config(const char *filename, const char *maildir)
 	conf->log_size = MAILESTD_LOGSIZ;
 	conf->log_count = MAILESTD_LOGROTMAX;
 	conf->trim_size = MAILESTD_TRIMSIZE;
+	conf->monitor = 1;
 	conf->monitor_delay = MAILESTD_MONITOR_DELAY;
 
 	if (stat(filename, &st) == 0) {
