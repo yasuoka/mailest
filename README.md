@@ -23,17 +23,17 @@ Prerequirement:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.10.tar.gz
-    % tar xzf mailest-0.9.10.tar.gz
-    % cd mailest-mailest-0.9.10
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.11.tar.gz
+    % tar xzf mailest-0.9.11.tar.gz
+    % cd mailest-mailest-0.9.11
     % make
     % sudo make install
 
 Other:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.10.tar.gz
-    % tar xzf mailest-0.9.10.tar.gz
-    % cd mailest-mailest-0.9.10
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.11.tar.gz
+    % tar xzf mailest-0.9.11.tar.gz
+    % cd mailest-mailest-0.9.11
     % ./configure
     % make
     % sudo make install
