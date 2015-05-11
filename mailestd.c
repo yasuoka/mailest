@@ -1156,9 +1156,10 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 	while ((doce = TAILQ_FIRST(&children)) != NULL) {
 		TAILQ_REMOVE(&children, doce, queue);
 		TAILQ_INSERT_TAIL(&ancestors, doce, queue);
-		msgid = est_doc_attr(doce->doc, ATTR_MSGID);
+		if (doce->msgid == NULL)
+			continue;	/* can't become parent */
 		strlcpy(buf, ATTR_PARID	" " ESTOPSTREQ " ", sizeof(buf));
-		strlcat(buf, msgid, sizeof(buf));
+		strlcat(buf, doce->msgid, sizeof(buf));
 		if ((cond = est_cond_new()) == NULL)
 			break;
 		est_cond_add_attr(cond, buf);
@@ -1200,7 +1201,8 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 		TAILQ_FOREACH(docc, &ancestors, queue) {
 			if (doce == docc)
 				break;
-			if (strcmp(doce->msgid, docc->msgid) == 0) {
+			if (doce->msgid != NULL && docc->msgid != NULL &&
+			    strcmp(doce->msgid, docc->msgid) == 0) {
 				if (!keepthis) {
 					TAILQ_REMOVE(&ancestors, doce, queue);
 					est_doc_delete(doce->doc);
@@ -1210,6 +1212,7 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 					est_doc_delete(docc->doc);
 					free(docc);
 				}
+				break;
 			}
 		}
 	}
