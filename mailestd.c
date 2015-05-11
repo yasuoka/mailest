@@ -16,7 +16,7 @@
 #include "compat.h"
 
 #include <sys/types.h>
-#ifdef DIRMON_KQ
+#ifdef DIRMON_KQUEUE
 #include <sys/event.h>
 #endif
 #ifdef DIRMON_INOTIFY
@@ -2211,7 +2211,7 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
 static void
 mailestd_dirmon_init(struct mailestd *_this)
 {
-#ifdef DIRMON_KQ
+#ifdef DIRMON_KQUEUE
 	if ((_this->dirmon_kq = kqueue()) == -1)
 		err(EX_OSERR, "kqueue");
 	_this->dirmon_kev = xcalloc(1, sizeof(struct kevent));
@@ -2263,7 +2263,7 @@ mailestd_dirmon_start(struct mailestd *_this)
 	}
 	EVENT_BASE_FREE();
 #endif
-#ifdef DIRMON_KQ
+#ifdef DIRMON_KQUEUE
 	/* libevent can't handle kquque inode events, so treat them directly */
     {
 	int		 i, ret, nkev, sock;
@@ -2400,7 +2400,7 @@ mailestd_dirmon_stop(struct mailestd *_this)
 static void
 mailestd_dirmon_fini(struct mailestd *_this)
 {
-#ifdef DIRMON_KQ
+#ifdef DIRMON_KQUEUE
 	free(_this->dirmon_kev);
 #endif
 }
@@ -2415,7 +2415,7 @@ mailestd_dirmon_monitor(struct mailestd *_this, const char *dirpath)
 	fld0.path = (char *)dirpath;
 	if ((fld = RB_FIND(folder_tree, &_this->dirmons, &fld0)) != NULL)
 		return;
-#ifdef DIRMON_KQ
+#ifdef DIRMON_KQUEUE
 	if ((fd = open(dirpath, O_RDONLY)) < 0)
 		return;
 #endif
