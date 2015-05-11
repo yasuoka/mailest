@@ -80,6 +80,11 @@ struct mailestd {
 
 	bool			  dirmon;
 	struct timespec		  dirmon_delay;
+#ifdef DIRMON_INOTIFY
+	int			  dirmon_in;
+	struct event		  dirmon_inev;
+	struct event		  dirmon_intimerev;
+#endif
 #ifdef DIRMON_KQ
 	int			  dirmon_kq;
 	struct kevent		 *dirmon_kev;
@@ -311,6 +316,9 @@ static void	 mailestd_dirmon_init(struct mailestd *);
 static void	 mailestd_dirmon_start(struct mailestd *);
 static void	 mailestd_dirmon_run(struct mailestd *);
 static void	 mailestd_dirmon_fini(struct mailestd *);
+#ifdef DIRMON_INOTIFY
+static void	 mailestd_dirmon_on_inotify(int, short, void *);
+#endif
 static void	 mailestd_dirmon_on_event(struct mailestd *);
 static void	 mailestd_dirmon_monitor(struct mailestd *, const char *);
 static int	 mailestd_dirmon_schedule(struct mailestd *,
@@ -373,10 +381,7 @@ static int		 evbase_key_initialized = 0;
 		event_base_set(pthread_getspecific(evbase_key), (_ev));	\
 	} while (0 /* CONSTCOND */)
 #define EVENT_LOOP(_flags)						\
-	do {								\
-		event_base_loop(pthread_getspecific(evbase_key),	\
-		    (_flags));						\
-	} while (0 /* CONSTCOND */)
+	event_base_loop(pthread_getspecific(evbase_key), (_flags))
 #define EVENT_BASE_FREE()						\
 	do {								\
 		event_base_free(pthread_getspecific(evbase_key));	\

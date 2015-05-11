@@ -45,10 +45,26 @@ void		*reallocarray(void *, size_t, size_t);
 #endif
 
 #ifndef timespeccmp
-#define timespeccmp(_tsa, _tsb, _cmp)			\
-	(((_tsa)->tv_sec == (_tsb)->tv_sec)		\
-	    ? ((_tsa)->tv_nsec _cmp (_tsb)->tv_nsec)	\
+#define timespeccmp(_tsa, _tsb, _cmp)				\
+	(((_tsa)->tv_sec == (_tsb)->tv_sec)			\
+	    ? ((_tsa)->tv_nsec _cmp (_tsb)->tv_nsec)		\
 	    : ((_tsa)->tv_sec _cmp (_tsb)->tv_sec))
+#endif
+#ifndef timespecsub
+#define timespecsub(_tsa, _tsb, _tsr)				\
+	do {							\
+		if ((_tsa)->tv_nsec < (_tsb)->tv_nsec) {	\
+			(_tsr)->tv_nsec = (_tsa)->tv_nsec	\
+			    + 1000000000L - (_tsb)->tv_nsec;	\
+			(_tsr)->tv_sec = (_tsa)->tv_sec		\
+			    - (_tsb)->tv_sec - 1;		\
+		} else {					\
+			(_tsr)->tv_nsec = (_tsa)->tv_nsec	\
+			    - (_tsb)->tv_nsec;			\
+			(_tsr)->tv_sec = (_tsa)->tv_sec		\
+			    - (_tsb)->tv_sec;			\
+		}						\
+	} while (0 /*CONSTCOND*/)
 #endif
 
 #ifndef timespecclear

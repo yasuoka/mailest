@@ -19,6 +19,9 @@
 #ifdef DIRMON_KQ
 #include <sys/event.h>
 #endif
+#ifdef DIRMON_INOTIFY
+#include <sys/inotify.h>
+#endif
 #include <sys/queue.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
@@ -2229,6 +2232,9 @@ mailestd_dirmon_start0(void *ctx)
 static void
 mailestd_dirmon_run(struct mailestd *_this)
 {
+#ifdef DIRMON_INOTIFY
+	_this->dirmon_in = inotify_init();	/* HERE? */
+#endif
 #ifdef MAILESTD_MT
 	_thread_create(&_this->dirmonworker.thread, NULL,
 	    mailestd_dirmon_start0, _this);
@@ -2240,15 +2246,32 @@ static void
 mailestd_dirmon_start(struct mailestd *_this)
 {
 	MAILESTD_ASSERT(_this->dirmon);
-	_this->dirmonworker.thread = _thread_self();
 
-#if defined(DIRMON_KQ) && defined(MAILESTD_MT)
+#ifdef DIRMON_INOTIFY
+	EVENT_INIT();
+	task_worker_start(&_this->dirmonworker);
+	EVENT_SET(&_this->dirmon_inev, _this->dirmon_in, EV_READ | EV_PERSIST,
+	    mailestd_dirmon_on_inotify, _this);
+	event_add(&_this->dirmon_inev, NULL);
+	EVENT_SET(&_this->dirmon_intimerev, -1, EV_TIMEOUT,
+	    mailestd_dirmon_on_inotify, _this);
+	for (;;) {
+		if (EVENT_LOOP(EVLOOP_ONCE) != 0)
+			break;
+		if (_this->dirmonworker.sock < 0)
+			mailestd_dirmon_stop(_this);
+	}
+	EVENT_BASE_FREE();
+#endif
+#ifdef DIRMON_KQ
+	/* libevent can't handle kquque inode events, so treat them directly */
     {
 	int		 i, ret, nkev, sock;
 	struct kevent	 kev[64];
 	struct folder	*flde;
 	struct timespec	*ts, ts0;
 
+	_this->dirmonworker.thread = _thread_self();
 	for (;;) {
 		ts = NULL;
 		nkev = 0;
@@ -2308,17 +2331,70 @@ mailestd_dirmon_start(struct mailestd *_this)
 #endif
 }
 
+#ifdef DIRMON_INOTIFY
+static void
+mailestd_dirmon_on_inotify(int fd, short evmask, void *ctx)
+{
+	struct inotify_event	*inev;
+	u_char			 buf[1024];
+	ssize_t			 siz;
+	struct mailestd *_this = ctx;
+	struct folder		*flde;
+	struct timespec		*ts = NULL, ts0;
+	struct timeval		 tv;
+
+mailestd_log(LOG_INFO, "%s: ", __func__);
+	if (evmask & EV_READ) {
+		if ((siz = read(_this->dirmon_in, buf, sizeof(buf))) <= 0){
+			if (siz != 0) {
+				if (errno == EAGAIN || errno == EINTR)
+					return;
+				mailestd_log(LOG_ERR, "%s: read: %m", __func__);
+			}
+			mailestd_dirmon_stop(_this);
+		}
+		inev = (struct inotify_event *)buf;
+		RB_FOREACH(flde, folder_tree, &_this->dirmons) {
+			if (flde->fd == inev->wd)
+				break;
+		}
+		MAILESTD_ASSERT(flde != NULL);
+		if ((inev->mask & (IN_DELETE_SELF | IN_MOVE_SELF)) != 0) {
+			inotify_rm_watch(_this->dirmon_in, flde->fd);
+			close(flde->fd);
+			flde->fd = -1;
+		}
+		clock_gettime(CLOCK_MONOTONIC, &flde->mtime);
+	}
+	if (mailestd_dirmon_schedule(_this, &ts0) > 0)
+		ts = &ts0;
+	if (ts != NULL) {
+		TIMESPEC_TO_TIMEVAL(&tv, ts);
+		event_add(&_this->dirmon_intimerev, &tv);
+	}
+}
+#endif
+
 static void
 mailestd_dirmon_stop(struct mailestd *_this)
 {
 	struct folder	*flde, *fldt;
 
 	RB_FOREACH_SAFE(flde, folder_tree, &_this->dirmons, fldt) {
-		if (flde->fd >= 0)
 		RB_REMOVE(folder_tree, &_this->dirmons, flde);
+#ifdef DIRMON_INOTIFY
+		inotify_rm_watch(_this->dirmon_in, flde->fd);
+#endif
+		if (flde->fd >= 0)
 			close(flde->fd);
 		flde->fd = -1;
 	}
+#ifdef DIRMON_INOTIFY
+	if (event_pending(&_this->dirmon_intimerev, EV_TIMEOUT, NULL))
+		event_del(&_this->dirmon_intimerev);
+	close(_this->dirmon_in);
+	event_del(&_this->dirmon_inev);
+#endif
 }
 
 static void
@@ -2332,15 +2408,24 @@ mailestd_dirmon_fini(struct mailestd *_this)
 static void
 mailestd_dirmon_monitor(struct mailestd *_this, const char *dirpath)
 {
-	int		 fd;
+	int		 fd = -1;
 	struct folder	*fld, fld0;
 
 	MAILESTD_ASSERT(_thread_self() == _this->dirmonworker.thread);
 	fld0.path = (char *)dirpath;
 	if ((fld = RB_FIND(folder_tree, &_this->dirmons, &fld0)) != NULL)
 		return;
+#ifdef DIRMON_KQ
 	if ((fd = open(dirpath, O_RDONLY)) < 0)
 		return;
+#endif
+#ifdef DIRMON_INOTIFY
+	if ((fd = inotify_add_watch(_this->dirmon_in,
+	    dirpath, IN_CREATE | IN_DELETE | IN_DELETE_SELF |
+	    IN_MOVED_FROM | IN_MOVED_TO | IN_MOVE_SELF)) == -1) {
+		mailestd_log(LOG_ERR, "%s() inotify_add_watch: %m", __func__);
+	}
+#endif
 	fld = xcalloc(1, sizeof(struct folder));
 	fld->fd = fd;
 	fld->path = xstrdup(dirpath);
@@ -2581,10 +2666,10 @@ mailestd_vlog(int priority, const char *message, va_list args)
 				break;
 			case 'm':
 				saved_errno = errno;
-				strerror_r(saved_errno, fmt + fmtoff,
-				    sizeof(fmt) - fmtoff);
+				if (strerror_r(saved_errno, fmt + fmtoff,
+				    sizeof(fmt) - fmtoff) == 0)
+					fmtoff = strlen(fmt);
 				errno = saved_errno;
-				fmtoff = strlen(fmt);
 				state = 0;
 				goto copy_loop;
 			}

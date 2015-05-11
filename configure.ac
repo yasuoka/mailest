@@ -16,6 +16,8 @@ CFLAGS="$CFLAGS -I/usr/local/include"
 CFLAGS="$CFLAGS -I/usr/include/qdbm -I/usr/include/estraier"
 LDFLAGS="$LDFLAGS -L/usr/local/lib"
 
+AC_GNU_SOURCE
+
 AC_ARG_ENABLE([multi-threads],
     [AS_HELP_STRING(
 	[--enable-multi-threads], [enable multi threads (default yes)])],
@@ -30,7 +32,7 @@ AM_CONDITIONAL([ENABLE_MULTI_THREADS], [test x"$enable_multi_threads" != x"no"])
 AM_CONDITIONAL([WITH_LIBESTDRAFT], [test x"$with_libestdraft" != x"no"])
 
 # Checks for header files.
-AC_CHECK_HEADERS([estraier.h])
+AC_CHECK_HEADERS([estraier.h sys/time.h])
 
 AC_CHECK_LIB([qdbm], [cbmalloc],, [AC_MSG_ERROR([requires qdbm library])])
 AC_CHECK_LIB([estraier], [est_doc_new],,
