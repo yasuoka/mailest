@@ -23,6 +23,12 @@ AC_ARG_ENABLE([multi-threads],
 	[--enable-multi-threads], [enable multi threads (default yes)])],
     [], [enable_multi_threads=yes])
 
+AC_ARG_ENABLE([monitor],
+    [AS_HELP_STRING(
+	[--enable-monitor],
+	[enable monitoring the mail folders (default yes)])],
+    [], [enable_monitor=yes])
+
 AC_ARG_WITH([libestdraft],
     [AS_HELP_STRING(
 	[--with-libestdraft], [use libestdraft (default yes)])],
@@ -32,7 +38,7 @@ AM_CONDITIONAL([ENABLE_MULTI_THREADS], [test x"$enable_multi_threads" != x"no"])
 AM_CONDITIONAL([WITH_LIBESTDRAFT], [test x"$with_libestdraft" != x"no"])
 
 # Checks for header files.
-AC_CHECK_HEADERS([estraier.h sys/time.h])
+AC_CHECK_HEADERS([estraier.h sys/time.h sys/event.h sys/inotify.h])
 
 AC_CHECK_LIB([qdbm], [cbmalloc],, [AC_MSG_ERROR([requires qdbm library])])
 AC_CHECK_LIB([estraier], [est_doc_new],,
@@ -50,9 +56,25 @@ AC_REPLACE_FUNCS([open_memstream])
 
 # Checks for library functions.
 AC_CHECK_FUNCS([strlcat])
+AC_CHECK_FUNCS([inotify_init])
+AC_CHECK_FUNCS([kqueue])
 
-AC_CONFIG_FILES([GNUmakefile replace/GNUmakefile mailestd/GNUmakefile libestdraft/GNUmakefile])
+# check kqueue and inotify usability for monitor
+dirmon_sysreq_errmsg="--enable-monitor(default yes) requires the system has \
+    kqueue or inotify."
+AM_CONDITIONAL([WITH_DIRMON_KQUEUE],
+    [test $enable_monitor && test $ac_cb_func_kqueue])
+AM_CONDITIONAL([WITH_DIRMON_INOTIFY],
+    [test $enable_monitor && test $ac_cb_func_inotify])
+if test x"$enable_monitor" != x"no" &&
+    test x"$ac_cv_func_inotify_init" != x"yes" &&
+    test x"$ac_cv_func_kqueue" != x"yes"; then
+	AC_ERROR([$dirmon_sysreq_errmsg])
+fi
 
-AM_MAINTAINER_MODE([disable])
+AC_CONFIG_FILES([GNUmakefile replace/GNUmakefile mailestd/GNUmakefile
+    libestdraft/GNUmakefile])
+
+AM_MAINTAINER_MODE([enable])
 
 AC_OUTPUT
