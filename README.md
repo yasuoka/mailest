@@ -3,7 +3,8 @@ mailest - search mail messages with Hyper Estrairer
 
 "mailest" is a "search" backend for [Mew](http://mew.org) using
 [Hyper Estraier](fallabs.com/hyperestraier/index.html).  It can replace
-the existing backend `mewest`.
+the existing backend `mewest`.  Also it can replace the id index database
+(`id.db`, `cnew` or `smew`).
 
 
 Install
@@ -62,9 +63,10 @@ ChangeLog
 
 0.9.9
 
-- 2015-05-09: yasuoka
+- 2015-05-11: yasuoka
   - Monitor the inodes the directories (by kevent and inotify) and start
     update automatically.
+  - Fixed error in replace.h which is to redefine RB_FOREACH_SAFE.
 - 2015-05-08: yasuoka
   - Optimize database when many documents are put or deleted.  As the
     Hyper Estrairer's documet is recomended.
