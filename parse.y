@@ -142,30 +142,33 @@ varset		: STRING '=' STRING	{
 main		: MAILDIR STRING	{
 			conf->maildir = $2;
 		}
-		| SOCKET STRING {
+		| SOCKET STRING		{
 			conf->sock_path = $2;
 		}
-		| TASKS NUMBER {
+		| TASKS NUMBER		{
 			conf->tasks = $2;
 		}
-		| TRIMSIZE NUMBER {
+		| TRIMSIZE NUMBER	{
 			conf->trim_size = $2;
 		}
-		| SUFFIXES strings {
+		| SUFFIXES strings	{
 			conf->suffixes = $2;
 		}
-		| FOLDERS strings {
+		| FOLDERS strings	{
 			conf->folders = $2;
 		}
 		| LOG log_opts
 		| DATABASE database_opts
-		| DEBUG LEVEL NUMBER {
+		| DEBUG LEVEL NUMBER	{
 			conf->debug = $3;
+		}
+		| MONITOR		{
+			conf->monitor = 0;
 		}
 		| MONITOR monitor_opts
 		;
 
-strings		: strings STRING {
+strings		: strings STRING	{
 			int n;
 			char **strings;
 			for (n = 0; $1[n] != NULL; n++)
@@ -177,7 +180,7 @@ strings		: strings STRING {
 			$$[n++] = $2;
 			$$[n++] = NULL;
 		}
-		| STRING {
+		| STRING		{
 			$$ = calloc(2, sizeof(char *));
 			if ($$ == NULL)
 				fatal("out of memory");
@@ -217,14 +220,14 @@ database_opts	: database_opts database_opt
 		| database_opt
 		;
 
-monitor_opt	: DISABLE {
+monitor_opt	: DISABLE		{
 			conf->monitor = 0;
 		}
-		| DELAY NUMBER {
+		| DELAY NUMBER		{
 			conf->monitor_delay = $2;
 		}
 monitor_opts	: monitor_opts monitor_opt
-		| monitor_otp
+		| monitor_opt
 		;
 %%
 
