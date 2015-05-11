@@ -79,9 +79,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 sbin_PROGRAMS = mailestd$(EXEEXT)
 @ENABLE_MULTI_THREADS_TRUE@am__append_1 = -DMAILESTD_MT
-@WITH_LIBESTDRAFT_TRUE@am__append_2 = -DHAVE_LIBESTDRAFT
-@WITH_LIBESTDRAFT_TRUE@am__append_3 = -L../libestdraft
-@WITH_LIBESTDRAFT_TRUE@am__append_4 = -lestdraft
+@WITH_MONITOR_INOTIFY_TRUE@am__append_2 = -DMONITOR_INOTIFY
+@WITH_MONITOR_KQUEUE_TRUE@am__append_3 = -DMONITOR_KQUEUE
+@WITH_LIBESTDRAFT_TRUE@am__append_4 = -DHAVE_LIBESTDRAFT
+@WITH_LIBESTDRAFT_TRUE@am__append_5 = -L../libestdraft
+@WITH_LIBESTDRAFT_TRUE@am__append_6 = -lestdraft
 subdir = mailestd
 DIST_COMMON = $(srcdir)/GNUmakefile.in $(srcdir)/GNUmakefile.am \
 	../parse.c $(top_srcdir)/depcomp $(top_srcdir)/ylwrap \
@@ -303,14 +305,15 @@ mailestd_SOURCES = ../mailestd.c ../mailestctl.c ../parse.y \
 	../parser.c ../bytebuf.c ../bytebuf.h ../defs.h ../mailestd.h \
 	../mailestd_local.h ../parser.h ../thread.h
 mailestd_CPPFLAGS = -iquotedir -I$(top_srcdir)/replace -I$(top_srcdir) \
-	$(am__append_1) $(am__append_2)
-mailestd_LDFLAGS = -L../replace $(am__append_3)
-mailestd_LDADD = -lreplace $(am__append_4)
-dist_man_MANS = ../mailestctl.1 ../mailestd.8 ../mailestd.conf.5 \
-	../mew-mailest.1
-bin_SCRIPTS = mew-mailest
-CLEANFILES = mew-mailest ../parse.c
-EXTRA_DIST = $(top_srcdir)/mew-mailest.sh
+	$(am__append_1) $(am__append_2) $(am__append_3) \
+	$(am__append_4)
+mailestd_LDFLAGS = -L../replace $(am__append_5)
+mailestd_LDADD = -lreplace $(am__append_6)
+dist_man_MANS = ../mailestctl.1 ../mailestd.8 ../mailestd.conf.5 
+bin_SCRIPTS = mew-mailest cmew-mailest smew-mailest
+CLEANFILES = mew-mailest cmew-mailest smew-mailest ../parse.c
+EXTRA_DIST = $(top_srcdir)/mew-mailest.sh \
+	$(top_srcdir)/cmew-mailest.sh $(top_srcdir)/smew-mailest.sh
 all: all-am
 
 .SUFFIXES:
@@ -820,7 +823,8 @@ info: info-am
 info-am:
 
 install-data-am: install-man
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-data-hook
 install-dvi: install-dvi-am
 
 install-dvi-am:
@@ -871,34 +875,51 @@ uninstall-am: uninstall-binSCRIPTS uninstall-man \
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 uninstall-man: uninstall-man1 uninstall-man5 uninstall-man8
 
-.MAKE: install-am install-exec-am install-strip uninstall-am
+.MAKE: install-am install-data-am install-exec-am install-strip \
+	uninstall-am
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
 	clean-sbinPROGRAMS cscopelist-am ctags ctags-am distclean \
 	distclean-compile distclean-generic distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-binSCRIPTS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-exec-hook \
-	install-html install-html-am install-info install-info-am \
-	install-man install-man1 install-man5 install-man8 install-pdf \
-	install-pdf-am install-ps install-ps-am install-sbinPROGRAMS \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binSCRIPTS \
-	uninstall-hook uninstall-man uninstall-man1 uninstall-man5 \
-	uninstall-man8 uninstall-sbinPROGRAMS
+	install-binSCRIPTS install-data install-data-am \
+	install-data-hook install-dvi install-dvi-am install-exec \
+	install-exec-am install-exec-hook install-html install-html-am \
+	install-info install-info-am install-man install-man1 \
+	install-man5 install-man8 install-pdf install-pdf-am \
+	install-ps install-ps-am install-sbinPROGRAMS install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-binSCRIPTS uninstall-hook uninstall-man \
+	uninstall-man1 uninstall-man5 uninstall-man8 \
+	uninstall-sbinPROGRAMS
 
 
 mew-mailest: $(top_srcdir)/mew-mailest.sh
 	cp $(top_srcdir)/mew-mailest.sh mew-mailest
 	chmod +x mew-mailest
 
+cmew-mailest: $(top_srcdir)/cmew-mailest.sh
+	cp $(top_srcdir)/cmew-mailest.sh cmew-mailest
+	chmod +x cmew-mailest
+
+smew-mailest: $(top_srcdir)/smew-mailest.sh
+	cp $(top_srcdir)/smew-mailest.sh smew-mailest
+	chmod +x smew-mailest
+
 install-exec-hook:
 	ln -f $(DESTDIR)$(sbindir)/mailestd$(EXEEXT) \
 		$(DESTDIR)$(bindir)/mailestctl$(EXEEXT)
+
+install-data-hook:
+	ln -sf mew-mailest.1 $(DESTDIR)$(mandir)/man1/cmew-mailest.1
+	ln -sf mew-mailest.1 $(DESTDIR)$(mandir)/man1/smew-mailest.1
+
 uninstall-hook:
 	rm $(DESTDIR)$(bindir)/mailestctl$(EXEEXT)
+	rm $(DESTDIR)$(mandir)/man1/cmew-mailest.1
+	rm $(DESTDIR)$(mandir)/man1/smew-mailest.1
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
