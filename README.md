@@ -176,6 +176,8 @@ Backup of the database
 TODO
 ----
 
+- When indexing huge amount of mails, smew takes very long time.  Find
+  a way to workaround this.
 - Delete the index phsically
 - Automatically create a backup for the database when closing the
   writable DB connection.  Also recover the database automatically
