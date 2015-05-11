@@ -91,6 +91,7 @@ ChangeLog
 - 2015-05-12: yasuoka
   - Improve logging
 - 2015-05-11: yasuoka
+  - Tweak log levels
   - Fix parsing "monitor" in mailestd.conf
 
 0.9.11

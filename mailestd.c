@@ -1900,7 +1900,6 @@ task_worker_on_proc_db(struct task_worker *_this,
 	else
 		task_type = task->type;
 
-
 	switch (task_type) {
 	default:
 		break;
@@ -1971,10 +1970,10 @@ task_worker_on_proc_db(struct task_worker *_this,
 						   then call me again */
 		}
 		if (!ctx->optimized && ctx->puts + ctx->dels > 800) {
-			mailestd_log(LOG_INFO, "Optimizing DB");
+			mailestd_log(LOG_DEBUG, "Optimizing DB");
 			est_db_optimize(mailestd->db,
 			    ESTOPTNOPURGE | ESTOPTNODBOPT);
-			mailestd_log(LOG_INFO, "Optimized DB");
+			mailestd_log(LOG_DEBUG, "Optimized DB");
 			ctx->optimized = true;
 			return (false);
 		}
