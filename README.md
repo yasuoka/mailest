@@ -5,9 +5,9 @@ mailest - search mail messages with Hyper Estrairer
 [Hyper Estraier](fallabs.com/hyperestraier/index.html).
 
 - `V`, `k/` or other related commands for newly received/refiled mails
-  become avaiable very soon (it's in one breathe almostly).
+  become avaiable very soon.
 
-- You don't need to start indexing implicitly
+- You don't need to start indexing implicitly.
   - "mailestd" daemon (mailestd) does it automatically.  It monitors
     changes on the mail folders by kqueue or inotify.
 
