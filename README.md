@@ -88,6 +88,8 @@ ChangeLog
 
 0.9.12 (not yet)
 
+- 2015-05-12: yasuoka
+  - Improve logging
 - 2015-05-11: yasuoka
   - Fix parsing "monitor" in mailestd.conf
 

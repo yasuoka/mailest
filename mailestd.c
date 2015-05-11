@@ -542,6 +542,22 @@ mailestd_get_all_folders(struct mailestd *_this, struct folder_tree *tree)
 	}
 }
 
+static const char *
+mailestd_folder_name(struct mailestd *_this, const char *dir, char *buf,
+    int lbuf)
+{
+	int	ldirp;
+
+	ldirp = strlen(_this->maildir);
+	if (strncmp(_this->maildir, dir, ldirp) == 0 && dir[ldirp] == '/') {
+		buf[0] = '+';
+		strlcpy(buf + 1, dir + ldirp + 1, lbuf - 1);
+	} else
+		strlcpy(buf, dir, lbuf);
+
+	return buf;
+}
+
 /***********************************************************************
  * Database operations, gathering messages from file system
  ***********************************************************************/
@@ -588,7 +604,7 @@ mailestd_db_open_wr(struct mailestd *_this)
 	} else  {
 		_this->db = db;
 		_this->db_wr = true;
-		mailestd_log(LOG_DEBUG, "Opened DB");
+		mailestd_log(LOG_INFO, "Opened DB for writing");
 	}
 
 	return (db);
@@ -756,7 +772,7 @@ static int
 mailestd_gather(struct mailestd *_this, struct task_gather *task)
 {
 	int		 lrdir, update = 0, delete = 0, total = 0;
-	char		 rdir[PATH_MAX], *paths[2];
+	char		 rdir[PATH_MAX], buf[PATH_MAX], *paths[2];
 	const char	*folder = task->folder;
 	struct gather	*ctx;
 	FTS		*fts;
@@ -768,11 +784,11 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 
 	RB_INIT(&folders);
 	ctx = mailestd_get_gather(_this, task->gather_id);
-	if (folder[0] == '/') {
-		mailestd_log(LOG_DEBUG, "Gathering %s ...", folder);
+	mailestd_log(LOG_DEBUG, "Gathering %s ...", mailestd_folder_name(
+	    _this, folder, buf, sizeof(buf)));
+	if (folder[0] == '/')
 		strlcpy(rdir, folder, sizeof(rdir));
-	} else {
-		mailestd_log(LOG_DEBUG, "Gathering +%s ...", folder);
+	else {
 		strlcpy(rdir, _this->maildir, sizeof(rdir));
 		strlcat(rdir, "/", sizeof(rdir));
 		strlcat(rdir, folder, sizeof(rdir));
@@ -811,9 +827,9 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 		}
 	}
 
-	mailestd_log(LOG_INFO,
-	    "Gathered %s%s (Total: %d Remove: %d Update: %d)",
-	    (folder[0] != '/')? "+" : "", folder, total, delete, update);
+	mailestd_log(LOG_DEBUG, "Gathered %s (Total: %d Remove: %d Update: %d)",
+	    mailestd_folder_name(_this, folder, buf, sizeof(buf)),
+	    total, delete, update);
 out:
 	if (ctx != NULL) {
 		if (ctx->puts == ctx->puts_done &&
@@ -880,10 +896,19 @@ mailestd_gather_inform(struct mailestd *_this, struct task *task,
 		if (gather->folders_done == gather->folders &&
 		    gather->dels_done == gather->dels &&
 		    gather->puts_done == gather->puts) {
+			mailestd_log(LOG_INFO,
+			    "Updated %s (Folders: %d Remove: %d "
+			    "Update: %d)", gather->target,
+			    gather->folders_done, gather->dels_done,
+			    gather->puts_done);
 			TAILQ_REMOVE(&_this->gathers, gather, queue);
 			free(gather);
 		}
 	} else {
+		mailestd_log(LOG_INFO,
+		    "Updating %s failed (Folders: %d Remove: %d Update: %d): "
+		    "%s", gather->target, gather->folders_done,
+		    gather->dels_done, gather->puts_done, gather->errmsg);
 		mailestd_schedule_inform(_this, gather->id,
 		    (u_char *)gather, sizeof(struct gather));
 		TAILQ_REMOVE(&_this->gathers, gather, queue);
@@ -1224,7 +1249,7 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 		cnt++;
 	}
 out:
-	mailestd_log(LOG_INFO, "smew (%s%s%s) done.  Hit %d",
+	mailestd_log(LOG_INFO, "Done smew (%s%s%s)  Hit %d",
 	    smew->msgid, (lfolder > 0)? ", +" : "",
 	    (lfolder > 0)? smew->folder : "", cnt);
 	fclose(out);
@@ -1254,7 +1279,7 @@ mailestd_search(struct mailestd *_this, uint64_t task_id, ESTCOND *cond,
 		mailestd_schedule_inform(_this, task_id, NULL, 0);
 	} else {
 		mailestd_log(LOG_INFO,
-		    "Searched(%s) successfully.  Hit %d", cond->phrase, rnum);
+		    "Searched(%s).  Hit %d", cond->phrase, rnum);
 		for (i = 0; i < rnum; i++) {
 			doc = est_db_get_doc(_this->db, res[i], ESTGDNOKWD);
 			if (doc == NULL) {
@@ -1367,9 +1392,16 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 	struct folder		*flde, *fldt, fld0;
 	bool			 found = false;
 	struct rfc822		 msg0;
+	const char		*fn;
 
 	ctx = xcalloc(1, sizeof(struct gather));
 	ctx->id = mailestd_new_id(_this);
+	if (isnull(folder))
+		strlcpy(ctx->target, "all", sizeof(ctx->target));
+	else
+		mailestd_folder_name(_this, folder, ctx->target,
+		    sizeof(ctx->target));
+
 	ctx_id = ctx->id;	/* need this backup */
 	TAILQ_INSERT_TAIL(&_this->gathers, ctx, queue);
 
@@ -1530,6 +1562,8 @@ mailestd_schedule_search(struct mailestd *_this, ESTCOND *cond)
 {
 	struct task_search	*task;
 
+	mailestd_log(LOG_INFO, "Searching(%s)", cond->phrase);
+
 	task = xcalloc(1, sizeof(struct task_search));
 	task->type = MAILESTD_TASK_SEARCH;
 	task->cond = cond;
@@ -1543,6 +1577,12 @@ mailestd_schedule_smew(struct mailestd *_this, const char *msgid,
     const char *folder)
 {
 	struct task_smew	*task;
+
+	if (!isnull(folder))
+		mailestd_log(LOG_INFO, "Starting smew (%s, +%s)",
+		    msgid, folder);
+	else
+		mailestd_log(LOG_INFO, "Starting smew (%s)", msgid);
 
 	task = xcalloc(1, sizeof(struct task_smew));
 	task->type = MAILESTD_TASK_SMEW;
@@ -2435,16 +2475,6 @@ mailestd_monitor_folder(struct mailestd *_this, const char *dirpath)
 	mailestd_log(LOG_DEBUG, "Start monitoring %s", dirpath);
 }
 
-static bool
-is_parent_dir(const char *dirp, const char *dir)
-{
-	int	ldirp;
-
-	ldirp = strlen(dirp);
-	return ((strncmp(dirp, dir, ldirp) == 0 && dir[ldirp] == '/')
-	    ? true : false);
-}
-
 static void
 mailestd_monitor_maildir_changed(struct mailestd *_this)
 {
@@ -2492,6 +2522,7 @@ mailestd_monitor_schedule(struct mailestd *_this, struct timespec *wait)
 		TAILQ_ENTRY(dirpend)	 queue;
 	}			*pnde, *pndt;
 	TAILQ_HEAD(, dirpend)	 pend;
+	char			 buf[PATH_MAX];
 
 	TAILQ_INIT(&pend);
 	RB_FOREACH(dir0, folder_tree, &_this->monitors) {
@@ -2550,8 +2581,9 @@ mailestd_monitor_schedule(struct mailestd *_this, struct timespec *wait)
 				/* may scheduled again */
 				pends++;
 			} else {
-				mailestd_log(LOG_INFO, "Start gathering %s "
-				    "by monitor", dir0->path);
+				mailestd_log(LOG_INFO, "Gathering %s by "
+				    "monitor", mailestd_folder_name(_this,
+				    dir0->path, buf, sizeof(buf)));
 				mailestd_schedule_gather(_this, dir0->path);
 			}
 			if (dir0->fd <= 0) {
@@ -2935,6 +2967,16 @@ valid_msgid(const char *str)
 	}
 
 	return ((*str == '>')? true : false);
+}
+
+static bool
+is_parent_dir(const char *dirp, const char *dir)
+{
+	int	ldirp;
+
+	ldirp = strlen(dirp);
+	return ((strncmp(dirp, dir, ldirp) == 0 && dir[ldirp] == '/')
+	    ? true : false);
 }
 
 RB_GENERATE_STATIC(rfc822_tree, rfc822, tree, rfc822_compar);

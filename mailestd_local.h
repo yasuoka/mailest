@@ -217,6 +217,7 @@ struct gather {
 	u_int			 dels_done;
 	u_int			 folders_done;
 	char			 errmsg[80];
+	char			 target[40];
 	TAILQ_ENTRY(gather)	 queue;
 };
 
@@ -260,6 +261,9 @@ static void	 mailestc_on_ctl_event(int, short, void *);
 static void	 mailestc_reset_ctl_event(struct mailestd *);
 static void	 mailestd_get_all_folders(struct mailestd *,
 		    struct folder_tree *);
+static const char *
+		 mailestd_folder_name(struct mailestd *, const char *, char *,
+		    int);
 
 static ESTDB	*mailestd_db_open_rd(struct mailestd *);
 static ESTDB	*mailestd_db_open_wr(struct mailestd *);
