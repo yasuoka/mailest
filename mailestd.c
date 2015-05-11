@@ -781,7 +781,7 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 	paths[1] = NULL;
 	lrdir = strlen(rdir);
 
-	if ((fts = fts_open(paths, FTS_LOGICAL, NULL)) == NULL) {
+	if ((fts = fts_open(paths, FTS_LOGICAL | FTS_NOCHDIR, NULL)) == NULL) {
 		mailestd_log(LOG_ERR, "fts_open(%s): %m", folder);
 		goto out;
 	}

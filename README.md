@@ -89,6 +89,7 @@ ChangeLog
 0.9.11
 
 - 2015-05-11: yasuoka
+  - Fix not to change current working directory.
   - Fix: invalid memory access in mailestd_db_smew().
 
 0.9.10
