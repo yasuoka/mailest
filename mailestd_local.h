@@ -73,24 +73,24 @@ struct mailestd {
 	int			  rfc822_ntask;
 	struct task_worker	  dbworker;
 	struct task_worker	  mainworker;
-	struct task_worker	  dirmonworker;
+	struct task_worker	  monitorworker;
 	struct task_worker	 *workers[4];
 	struct gather_queue	  gathers;
 	struct task_queue	  gather_pendings;
 
-	bool			  dirmon;
-	struct timespec		  dirmon_delay;
+	bool			  monitor;
+	struct timespec		  monitor_delay;
 #ifdef DIRMON_INOTIFY
-	int			  dirmon_in;
-	struct event		  dirmon_inev;
-	struct event		  dirmon_intimerev;
+	int			  monitor_in;
+	struct event		  monitor_inev;
+	struct event		  monitor_intimerev;
 #endif
 #ifdef DIRMON_KQ
-	int			  dirmon_kq;
-	struct kevent		 *dirmon_kev;
-	int			  dirmon_kev_siz;
+	int			  monitor_kq;
+	struct kevent		 *monitor_kev;
+	int			  monitor_kev_siz;
 #endif
-	struct folder_tree	  dirmons;
+	struct folder_tree	  monitors;
 
 	int			  sock_ctl;
 	struct event		  evsock_ctl;
@@ -123,7 +123,7 @@ enum MAILESTD_TASK {
 	MAILESTD_TASK_RFC822_DRAFT,
 	MAILESTD_TASK_RFC822_PUTDB,
 	MAILESTD_TASK_RFC822_DELDB,
-	MAILESTD_TASK_DIRMON
+	MAILESTD_TASK_MONITOR_FOLDER
 };
 
 struct task {
@@ -150,7 +150,7 @@ struct task_gather {
 	char			 folder[PATH_MAX];
 };
 
-struct task_dirmon {
+struct task_monitor {
 	uint64_t		 id;
 	enum MAILESTD_TASK	 type;
 	TAILQ_ENTRY(task)	 queue;
@@ -291,7 +291,7 @@ static uint64_t	 mailestd_schedule_inform(struct mailestd *, uint64_t,
 		    u_char *, size_t);
 static void	 mailestd_schedule_message_all(struct mailestd *,
 		    enum MAILESTD_TASK);
-static uint64_t	 mailestd_schedule_dirmon(struct mailestd *, const char *);
+static uint64_t	 mailestd_schedule_monitor(struct mailestd *, const char *);
 
 static void	 task_worker_init(struct task_worker *, struct mailestd *);
 static void	 task_worker_start(struct task_worker *);
@@ -312,16 +312,16 @@ static void	 mailestc_send_message(struct mailestc *, u_char *, size_t);
 static void	 mailestc_task_inform(struct mailestc *, uint64_t, u_char *,
 		    size_t);
 
-static void	 mailestd_dirmon_init(struct mailestd *);
-static void	 mailestd_dirmon_start(struct mailestd *);
-static void	 mailestd_dirmon_run(struct mailestd *);
-static void	 mailestd_dirmon_fini(struct mailestd *);
+static void	 mailestd_monitor_init(struct mailestd *);
+static void	 mailestd_monitor_start(struct mailestd *);
+static void	 mailestd_monitor_run(struct mailestd *);
+static void	 mailestd_monitor_fini(struct mailestd *);
 #ifdef DIRMON_INOTIFY
-static void	 mailestd_dirmon_on_inotify(int, short, void *);
+static void	 mailestd_monitor_on_inotify(int, short, void *);
 #endif
-static void	 mailestd_dirmon_on_event(struct mailestd *);
-static void	 mailestd_dirmon_monitor(struct mailestd *, const char *);
-static int	 mailestd_dirmon_schedule(struct mailestd *,
+static void	 mailestd_monitor_on_event(struct mailestd *);
+static void	 mailestd_monitor_folder(struct mailestd *, const char *);
+static int	 mailestd_monitor_schedule(struct mailestd *,
 		    struct timespec *);
 
 static void	 mailestd_log_init(void);

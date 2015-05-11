@@ -16,10 +16,10 @@
 #include "compat.h"
 
 #include <sys/types.h>
-#ifdef DIRMON_KQUEUE
+#ifdef MONITOR_KQUEUE
 #include <sys/event.h>
 #endif
-#ifdef DIRMON_INOTIFY
+#ifdef MONITOR_INOTIFY
 #include <sys/inotify.h>
 #endif
 #include <sys/queue.h>
@@ -235,9 +235,9 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 		_this->folder = conf->folders;
 		conf->folders = NULL;
 	}
-	_this->dirmon = conf->monitor;
-	_this->dirmon_delay.tv_sec = conf->monitor_delay / 1000;
-	_this->dirmon_delay.tv_nsec = (conf->monitor_delay % 1000) * 1000000UL;
+	_this->monitor = conf->monitor;
+	_this->monitor_delay.tv_sec = conf->monitor_delay / 1000;
+	_this->monitor_delay.tv_nsec = (conf->monitor_delay % 1000) * 1000000UL;
 
 	for (i = 0; suffix != NULL && !isnull(suffix[i]); i++)
 		/* nothing */;
@@ -306,12 +306,12 @@ mailestd_start(struct mailestd *_this, bool fg)
 		task = xcalloc(1, sizeof(struct task_rfc822));
 		TAILQ_INSERT_TAIL(&_this->rfc822_tasks, task, queue);
 	}
-	mailestd_dirmon_init(_this);
+	mailestd_monitor_init(_this);
 
 	_this->workers[ntask++] = &_this->mainworker;
 	_this->workers[ntask++] = &_this->dbworker;
-	if (_this->dirmon)
-		_this->workers[ntask++] = &_this->dirmonworker;
+	if (_this->monitor)
+		_this->workers[ntask++] = &_this->monitorworker;
 	_this->workers[ntask++] = NULL;
 	for (i = 0; _this->workers[i] != NULL; i++) {
 		task_worker_init(_this->workers[i], _this);
@@ -322,8 +322,8 @@ mailestd_start(struct mailestd *_this, bool fg)
 #ifdef MAILESTD_MT
 	task_worker_start(&_this->mainworker);	/* this thread */
 	task_worker_run(&_this->dbworker);	/* another thread */
-	if (_this->dirmon)
-		mailestd_dirmon_run(_this);	/* another thread */
+	if (_this->monitor)
+		mailestd_monitor_run(_this);	/* another thread */
 #endif
 
 	if (listen(_this->sock_ctl, 5) == -1)
@@ -403,7 +403,7 @@ mailestd_fini(struct mailestd *_this)
 		RB_REMOVE(rfc822_tree, &_this->root, msge);
 		rfc822_free(msge);
 	}
-	mailestd_dirmon_fini(_this);
+	mailestd_monitor_fini(_this);
 
 	if (_this->suffix != NULL) {
 		for (i = 0; !isnull(_this->suffix[i]); i++)
@@ -739,12 +739,12 @@ mailestd_db_sync(struct mailestd *_this)
 		free(tske);
 	}
 	_this->db_sync_time = _this->curr_time;
-	if (_this->dirmon) {
+	if (_this->monitor) {
 		RB_INIT(&folders);
 		mailestd_get_all_folders(_this, &folders);
 		RB_FOREACH_SAFE(flde, folder_tree, &folders, fldt) {
 			RB_REMOVE(folder_tree, &folders, flde);
-			mailestd_schedule_dirmon(_this, flde->path);
+			mailestd_schedule_monitor(_this, flde->path);
 			folder_free(flde);
 		}
 	}
@@ -832,8 +832,8 @@ out:
 	}
 	RB_FOREACH_SAFE(flde, folder_tree, &folders, fldt) {
 		RB_REMOVE(folder_tree, &folders, flde);
-		if (_this->dirmon)
-			mailestd_schedule_dirmon(_this, flde->path);
+		if (_this->monitor)
+			mailestd_schedule_monitor(_this, flde->path);
 		folder_free(flde);
 	}
 
@@ -910,7 +910,7 @@ mailestd_fts(struct mailestd *_this, struct gather *ctx, time_t curr_time,
 		needupdate = false;
 		if (ftse == NULL)
 			break;
-		if (_this->dirmon && ftse->fts_info == FTS_D) {
+		if (_this->monitor && ftse->fts_info == FTS_D) {
 			fld = xcalloc(1, sizeof(struct folder));
 			fld->path = xstrdup(ftse->fts_path);
 			RB_INSERT(folder_tree, folders, fld);
@@ -1437,8 +1437,8 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 				folder_free(flde);
 			}
 		}
-		if (_this->dirmon)
-			mailestd_schedule_dirmon(_this, _this->maildir);
+		if (_this->monitor)
+			mailestd_schedule_monitor(_this, _this->maildir);
 	}
 	if (ctx->folders == 0) {
 		strlcpy(ctx->errmsg, "grabing folders", sizeof(ctx->errmsg));
@@ -1584,14 +1584,14 @@ mailestd_schedule_message_all(struct mailestd *_this,
 }
 
 static uint64_t
-mailestd_schedule_dirmon(struct mailestd *_this, const char *path)
+mailestd_schedule_monitor(struct mailestd *_this, const char *path)
 {
-	struct task_dirmon	*task;
+	struct task_monitor	*task;
 
-	if (!_this->dirmon)
+	if (!_this->monitor)
 		return (0);
-	task = xcalloc(1, sizeof(struct task_dirmon));
-	task->type = MAILESTD_TASK_DIRMON;
+	task = xcalloc(1, sizeof(struct task_monitor));
+	task->type = MAILESTD_TASK_MONITOR_FOLDER;
 	task->highprio = true;
 	if (path[0] == '/')
 		strlcpy(task->path, path, sizeof(task->path));
@@ -1601,7 +1601,7 @@ mailestd_schedule_dirmon(struct mailestd *_this, const char *path)
 		strlcat(task->path, path, sizeof(task->path));
 	}
 
-	return (task_worker_add_task(&_this->dirmonworker,
+	return (task_worker_add_task(&_this->monitorworker,
 	    (struct task *)task));
 }
 
@@ -1828,9 +1828,9 @@ task_worker_on_proc(struct task_worker *_this)
 			}
 			break;
 
-		case MAILESTD_TASK_DIRMON:
-			mailestd_dirmon_monitor(mailestd,
-			    ((struct task_dirmon *)task)->path);
+		case MAILESTD_TASK_MONITOR_FOLDER:
+			mailestd_monitor_folder(mailestd,
+			    ((struct task_monitor *)task)->path);
 			break;
 
 		case MAILESTD_TASK_NONE:
@@ -2209,61 +2209,61 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
  * Monitoring
  ***********************************************************************/
 static void
-mailestd_dirmon_init(struct mailestd *_this)
+mailestd_monitor_init(struct mailestd *_this)
 {
-#ifdef DIRMON_KQUEUE
-	if ((_this->dirmon_kq = kqueue()) == -1)
+#ifdef MONITOR_KQUEUE
+	if ((_this->monitor_kq = kqueue()) == -1)
 		err(EX_OSERR, "kqueue");
-	_this->dirmon_kev = xcalloc(1, sizeof(struct kevent));
-	_this->dirmon_kev_siz = 1;
+	_this->monitor_kev = xcalloc(1, sizeof(struct kevent));
+	_this->monitor_kev_siz = 1;
 #endif
-	RB_INIT(&_this->dirmons);
+	RB_INIT(&_this->monitors);
 }
 
 #ifdef MAILESTD_MT
 static void *
-mailestd_dirmon_start0(void *ctx)
+mailestd_monitor_start0(void *ctx)
 {
-	mailestd_dirmon_start(ctx);
+	mailestd_monitor_start(ctx);
 	return (NULL);
 }
 #endif
 
 static void
-mailestd_dirmon_run(struct mailestd *_this)
+mailestd_monitor_run(struct mailestd *_this)
 {
-#ifdef DIRMON_INOTIFY
-	_this->dirmon_in = inotify_init();	/* HERE? */
+#ifdef MONITOR_INOTIFY
+	_this->monitor_in = inotify_init();	/* HERE? */
 #endif
 #ifdef MAILESTD_MT
-	_thread_create(&_this->dirmonworker.thread, NULL,
-	    mailestd_dirmon_start0, _this);
+	_thread_create(&_this->monitorworker.thread, NULL,
+	    mailestd_monitor_start0, _this);
 #endif
 }
 
-static void mailestd_dirmon_stop(struct mailestd *);
+static void mailestd_monitor_stop(struct mailestd *);
 static void
-mailestd_dirmon_start(struct mailestd *_this)
+mailestd_monitor_start(struct mailestd *_this)
 {
-	MAILESTD_ASSERT(_this->dirmon);
+	MAILESTD_ASSERT(_this->monitor);
 
-#ifdef DIRMON_INOTIFY
+#ifdef MONITOR_INOTIFY
 	EVENT_INIT();
-	task_worker_start(&_this->dirmonworker);
-	EVENT_SET(&_this->dirmon_inev, _this->dirmon_in, EV_READ | EV_PERSIST,
-	    mailestd_dirmon_on_inotify, _this);
-	event_add(&_this->dirmon_inev, NULL);
-	EVENT_SET(&_this->dirmon_intimerev, -1, EV_TIMEOUT,
-	    mailestd_dirmon_on_inotify, _this);
+	task_worker_start(&_this->monitorworker);
+	EVENT_SET(&_this->monitor_inev, _this->monitor_in, EV_READ | EV_PERSIST,
+	    mailestd_monitor_on_inotify, _this);
+	event_add(&_this->monitor_inev, NULL);
+	EVENT_SET(&_this->monitor_intimerev, -1, EV_TIMEOUT,
+	    mailestd_monitor_on_inotify, _this);
 	for (;;) {
 		if (EVENT_LOOP(EVLOOP_ONCE) != 0)
 			break;
-		if (_this->dirmonworker.sock < 0)
-			mailestd_dirmon_stop(_this);
+		if (_this->monitorworker.sock < 0)
+			mailestd_monitor_stop(_this);
 	}
 	EVENT_BASE_FREE();
 #endif
-#ifdef DIRMON_KQUEUE
+#ifdef MONITOR_KQUEUE
 	/* libevent can't handle kquque inode events, so treat them directly */
     {
 	int		 i, ret, nkev, sock;
@@ -2271,30 +2271,30 @@ mailestd_dirmon_start(struct mailestd *_this)
 	struct folder	*flde;
 	struct timespec	*ts, ts0;
 
-	_this->dirmonworker.thread = _thread_self();
+	_this->monitorworker.thread = _thread_self();
 	for (;;) {
 		ts = NULL;
 		nkev = 0;
-		if ((sock = _this->dirmonworker.sock) < 0)
-			mailestd_dirmon_stop(_this);
+		if ((sock = _this->monitorworker.sock) < 0)
+			mailestd_monitor_stop(_this);
 		else {
-			EV_SET(&_this->dirmon_kev[nkev], sock,
+			EV_SET(&_this->monitor_kev[nkev], sock,
 			    EVFILT_READ, EV_ADD, NOTE_EOF, 0, NULL);
 			nkev++;
-			if (mailestd_dirmon_schedule(_this, &ts0) > 0)
+			if (mailestd_monitor_schedule(_this, &ts0) > 0)
 				ts = &ts0;
 		}
 
-		RB_FOREACH(flde, folder_tree, &_this->dirmons) {
+		RB_FOREACH(flde, folder_tree, &_this->monitors) {
 			if (flde->fd >= 0) {
-				if (_this->dirmon_kev_siz <= nkev) {
-					_this->dirmon_kev_siz++;
-					_this->dirmon_kev = xreallocarray(
-					    _this->dirmon_kev,
-					    _this->dirmon_kev_siz,
+				if (_this->monitor_kev_siz <= nkev) {
+					_this->monitor_kev_siz++;
+					_this->monitor_kev = xreallocarray(
+					    _this->monitor_kev,
+					    _this->monitor_kev_siz,
 					    sizeof(struct kevent));
 				}
-				EV_SET(&_this->dirmon_kev[nkev], flde->fd,
+				EV_SET(&_this->monitor_kev[nkev], flde->fd,
 				    EVFILT_VNODE, EV_ADD | EV_ONESHOT,
 				    NOTE_WRITE | NOTE_DELETE |
 				    NOTE_RENAME | NOTE_REVOKE, 0, flde);
@@ -2304,7 +2304,7 @@ mailestd_dirmon_start(struct mailestd *_this)
 		if (nkev == 0)
 			break;
 		memset(kev, 0, sizeof(kev));
-		if ((ret = kevent(_this->dirmon_kq, _this->dirmon_kev, nkev,
+		if ((ret = kevent(_this->monitor_kq, _this->monitor_kev, nkev,
 		    kev, nitems(kev), ts)) == -1) {
 			if (errno == EINTR || errno == EAGAIN)
 				continue;
@@ -2314,7 +2314,7 @@ mailestd_dirmon_start(struct mailestd *_this)
 		for (i = 0; i < ret; i++) {
 			if (kev[i].ident == sock)
 				task_worker_on_itc_event(kev[i].ident,
-				    EV_READ, &_this->dirmonworker);
+				    EV_READ, &_this->monitorworker);
 			else if (kev[i].udata != NULL) {
 				flde = kev[i].udata;
 				if ((kev[i].fflags & (NOTE_DELETE |
@@ -2331,9 +2331,9 @@ mailestd_dirmon_start(struct mailestd *_this)
 #endif
 }
 
-#ifdef DIRMON_INOTIFY
+#ifdef MONITOR_INOTIFY
 static void
-mailestd_dirmon_on_inotify(int fd, short evmask, void *ctx)
+mailestd_monitor_on_inotify(int fd, short evmask, void *ctx)
 {
 	struct inotify_event	*inev;
 	u_char			 buf[1024];
@@ -2345,82 +2345,82 @@ mailestd_dirmon_on_inotify(int fd, short evmask, void *ctx)
 
 mailestd_log(LOG_INFO, "%s: ", __func__);
 	if (evmask & EV_READ) {
-		if ((siz = read(_this->dirmon_in, buf, sizeof(buf))) <= 0){
+		if ((siz = read(_this->monitor_in, buf, sizeof(buf))) <= 0){
 			if (siz != 0) {
 				if (errno == EAGAIN || errno == EINTR)
 					return;
 				mailestd_log(LOG_ERR, "%s: read: %m", __func__);
 			}
-			mailestd_dirmon_stop(_this);
+			mailestd_monitor_stop(_this);
 		}
 		inev = (struct inotify_event *)buf;
-		RB_FOREACH(flde, folder_tree, &_this->dirmons) {
+		RB_FOREACH(flde, folder_tree, &_this->monitors) {
 			if (flde->fd == inev->wd)
 				break;
 		}
 		MAILESTD_ASSERT(flde != NULL);
 		if ((inev->mask & (IN_DELETE_SELF | IN_MOVE_SELF)) != 0) {
-			inotify_rm_watch(_this->dirmon_in, flde->fd);
+			inotify_rm_watch(_this->monitor_in, flde->fd);
 			close(flde->fd);
 			flde->fd = -1;
 		}
 		clock_gettime(CLOCK_MONOTONIC, &flde->mtime);
 	}
-	if (mailestd_dirmon_schedule(_this, &ts0) > 0)
+	if (mailestd_monitor_schedule(_this, &ts0) > 0)
 		ts = &ts0;
 	if (ts != NULL) {
 		TIMESPEC_TO_TIMEVAL(&tv, ts);
-		event_add(&_this->dirmon_intimerev, &tv);
+		event_add(&_this->monitor_intimerev, &tv);
 	}
 }
 #endif
 
 static void
-mailestd_dirmon_stop(struct mailestd *_this)
+mailestd_monitor_stop(struct mailestd *_this)
 {
 	struct folder	*flde, *fldt;
 
-	RB_FOREACH_SAFE(flde, folder_tree, &_this->dirmons, fldt) {
-		RB_REMOVE(folder_tree, &_this->dirmons, flde);
-#ifdef DIRMON_INOTIFY
-		inotify_rm_watch(_this->dirmon_in, flde->fd);
+	RB_FOREACH_SAFE(flde, folder_tree, &_this->monitors, fldt) {
+		RB_REMOVE(folder_tree, &_this->monitors, flde);
+#ifdef MONITOR_INOTIFY
+		inotify_rm_watch(_this->monitor_in, flde->fd);
 #endif
 		if (flde->fd >= 0)
 			close(flde->fd);
 		flde->fd = -1;
 	}
-#ifdef DIRMON_INOTIFY
-	if (event_pending(&_this->dirmon_intimerev, EV_TIMEOUT, NULL))
-		event_del(&_this->dirmon_intimerev);
-	close(_this->dirmon_in);
-	event_del(&_this->dirmon_inev);
+#ifdef MONITOR_INOTIFY
+	if (event_pending(&_this->monitor_intimerev, EV_TIMEOUT, NULL))
+		event_del(&_this->monitor_intimerev);
+	close(_this->monitor_in);
+	event_del(&_this->monitor_inev);
 #endif
 }
 
 static void
-mailestd_dirmon_fini(struct mailestd *_this)
+mailestd_monitor_fini(struct mailestd *_this)
 {
-#ifdef DIRMON_KQUEUE
-	free(_this->dirmon_kev);
+#ifdef MONITOR_KQUEUE
+	free(_this->monitor_kev);
 #endif
 }
 
 static void
-mailestd_dirmon_monitor(struct mailestd *_this, const char *dirpath)
+mailestd_monitor_folder(struct mailestd *_this, const char *dirpath)
 {
 	int		 fd = -1;
 	struct folder	*fld, fld0;
 
-	MAILESTD_ASSERT(_thread_self() == _this->dirmonworker.thread);
+	MAILESTD_ASSERT(_thread_self() == _this->monitorworker.thread);
 	fld0.path = (char *)dirpath;
-	if ((fld = RB_FIND(folder_tree, &_this->dirmons, &fld0)) != NULL)
+	if ((fld = RB_FIND(folder_tree, &_this->monitors, &fld0)) != NULL)
 		return;
-#ifdef DIRMON_KQUEUE
+#ifdef MONITOR_KQUEUE
 	if ((fd = open(dirpath, O_RDONLY)) < 0)
 		return;
 #endif
-#ifdef DIRMON_INOTIFY
-	if ((fd = inotify_add_watch(_this->dirmon_in,
+#ifdef MONITOR_INOTIFY
+	if ((fd = inotify_add_watch(_this->monitor_in,
 	    dirpath, IN_CREATE | IN_DELETE | IN_DELETE_SELF |
 	    IN_MOVED_FROM | IN_MOVED_TO | IN_MOVE_SELF)) == -1) {
 		mailestd_log(LOG_ERR, "%s() inotify_add_watch: %m", __func__);
@@ -2429,7 +2429,7 @@ mailestd_dirmon_monitor(struct mailestd *_this, const char *dirpath)
 	fld = xcalloc(1, sizeof(struct folder));
 	fld->fd = fd;
 	fld->path = xstrdup(dirpath);
-	RB_INSERT(folder_tree, &_this->dirmons, fld);
+	RB_INSERT(folder_tree, &_this->monitors, fld);
 	mailestd_log(LOG_DEBUG, "Start monitoring %s", dirpath);
 }
 
@@ -2444,7 +2444,7 @@ is_parent_dir(const char *dirp, const char *dir)
 }
 
 static void
-mailestd_dirmon_maildir_changed(struct mailestd *_this)
+mailestd_monitor_maildir_changed(struct mailestd *_this)
 {
 	int		 lmaildir;
 	DIR		*dp;
@@ -2467,12 +2467,12 @@ mailestd_dirmon_maildir_changed(struct mailestd *_this)
 			continue;
 		strlcpy(path + lmaildir, de->d_name, sizeof(path) - lmaildir);
 		fld0.path = path;
-		if ((fld = RB_FIND(folder_tree, &_this->dirmons, &fld0))
+		if ((fld = RB_FIND(folder_tree, &_this->monitors, &fld0))
 		    != NULL)
 			continue;
 		/* new folder */
-		mailestd_dirmon_monitor(_this, path);
-		fld = RB_FIND(folder_tree, &_this->dirmons, &fld0);
+		mailestd_monitor_folder(_this, path);
+		fld = RB_FIND(folder_tree, &_this->monitors, &fld0);
 		MAILESTD_ASSERT(fld != NULL);
 		clock_gettime(CLOCK_MONOTONIC, &fld->mtime);
 	}
@@ -2480,7 +2480,7 @@ mailestd_dirmon_maildir_changed(struct mailestd *_this)
 }
 
 static int
-mailestd_dirmon_schedule(struct mailestd *_this, struct timespec *wait)
+mailestd_monitor_schedule(struct mailestd *_this, struct timespec *wait)
 {
 	int			 pends;
 	struct timespec		 currtime, diffts, maxts;
@@ -2492,7 +2492,7 @@ mailestd_dirmon_schedule(struct mailestd *_this, struct timespec *wait)
 	TAILQ_HEAD(, dirpend)	 pend;
 
 	TAILQ_INIT(&pend);
-	RB_FOREACH(dir0, folder_tree, &_this->dirmons) {
+	RB_FOREACH(dir0, folder_tree, &_this->monitors) {
 		if (dir0->mtime.tv_sec == 0 && dir0->mtime.tv_nsec == 0)
 			continue;
 		if (strcmp(dir0->path, _this->maildir) == 0) {
@@ -2538,13 +2538,13 @@ mailestd_dirmon_schedule(struct mailestd *_this, struct timespec *wait)
 		dir0 = pnde->dir;
 		free(pnde);
 		timespecsub(&currtime, &dir0->mtime, &diffts);
-		if (timespeccmp(&diffts, &_this->dirmon_delay, >=)) {
+		if (timespeccmp(&diffts, &_this->monitor_delay, >=)) {
 			MAILESTD_DBG((LOG_DEBUG, "FIRE %lld.%09lld %s",
 			    (long long)diffts.tv_sec, (long long)
 			    diffts.tv_nsec, dir0->path));
 			timespecclear(&dir0->mtime);
 			if (strcmp(dir0->path, _this->maildir) == 0) {
-				mailestd_dirmon_maildir_changed(_this);
+				mailestd_monitor_maildir_changed(_this);
 				/* may scheduled again */
 				pends++;
 			} else {
@@ -2555,7 +2555,7 @@ mailestd_dirmon_schedule(struct mailestd *_this, struct timespec *wait)
 			if (dir0->fd <= 0) {
 				mailestd_log(LOG_DEBUG,
 				    "Stop monitoring %s", dir0->path);
-				RB_REMOVE(folder_tree, &_this->dirmons, dir0);
+				RB_REMOVE(folder_tree, &_this->monitors, dir0);
 				folder_free(dir0);
 			}
 		} else if (timespeccmp(&diffts, &maxts, >)) {
@@ -2567,7 +2567,7 @@ mailestd_dirmon_schedule(struct mailestd *_this, struct timespec *wait)
 		}
 	}
 	if (pends > 0)
-		timespecsub(&_this->dirmon_delay, &maxts, wait);
+		timespecsub(&_this->monitor_delay, &maxts, wait);
 
 	return (pends);
 }
