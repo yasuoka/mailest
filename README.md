@@ -48,16 +48,16 @@ How to start
   (`~/Mail/casket`)
 
   - Since "mailestd" can work with the old database, so OK to skip deleting
-    `~/Mail/casket`, but remark that 'V' will not work against the mails
-    which are indexed by `mewest`.   To make 'V' work against them, delete
+    `~/Mail/casket`, but remark that `V` will not work against the mails
+    which are indexed by `mewest`.   To make `V` work against them, delete
     the database in advance.
 
-+ Add the below line to .mew.el to let Mew use "Hyper Estrairer" for
++ Add the below line to `.mew.el` to let Mew use "Hyper Estrairer" for
   search.
 
       ((setq mew-search-method 'est)
 
-+ Add the below lines to ~/.emacs use use the "mailest" instead of
++ Add the below lines to `~/.emacs` use use the "mailest" instead of
   existing "mewest".
 
       (defvar mew-prog-est        "mew-mailest")
@@ -74,13 +74,21 @@ How to start
 Usage
 -----
 
-"mailest" monitors the changes on:
+- "mailest" daemon will start by the following operations on Mew
+  - Search or virutal folder operations (`V`, `k/` and so on)
+  - Making index operations (`km` or `kM`)
+- After the daemon starts, it  monitors the changes on the folders
+  which has index already.
+- After `kM`, "mailest" will start monitoring for newly created folders
+  as well.  Otherwise `km` is required for monitoring new folders.
+- Other
+  - to stop the daemon: `mailestctl stop`
+  - to watch the behaviour of the daemon: `tail -f ~/Mail/mailestd.log`
+  - to suspend/resume indexing `mailestctl suspend` or `mailestctl resume`
+  - if you want to stop monitoring the folders, add `monitor disable`
+    to `~/Mail/mailestd.conf`.
 
-- the folder which is already indexed
-- the folder which you did `km` on
-- all folders below `~/Mail` if you did `kM`
-
-Also see (man pages)[#man-pages].
+See (man pages)[#man-pages] also.
 
 
 ChangeLog
@@ -183,7 +191,7 @@ TODO
 - Automatically create a backup for the database when closing the
   writable DB connection.  Also recover the database automatically
   when it's broken.
-- Greate a tool which add x-mew-parid attribute for mails which doesn't
+- Create a tool which add x-mew-parid attribute for mails which doesn't
   have any In-Reply-To or Reference header by guessing with Subject and
   Date.
 
