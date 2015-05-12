@@ -9,7 +9,7 @@ mailest - search mail messages with Hyper Estrairer
   become avaiable very soon.
 
 - You don't need to start indexing implicitly.
-  - "mailestd" daemon (mailestd) does it automatically.  It monitors
+  - "mailest" daemon (mailestd) does it automatically.  It monitors
     changes on the mail folders by kqueue or inotify.
 
 
