@@ -28,19 +28,19 @@ MAILESTD.CONF(5)</td>
 </tbody>
 </table>
 <div class="section">
-<h1 id="x4e414d45">NAME</h1> <b class="name">mailestd.conf</b> &#8212; <span class="desc"><a class="link-man">mailestd(8)</a> configuration file</span></div>
+<h1 id="x4e414d45">NAME</h1> <b class="name">mailestd.conf</b> &#8212; <span class="desc"><a class="link-man" href="mailestd.8.html">mailestd(8)</a> configuration file</span></div>
 <div class="section">
-<h1 id="x4445534352495054494f4e">DESCRIPTION</h1> <b class="name">mailestd.conf</b> is the configuration file for the <a class="link-man">mailestd(8)</a> daemon.<div class="spacer">
+<h1 id="x4445534352495054494f4e">DESCRIPTION</h1> <b class="name">mailestd.conf</b> is the configuration file for the <a class="link-man" href="mailestd.8.html">mailestd(8)</a> daemon.<div class="spacer">
 </div>
 The following options can be set:<dl style="margin-top: 0.00em;margin-bottom: 0.00em;" class="list list-tag">
 <dt class="list-tag" style="margin-top: 1.00em;">
 <b class="cmd">maildir</b> <i class="arg">directory</i></dt>
 <dd class="list-tag" style="margin-left: 6.00ex;">
-The base directory instead of the default <i class="file">${HOME}/Mail</i>. <a class="link-man">mailestd(8)</a> creates indexes for the mail message in the folders under this directory and uses some files under from this directory.</dd>
+The base directory instead of the default <i class="file">${HOME}/Mail</i>. <a class="link-man" href="mailestd.8.html">mailestd(8)</a> creates indexes for the mail message in the folders under this directory and uses some files under from this directory.</dd>
 <dt class="list-tag" style="margin-top: 1.00em;">
 <b class="cmd">socket</b> <i class="arg">path</i></dt>
 <dd class="list-tag" style="margin-left: 6.00ex;">
-The <span class="unix">UNIX</span>-domain socket for communication from <a class="link-man">mailectl(1)</a>. As the default relateve path <i class="file">.mailestd.sock</i> from the <i class="arg">maildir</i> is used.</dd>
+The <span class="unix">UNIX</span>-domain socket for communication from <a class="link-man" href="mailectl.1.html">mailectl(1)</a>. As the default relateve path <i class="file">.mailestd.sock</i> from the <i class="arg">maildir</i> is used.</dd>
 <dt class="list-tag" style="margin-top: 1.00em;">
 <b class="cmd">tasks</b> <i class="arg">number</i></dt>
 <dd class="list-tag" style="margin-left: 6.00ex;">
@@ -56,7 +56,7 @@ The file name suffixes of the mail messages gathered for indexing. The default i
 <dt class="list-tag" style="margin-top: 1.00em;">
 <b class="cmd">folders</b> <i class="arg">folder ...</i></dt>
 <dd class="list-tag" style="margin-left: 6.00ex;">
-The folder name patterns <a class="link-man">emailestd(8)</a> creates index for. An shell pattern (&#8220;openbsd-*&#8221; for example) is usable. If the <i class="arg">folder</i> starts with &#8220;!&#8221;, matched folders are ignored. Folders not matched any are target for indexing. The default is &#8220;!trash !casket !casket_replica&#8221;.</dd>
+The folder name patterns <a class="link-man" href="emailestd.8.html">emailestd(8)</a> creates index for. An shell pattern (&#8220;openbsd-*&#8221; for example) is usable. If the <i class="arg">folder</i> starts with &#8220;!&#8221;, matched folders are ignored. Folders not matched any are target for indexing. The default is &#8220;!trash !casket !casket_replica&#8221;.</dd>
 <dt class="list-tag" style="margin-top: 1.00em;">
 <b class="cmd">log</b> <b class="cmd">path</b> <i class="arg">path</i></dt>
 <dd class="list-tag" style="margin-left: 6.00ex;">
@@ -86,7 +86,7 @@ Additional configuration files can be included with the <b class="cmd">include</
 include &quot;/etc/mailestd.conf&quot;</pre>
 </div>
 <div class="section">
-<h1 id="x53454520414c534f">SEE ALSO</h1> <a class="link-man">mailestd(8)</a></div>
+<h1 id="x53454520414c534f">SEE ALSO</h1> <a class="link-man" href="mailestd.8.html">mailestd(8)</a></div>
 <div class="section">
 <h1 id="x46494c4553">FILES</h1><dl style="margin-top: 0.00em;margin-bottom: 0.00em;" class="list list-tag">
 <dt class="list-tag" style="margin-top: 0.00em;">
