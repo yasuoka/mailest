@@ -1,8 +1,9 @@
 mailest - search mail messages with Hyper Estrairer
 ===================================================
 
-"mailest" provides a search backend and id index database for Mew using
-[Hyper Estraier](fallabs.com/hyperestraier/index.html).
+"mailest" provides a search backend and id index database for
+[Mew](http://www.mew.org/) using
+[Hyper Estraier](http://fallabs.com/hyperestraier/index.html).
 
 - `V`, `k/` or other related commands for newly received/refiled mails
   become avaiable very soon.
@@ -88,7 +89,7 @@ Usage
   - if you want to stop monitoring the folders, add `monitor disable`
     to `~/Mail/mailestd.conf`.
 
-See (man pages)[#man-pages] also.
+See [man pages](#man-pages) also.
 
 
 ChangeLog
@@ -163,8 +164,8 @@ ChangeLog
   -  Fix the results of "update" to be passed correctly.
   -  Support build on FreeBSD and NetBSD
 
-Man page
---------
+Man pages
+---------
 
 - [mailestctl(1)](http://yasuoka.github.io/mailest/mailestctl.1.html)
 - [mailestd(8)](http://yasuoka.github.io/mailest/mailestd.8.html)
