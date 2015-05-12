@@ -639,6 +639,8 @@ mailestd_db_add_msgid_index(struct mailestd *_this)
 		goto db_noent;
 	if ((db = mailestd_db_open_rd(_this)) == NULL)
 		return;
+	mailestd_log(LOG_INFO, "Opened database(%s) has %d docs",
+	    _this->dbpath, db->dnum);
 	if ((exprs = est_db_attr_index_exprs(db)) != NULL) {
 		for (i = 0; i < cblistnum(exprs); i++) {
 			if (!strncasecmp(ATTR_MSGID "=",
