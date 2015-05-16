@@ -95,6 +95,14 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
+0.9.13 (not yet)
+
+- 2015-05-16: yasuoka
+  - Add "guess-parid" configration option to find the parent message
+    for the messages which don't contain "In-Reply-To" or "Reference"
+    header by guessing with "Subject" and "Date".  Add the following
+    to `~/Mail/mailestd.conf`.
+
 0.9.12
 
 - 2015-05-12: yasuoka
