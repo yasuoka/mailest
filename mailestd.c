@@ -96,8 +96,6 @@ main(int argc, char *argv[])
 	bool			 noaction = false;
 	struct stat		 st;
 	extern char		*__progname;
-	rlim_t			 olim;
-	struct rlimit		 rl;
 
 	if (strcmp(__progname, "mailestctl") == 0)
 		return (mailestctl_main(argc, argv));
