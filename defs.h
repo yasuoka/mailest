@@ -42,4 +42,5 @@ struct mailestd_conf {
 	char	**folders;
 	int	  monitor;
 	long	  monitor_delay;	/* millisec */
+	int	  paridguess;
 };

@@ -100,8 +100,8 @@ typedef struct {
 %}
 
 %token	INCLUDE ERROR
-%token	COUNT DATABASE DEBUG DELAY DISABLE FOLDERS LEVEL LOG MAILDIR MONITOR
-%token	ROTATE PATH SOCKET SUFFIXES SIZE TASKS TRIMSIZE
+%token	COUNT DATABASE DEBUG DELAY DISABLE FOLDERS GUESSPARID LEVEL LOG
+%token	MAILDIR MONITOR ROTATE PATH SOCKET SUFFIXES SIZE TASKS TRIMSIZE
 %token	<v.string>	STRING
 %token  <v.number>	NUMBER
 %type	<v.strings>	strings
@@ -166,6 +166,10 @@ main		: MAILDIR STRING	{
 			conf->monitor = 1;
 		}
 		| MONITOR monitor_opts
+		;
+		| GUESSPARID {
+			conf->paridguess = 1;
+		}
 		;
 
 strings		: strings STRING	{
@@ -269,6 +273,7 @@ lookup(char *s)
 		{ "delay",		DELAY },
 		{ "disable",		DISABLE },
 		{ "folders",		FOLDERS },
+		{ "guess-parid",	GUESSPARID },
 		{ "include",		INCLUDE },
 		{ "level",		LEVEL },
 		{ "log",		LOG },

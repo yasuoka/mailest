@@ -92,6 +92,9 @@ struct mailestd {
 #endif
 	struct folder_tree	  monitors;
 
+	bool			  paridguess;
+	int			  paridnotdone;
+
 	int			  sock_ctl;
 	struct event		  evsock_ctl;
 	struct mailestc_queue	  ctls;
@@ -108,6 +111,7 @@ struct rfc822 {
 	TAILQ_ENTRY(rfc822)	 queue;
 	bool			 ontask;
 	uint64_t		 gather_id;	/* gather of the task */
+	bool			 pariddone;
 };
 
 enum MAILESTD_TASK {
@@ -123,6 +127,7 @@ enum MAILESTD_TASK {
 	MAILESTD_TASK_RFC822_DRAFT,
 	MAILESTD_TASK_RFC822_PUTDB,
 	MAILESTD_TASK_RFC822_DELDB,
+	MAILESTD_TASK_RFC822_GUESS,
 	MAILESTD_TASK_MONITOR_FOLDER
 };
 
@@ -280,6 +285,7 @@ static void	 mailestd_putdb(struct mailestd *, struct rfc822 *);
 static void	 mailestd_deldb(struct mailestd *, struct rfc822 *);
 static void	 mailestd_search(struct mailestd *, uint64_t,
 		    ESTCOND *, enum SEARCH_OUTFORM);
+static void	 mailestd_guess_parid(struct mailestd *);
 static void	 mailestd_db_informer(const char *, void *);
 static void	 mailestd_db_error(struct mailestd *);
 
@@ -296,6 +302,8 @@ static uint64_t	 mailestd_schedule_inform(struct mailestd *, uint64_t,
 static void	 mailestd_schedule_message_all(struct mailestd *,
 		    enum MAILESTD_TASK);
 static uint64_t	 mailestd_schedule_monitor(struct mailestd *, const char *);
+static uint64_t	 mailestd_schedule_guess_parid(struct mailestd *,
+		    struct rfc822 *);
 
 static void	 task_worker_init(struct task_worker *, struct mailestd *);
 static void	 task_worker_start(struct task_worker *);
@@ -346,9 +354,11 @@ static int	 unlimit_nofile(void);
 
 static int	 folder_compar(struct folder *, struct folder *);
 static void	 folder_free(struct folder *);
-static void	 estdoc_add_parid(ESTDOC *);
+static bool	 estdoc_add_parid(ESTDOC *);
 static bool	 valid_msgid(const char *);
 static bool	 is_parent_dir(const char *, const char *);
+static const char *
+		 skip_subject(const char *);
 
 #ifndef	nitems
 #define nitems(_n)	(sizeof((_n)) / sizeof((_n)[0]))

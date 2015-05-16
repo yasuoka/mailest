@@ -40,6 +40,8 @@ enum MAILESTCTL_CMD {
 
 #define	ATTR_MSGID	"message-id"
 #define	ATTR_PARID	"x-mew-parid"
+#define	ATTR_TITLE	"@title"
+#define	ATTR_CDATE	"@cdate"
 
 struct mailestctl {
 	enum MAILESTCTL_CMD	 command;

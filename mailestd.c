@@ -236,6 +236,7 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 	_this->monitor = conf->monitor;
 	_this->monitor_delay.tv_sec = conf->monitor_delay / 1000;
 	_this->monitor_delay.tv_nsec = (conf->monitor_delay % 1000) * 1000000UL;
+	_this->paridguess = (conf->paridguess)? true : false;
 
 	for (i = 0; suffix != NULL && !isnull(suffix[i]); i++)
 		/* nothing */;
@@ -630,7 +631,7 @@ mailestd_db_add_msgid_index(struct mailestd *_this)
 	int	 i;
 	CBLIST	*exprs;
 	ESTDB	*db;
-	bool	 msgid_found = false, parid_found = false;
+	bool	 msgid_found = false, parid_found = false, title_found = false;
 	struct stat	 st;
 
 	if (lstat(_this->dbpath, &st) == -1 && errno == ENOENT)
@@ -647,13 +648,16 @@ mailestd_db_add_msgid_index(struct mailestd *_this)
 			if (!strncasecmp(ATTR_PARID "=",
 			    cblistval(exprs, i, NULL), sizeof(ATTR_PARID)))
 				parid_found = true;
-			if (msgid_found && parid_found)
+			if (!strncasecmp(ATTR_PARID "=",
+			    cblistval(exprs, i, NULL), sizeof(ATTR_PARID)))
+				title_found = true;
+			if (msgid_found && parid_found && title_found)
 				break;
 		}
 		cblistclose(exprs);
 	}
 db_noent:
-	if (!msgid_found || !parid_found) {
+	if (!msgid_found || !parid_found || !title_found && _this->paridguess) {
 		if ((db = mailestd_db_open_wr(_this)) == NULL)
 			return;
 		if (!msgid_found) {
@@ -662,6 +666,10 @@ db_noent:
 		}
 		if (!parid_found) {
 			mailestd_log(LOG_INFO, "Adding \""ATTR_PARID"\" index");
+			est_db_add_attr_index(db, ATTR_PARID, ESTIDXATTRSTR);
+		}
+		if (!title_found) {
+			mailestd_log(LOG_INFO, "Adding \""ATTR_TITLE"\" index");
 			est_db_add_attr_index(db, ATTR_PARID, ESTIDXATTRSTR);
 		}
 		mailestd_db_close(_this);
@@ -674,7 +682,7 @@ mailestd_db_sync(struct mailestd *_this)
 	ESTDB		*db;
 	int		 i, id, ldir, delete;
 	char		 dir[PATH_MAX + 128];
-	const char	*prev, *fn, *uri, *errstr, *folder;
+	const char	*prev, *fn, *uri, *errstr, *folder, *subj;
 	ESTDOC		*doc;
 	struct rfc822	*msg, msg0;
 	struct tm	 tm;
@@ -723,6 +731,19 @@ mailestd_db_sync(struct mailestd *_this)
 			mailestd_schedule_db_sync(_this); /* schedule again */
 			return (0);
 		}
+
+		msg->pariddone =
+		    (est_doc_attr(doc, ATTR_PARID) != NULL)? true : false;
+		if (_this->paridguess && !msg->pariddone) {
+			if (skip_subject(est_doc_attr(doc, "@title")) == NULL)
+				/*
+				 * The message has not x-mew-parid and subject
+				 * seems to be a reply message
+				 */
+				msg->pariddone = true;
+		}
+		if (_this->paridguess && !msg->pariddone)
+			_this->paridnotdone++;
 		est_doc_delete(doc);
 	}
 	free(_this->sync_prev);
@@ -763,6 +784,10 @@ mailestd_db_sync(struct mailestd *_this)
 			mailestd_schedule_monitor(_this, flde->path);
 			folder_free(flde);
 		}
+	}
+	if (_this->paridguess) {
+		mailestd_guess_parid(_this);
+		_this->paridnotdone = 0;
 	}
 
 	return (0);
@@ -1101,6 +1126,65 @@ mailestd_putdb(struct mailestd *_this, struct rfc822 *msg)
 }
 
 static void
+mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
+{
+	ESTDOC		*doc = NULL, *docpar;
+	const char	*subj, *cdate, *subj1, *parid;
+	ESTCOND		*cond;
+	char		 condbuf[128];
+	int		*res, rnum;
+
+	if (msg->db_id == 0)
+		goto out;
+
+	doc = est_db_get_doc(_this->db, msg->db_id, ESTGDNOTEXT);
+	if (doc == NULL)
+		goto out;
+	subj = est_doc_attr(doc, ATTR_TITLE);
+	cdate = est_doc_attr(doc, ATTR_CDATE);
+	if (subj == NULL || cdate == NULL)
+		goto out;
+	if ((subj1 = skip_subject(subj)) == NULL)
+		goto out;
+
+	cond = est_cond_new();
+
+	strlcpy(condbuf, ATTR_TITLE " " ESTOPSTREW " ", sizeof(condbuf));
+	strlcat(condbuf, subj1, sizeof(condbuf));
+	est_cond_add_attr(cond, condbuf);
+
+	strlcpy(condbuf, ATTR_CDATE" " ESTOPNUMLT " ", sizeof(condbuf));
+	strlcat(condbuf, cdate, sizeof(condbuf));
+	est_cond_add_attr(cond, condbuf);
+
+	strlcpy(condbuf, ATTR_CDATE " " ESTORDNUMD, sizeof(condbuf));
+	est_cond_set_order(cond, condbuf);
+
+	est_cond_set_max(cond, 1);
+	res = est_db_search(_this->db, cond, &rnum, NULL);
+	if (rnum != 1)
+		goto out;
+
+	docpar = est_db_get_doc(_this->db, res[0], ESTGDNOTEXT);
+	if (docpar == NULL)
+		goto out;
+
+	parid = est_doc_attr(docpar, ATTR_MSGID);
+	if (parid != NULL) {
+		mailestd_log(LOG_INFO,
+		    "guess %s's parent message is %s",
+		    msg->path, est_doc_attr(docpar, ESTDATTRURI) + 7);
+		est_doc_add_attr(doc, ATTR_PARID, parid);
+		est_db_edit_doc(_this->db, doc);
+	}
+	est_doc_delete(docpar);
+out:
+	if (doc != NULL)
+		est_doc_delete(doc);
+	msg->pariddone = true;
+}
+
+static void
 mailestd_deldb(struct mailestd *_this, struct rfc822 *msg)
 {
 	int		 ecode;
@@ -1300,6 +1384,17 @@ mailestd_search(struct mailestd *_this, uint64_t task_id, ESTCOND *cond,
 		mailestd_schedule_inform(_this, task_id, (u_char *)bufp,
 		    bufsiz);
 		free(bufp);
+	}
+}
+
+static void
+mailestd_guess_parid(struct mailestd *_this)
+{
+	struct rfc822	*msg;
+
+	RB_FOREACH(msg, rfc822_tree, &_this->root) {
+		if (!msg->pariddone)
+			mailestd_schedule_guess_parid(_this, msg);
 	}
 }
 
@@ -1647,6 +1742,20 @@ mailestd_schedule_monitor(struct mailestd *_this, const char *path)
 	    (struct task *)task));
 }
 
+static uint64_t
+mailestd_schedule_guess_parid(struct mailestd *_this, struct rfc822 *msg)
+{
+	struct task_rfc822	*task;
+
+	task = calloc(1, sizeof(struct task_rfc822));
+	/* given task is a member of mailestd.rfc822_tasks */
+	task->type = MAILESTD_TASK_RFC822_GUESS;
+	task->msg = msg;
+	msg->ontask = true;
+
+	return (task_worker_add_task(&_this->dbworker, (struct task *)task));
+}
+
 /***********************************************************************
  * Tasks
  ***********************************************************************/
@@ -1811,8 +1920,17 @@ task_worker_on_proc(struct task_worker *_this)
 			msg = ((struct task_rfc822 *)task)->msg;
 			MAILESTD_ASSERT(msg->draft == NULL);
 			mailestd_draft(mailestd, msg);
-			if (msg->draft != NULL)
-				estdoc_add_parid(msg->draft);
+			if (msg->draft != NULL) {
+				msg->pariddone = estdoc_add_parid(msg->draft);
+				if (mailestd->paridguess) {
+					if (!msg->pariddone && skip_subject(
+					    est_doc_attr(msg->draft, "@title"))
+						    == NULL)
+						msg->pariddone = true;
+				}
+			}
+			if (mailestd->paridguess && !msg->pariddone)
+				mailestd->paridnotdone++;
 			/*
 			 * This thread can't return the task even if creating
 			 * a draft failed.  (since it's not dbworker)
@@ -1821,6 +1939,7 @@ task_worker_on_proc(struct task_worker *_this)
 			task = NULL;	/* recycled */
 			break;
 
+		case MAILESTD_TASK_RFC822_GUESS:
 		case MAILESTD_TASK_RFC822_PUTDB:
 		case MAILESTD_TASK_RFC822_DELDB:
 		case MAILESTD_TASK_SEARCH:
@@ -1929,6 +2048,14 @@ task_worker_on_proc_db(struct task_worker *_this,
 		rfc822_free(msg);
 		break;
 
+	case MAILESTD_TASK_RFC822_GUESS:
+		msg = ((struct task_rfc822 *)task)->msg;
+		if (mailestd_db_open_wr(mailestd) == NULL)
+			break;
+		mailestd_guess(mailestd, msg);
+		msg->pariddone = true;
+		break;
+
 	case MAILESTD_TASK_SEARCH:
 		search = (struct task_search *)task;
 		if (mailestd_db_open_rd(mailestd) == NULL)
@@ -1947,6 +2074,11 @@ task_worker_on_proc_db(struct task_worker *_this,
 		if (mailestd->db == NULL || !mailestd->db_wr)
 			/* Keep the read only db connection */
 			break;
+		if (mailestd->paridguess && mailestd->paridnotdone > 0) {
+			mailestd_guess_parid(mailestd);
+			mailestd->paridnotdone = 0;
+			return (true);
+		}
 		if (ctx->puts + ctx->dels > 0 &&
 		    est_db_used_cache_size(mailestd->db) > MAILESTD_DBFLUSHSIZ){
 			/*
@@ -2901,7 +3033,7 @@ folder_free(struct folder *dir)
 	free(dir);
 }
 
-static void
+static bool
 estdoc_add_parid(ESTDOC *doc)
 {
 	int		 cinrp = 0;
@@ -2940,6 +3072,8 @@ estdoc_add_parid(ESTDOC *doc)
 
 	free(inrp);
 	free(refs);
+
+	return ((parid != NULL)? true : false);
 }
 
 /* -a-zA-Z0-9!#$%&\'*+/=?^_`{}|~.@ is valid chars for Message-Id */
@@ -2976,6 +3110,28 @@ is_parent_dir(const char *dirp, const char *dir)
 	ldirp = strlen(dirp);
 	return ((strncmp(dirp, dir, ldirp) == 0 && dir[ldirp] == '/')
 	    ? true : false);
+}
+
+static const char *
+skip_subject(const char *subj)
+{
+	if (subj == NULL)
+		return (NULL);
+	if ((subj[0] != 'r' && subj[0] != 'R') ||
+	    (subj[1] != 'e' && subj[1] != 'E'))
+		return NULL;
+	subj += 2;
+	/* Re^2: Re*2: */
+	while (*subj == '*' || *subj == '^')
+		subj++;
+	while (isdigit(*subj))
+		subj++;
+	if (*subj != ':')
+		return (NULL);
+	subj++;
+	while (isspace(*subj))
+		subj++;
+	return (subj);
 }
 
 RB_GENERATE_STATIC(rfc822_tree, rfc822, tree, rfc822_compar);

@@ -192,9 +192,6 @@ TODO
 - Automatically create a backup for the database when closing the
   writable DB connection.  Also recover the database automatically
   when it's broken.
-- Create a tool which add x-mew-parid attribute for mails which doesn't
-  have any In-Reply-To or Reference header by guessing with Subject and
-  Date.
 
 
 Copyright
