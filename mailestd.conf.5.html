@@ -50,6 +50,10 @@ The number of tasks allowed to prepare for indexing paralelly. The default value
 <dd class="list-tag" style="margin-left: 6.00ex;">
 The monitor is enabled unless <b class="cmd">disable</b> is specified. When the monitor is enabled, <b class="name">mailestd</b> will start indexing automatically when changes are made on the folder already indexed. Specify <i class="arg">delay</i> in milli seconds instead of the default value 1500 which the <b class="name">mailestd</b> waits for until it starts indexing.</dd>
 <dt class="list-tag" style="margin-top: 1.00em;">
+<b class="cmd">guess-parid</b></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+This option makes <b class="name">mailestd</b> to create a parent message id (&#8220;x-mew-parid&#8221;) attribue in the database, when it finds a message which failed to create the parent message-id in the normal way by guessing guessing by the &#8220;Subject&#8221; and &#8220;Date&#8221;.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
 <b class="cmd">suffixes</b> <i class="arg">suffix ...</i></dt>
 <dd class="list-tag" style="margin-left: 6.00ex;">
 The file name suffixes of the mail messages gathered for indexing. The default is &#8220;&#8221; (none).</dd>
