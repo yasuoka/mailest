@@ -331,7 +331,6 @@ static void	 mailestd_monitor_fini(struct mailestd *);
 #ifdef DIRMON_INOTIFY
 static void	 mailestd_monitor_on_inotify(int, short, void *);
 #endif
-static void	 mailestd_monitor_on_event(struct mailestd *);
 static void	 mailestd_monitor_folder(struct mailestd *, const char *);
 static int	 mailestd_monitor_schedule(struct mailestd *,
 		    struct timespec *);

@@ -657,7 +657,8 @@ mailestd_db_add_msgid_index(struct mailestd *_this)
 		cblistclose(exprs);
 	}
 db_noent:
-	if (!msgid_found || !parid_found || !title_found && _this->paridguess) {
+	if (!msgid_found || !parid_found ||
+	    (!title_found && _this->paridguess)) {
 		if ((db = mailestd_db_open_wr(_this)) == NULL)
 			return;
 		if (!msgid_found) {
@@ -682,7 +683,7 @@ mailestd_db_sync(struct mailestd *_this)
 	ESTDB		*db;
 	int		 i, id, ldir, delete;
 	char		 dir[PATH_MAX + 128];
-	const char	*prev, *fn, *uri, *errstr, *folder, *subj;
+	const char	*prev, *fn, *uri, *errstr, *folder;
 	ESTDOC		*doc;
 	struct rfc822	*msg, msg0;
 	struct tm	 tm;
@@ -1489,7 +1490,6 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 	struct folder		*flde, *fldt, fld0;
 	bool			 found = false;
 	struct rfc822		 msg0;
-	const char		*fn;
 
 	ctx = xcalloc(1, sizeof(struct gather));
 	ctx->id = mailestd_new_id(_this);
@@ -2492,7 +2492,7 @@ mailestd_monitor_start(struct mailestd *_this)
 			break;
 		}
 		for (i = 0; i < ret; i++) {
-			if (kev[i].ident == sock)
+			if (kev[i].ident == (unsigned)sock)
 				task_worker_on_itc_event(kev[i].ident,
 				    EV_READ, &_this->monitorworker);
 			else if (kev[i].udata != NULL) {
