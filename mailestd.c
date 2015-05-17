@@ -736,11 +736,13 @@ mailestd_db_sync(struct mailestd *_this)
 		    (est_doc_attr(doc, ATTR_PARID) != NULL)? true : false;
 		if (_this->paridguess && !msg->pariddone) {
 			if (skip_subject(est_doc_attr(doc, "@title")) == NULL)
-				/*
-				 * The message has not x-mew-parid and subject
-				 * seems to be a reply message
-				 */
 				msg->pariddone = true;
+			/*
+			 * Otherwise, let msg->pariddone keep false to
+			 * indicate it's a target in mailestd_guess_parid().
+			 * The message has no x-mew-parid and subject
+			 * seems to replying the other message.
+			 */
 		}
 		if (_this->paridguess && !msg->pariddone)
 			_this->paridnotdone++;
@@ -1922,11 +1924,16 @@ task_worker_on_proc(struct task_worker *_this)
 			mailestd_draft(mailestd, msg);
 			if (msg->draft != NULL) {
 				msg->pariddone = estdoc_add_parid(msg->draft);
-				if (mailestd->paridguess) {
-					if (!msg->pariddone && skip_subject(
+				if (mailestd->paridguess && !msg->pariddone) {
+					if (skip_subject(
 					    est_doc_attr(msg->draft, "@title"))
 						    == NULL)
 						msg->pariddone = true;
+					    /*
+					     * Otherwise, let msg->pariddone
+					     * keep false to indicate it's a
+					     * target in mailestd_guess_parid().
+					     */
 				}
 			}
 			if (mailestd->paridguess && !msg->pariddone)
