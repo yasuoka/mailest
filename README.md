@@ -24,17 +24,17 @@ Prerequirement:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.12.tar.gz
-    % tar xzf mailest-0.9.12.tar.gz
-    % cd mailest-mailest-0.9.12
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.13.tar.gz
+    % tar xzf mailest-0.9.13.tar.gz
+    % cd mailest-mailest-0.9.13
     % make
     % sudo make install
 
 Other:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.12.tar.gz
-    % tar xzf mailest-0.9.12.tar.gz
-    % cd mailest-mailest-0.9.12
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.13.tar.gz
+    % tar xzf mailest-0.9.13.tar.gz
+    % cd mailest-mailest-0.9.13
     % ./configure
     % make
     % sudo make install
@@ -95,13 +95,15 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
-0.9.13 (not yet)
+0.9.13
 
 - 2015-05-16: yasuoka
   - Add "guess-parid" configration option to find the parent message
     for the messages which don't contain "In-Reply-To" or "Reference"
     header by guessing with "Subject" and "Date".  Add the following
     to `~/Mail/mailestd.conf`.
+
+        guess-parid
 
 0.9.12
 
