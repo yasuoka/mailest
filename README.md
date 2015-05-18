@@ -95,6 +95,13 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
+0.9.14 (not yet)
+
+- 2015-05-18: yasuoka
+
+  - Fixed: "guess-parid" is too slow since mailestd failed to create the
+    index of "@title" on startup.
+
 0.9.13
 
 - 2015-05-16: yasuoka

@@ -648,8 +648,8 @@ mailestd_db_add_msgid_index(struct mailestd *_this)
 			if (!strncasecmp(ATTR_PARID "=",
 			    cblistval(exprs, i, NULL), sizeof(ATTR_PARID)))
 				parid_found = true;
-			if (!strncasecmp(ATTR_PARID "=",
-			    cblistval(exprs, i, NULL), sizeof(ATTR_PARID)))
+			if (!strncasecmp(ATTR_TITLE "=",
+			    cblistval(exprs, i, NULL), sizeof(ATTR_TITLE)))
 				title_found = true;
 			if (msgid_found && parid_found && title_found)
 				break;
@@ -1132,7 +1132,7 @@ static void
 mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
 {
 	ESTDOC		*doc = NULL, *docpar;
-	const char	*subj, *cdate, *subj1, *parid;
+	const char	*subj, *cdate, *subj1, *parid = NULL;
 	ESTCOND		*cond;
 	char		 condbuf[128];
 	int		*res, rnum;
