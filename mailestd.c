@@ -1165,12 +1165,21 @@ mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
 
 	est_cond_set_max(cond, 1);
 	res = est_db_search(_this->db, cond, &rnum, NULL);
-	if (rnum != 1)
+	if (rnum != 1) {
+		mailestd_log(LOG_INFO,
+		    "guess %s's parent message doesn't exist", msg->path);
+		est_doc_add_attr(doc, ATTR_PARID, "notexist");
+		est_db_edit_doc(_this->db, doc);
 		goto out;
+	}
 
 	docpar = est_db_get_doc(_this->db, res[0], ESTGDNOTEXT);
-	if (docpar == NULL)
+	if (docpar == NULL) {
+		mailestd_log(LOG_WARNING,
+		    "gussing %s failed: search result no doc %d", msg->path,
+			res[0]);
 		goto out;
+	}
 
 	parid = est_doc_attr(docpar, ATTR_MSGID);
 	if (parid != NULL) {
@@ -1179,7 +1188,10 @@ mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
 		    msg->path, est_doc_attr(docpar, ESTDATTRURI) + 7);
 		est_doc_add_attr(doc, ATTR_PARID, parid);
 		est_db_edit_doc(_this->db, doc);
-	}
+	} else
+		mailestd_log(LOG_WARNING,
+		    "gussing %s failed: search result no msgid %d", msg->path,
+		    res[0]);
 	est_doc_delete(docpar);
 out:
 	if (doc != NULL)
