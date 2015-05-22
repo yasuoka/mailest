@@ -39,8 +39,7 @@ enum token_type {
 	SEARCH_IC,
 	SEARCH_ATTR,
 	SEARCH_PHRASE,
-	MSGID,
-	PARID
+	MSGID
 };
 
 struct token {
