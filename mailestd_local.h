@@ -47,6 +47,7 @@ struct task_worker {
 
 struct mailestd {
 	char			  maildir[PATH_MAX];
+	int			  lmaildir;
 	char			  dbpath[PATH_MAX];
 	char			  logfn[PATH_MAX];
 	int			  logsiz;

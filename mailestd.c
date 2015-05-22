@@ -209,6 +209,7 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 	memset(_this, 0, sizeof(struct mailestd));
 
 	strlcpy(_this->maildir, conf->maildir, sizeof(_this->maildir));
+	_this->lmaildir = strlen(_this->maildir);
 
 	if (debug == 0)
 		debug = conf->debug;
@@ -509,16 +510,15 @@ mailestc_reset_ctl_event(struct mailestd *_this)
 static void
 mailestd_get_all_folders(struct mailestd *_this, struct folder_tree *tree)
 {
-	int		 len, lmaildir;
+	int		 len;
 	char		*ps;
 	struct rfc822	*msge, msg0;
 	char		 path[PATH_MAX];
 	struct folder	*fld;
 
-	lmaildir = strlen(_this->maildir);
 	strlcpy(path, _this->maildir, sizeof(path));
-	path[lmaildir++] = '/';
-	path[lmaildir] = '\0';
+	path[_this->lmaildir] = '/';
+	path[_this->lmaildir + 1] = '\0';
 	msg0.path = path;
 	msge = RB_NFIND(rfc822_tree, &_this->root, &msg0);
 	while (msge != NULL) {
@@ -532,7 +532,7 @@ mailestd_get_all_folders(struct mailestd *_this, struct folder_tree *tree)
 		memcpy(path, msge->path, len);
 		path[len] = '\0';
 		fld = xcalloc(1, sizeof(struct folder));
-		fld->path = xstrdup(path + lmaildir);
+		fld->path = xstrdup(path + _this->lmaildir + 1);
 		RB_INSERT(folder_tree, tree, fld);
 		path[len++] = '/' + 1;
 		path[len] = '\0';
@@ -545,12 +545,9 @@ static const char *
 mailestd_folder_name(struct mailestd *_this, const char *dir, char *buf,
     int lbuf)
 {
-	int	ldirp;
-
-	ldirp = strlen(_this->maildir);
-	if (strncmp(_this->maildir, dir, ldirp) == 0 && dir[ldirp] == '/') {
+	if (is_parent_dir(_this->maildir, dir)) {
 		buf[0] = '+';
-		strlcpy(buf + 1, dir + ldirp + 1, lbuf - 1);
+		strlcpy(buf + 1, dir + _this->lmaildir + 1, lbuf - 1);
 	} else
 		strlcpy(buf, dir, lbuf);
 
@@ -1223,7 +1220,7 @@ mailestd_deldb(struct mailestd *_this, struct rfc822 *msg)
 static void
 mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 {
-	int		 i, cnt = 0, *res, rnum, lmaildir, lfolder;
+	int		 i, cnt = 0, *res, rnum, lfolder;
 	const char	*uri, *msgid;
 	char		 buf[BUFSIZ], *bufp = NULL;
 	bool		 keepthis;
@@ -1248,7 +1245,6 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 	if ((db = mailestd_db_open_rd(_this)) == NULL)
 		goto out;
 
-	lmaildir = strlen(_this->maildir);
 	TAILQ_INIT(&children);
 	TAILQ_INIT(&ancestors);
 	/* search ancestors */
@@ -1306,7 +1302,7 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 		uri = est_doc_attr(doce->doc, ESTDATTRURI);
 		if (uri != NULL) {
 			if (is_parent_dir(_this->maildir, URI2PATH(uri))) {
-				doce->uri = uri + lmaildir + 8;
+				doce->uri = uri + _this->lmaildir + 8;
 				if (lfolder > 0 &&
 				    !strncmp(doce->uri, smew->folder, lfolder)
 				    && doce->uri[lfolder] == '/')
@@ -1495,7 +1491,6 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 	struct stat		 st;
 	DIR			*dp;
 	struct dirent		*de;
-	ssize_t			 lmaildir;
 	struct gather		*ctx;
 	uint64_t		 ctx_id;
 	struct folder_tree	 folders;
@@ -1518,7 +1513,7 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 		if (folder[0] != '/') {
 			memset(&gl, 0, sizeof(gl));
 			strlcpy(path, _this->maildir, sizeof(path));
-			lmaildir = strlcat(path, "/", sizeof(path));
+			strlcat(path, "/", sizeof(path));
 			strlcat(path, folder, sizeof(path));
 			if (glob(path, GLOB_BRACE, NULL, &gl) == 0) {
 				for (i = 0; i < gl.gl_pathc; i++) {
@@ -1526,10 +1521,12 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 					    !S_ISDIR(st.st_mode))
 						continue;
 					if (!mailestd_folder_match(_this,
-					    gl.gl_pathv[i] + lmaildir))
+					    gl.gl_pathv[i] +
+						    _this->lmaildir + 1))
 						continue;
 					mailestd_schedule_gather0(_this, ctx,
-					    gl.gl_pathv[i] + lmaildir);
+					    gl.gl_pathv[i] + _this->lmaildir
+						    + 1);
 				}
 				globfree(&gl);
 				found = true;
@@ -2628,16 +2625,14 @@ mailestd_monitor_folder(struct mailestd *_this, const char *dirpath)
 static void
 mailestd_monitor_maildir_changed(struct mailestd *_this)
 {
-	int		 lmaildir;
 	DIR		*dp;
 	struct dirent	*de;
 	char		 path[PATH_MAX];
 	struct folder	*fld, fld0;
 
 	strlcpy(path, _this->maildir, sizeof(path));
-	lmaildir = strlen(path);
-	path[lmaildir++] = '/';
-	path[lmaildir] = '\0';
+	path[_this->lmaildir] = '/';
+	path[_this->lmaildir] = '\0';
 
 	if ((dp = opendir(_this->maildir)) == NULL)
 		return;
@@ -2647,7 +2642,8 @@ mailestd_monitor_maildir_changed(struct mailestd *_this)
 			continue;
 		if (!mailestd_folder_match(_this, de->d_name))
 			continue;
-		strlcpy(path + lmaildir, de->d_name, sizeof(path) - lmaildir);
+		strlcpy(path + _this->lmaildir + 1, de->d_name,
+		    sizeof(path) - _this->lmaildir - 1);
 		fld0.path = path;
 		if ((fld = RB_FIND(folder_tree, &_this->monitors, &fld0))
 		    != NULL)
