@@ -1354,13 +1354,14 @@ out:
 
 static void
 mailestd_search(struct mailestd *_this, uint64_t task_id, ESTCOND *cond,
-    enum SEARCH_OUTFORM outform)
+    enum MAILESTCTL_OUTFORM outform)
 {
-	int	 i, rnum, *res, ecode;
-	char	*bufp = NULL;
-	size_t	 bufsiz = 0;
-	ESTDOC	*doc;
-	FILE	*out;
+	int		 i, rnum, *res, ecode;
+	char		*bufp = NULL;
+	size_t		 bufsiz = 0;
+	ESTDOC		*doc;
+	FILE		*out;
+	const char	*uri;
 
 	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 	MAILESTD_ASSERT(_this->db != NULL);
@@ -1383,10 +1384,20 @@ mailestd_search(struct mailestd *_this, uint64_t task_id, ESTCOND *cond,
 				    "est_db_get_doc(id=%d) failed: %s",
 				    res[i], est_err_msg(ecode));
 			} else {
+				uri = est_doc_attr(doc, ESTDATTRURI);
 				switch (outform) {
-				case SEARCH_OUTFORM_COMPAT_VU:
-					fprintf(out, "%d\t%s\n", res[i],
-					    est_doc_attr(doc, ESTDATTRURI));
+				case MAILESTCTL_OUTFORM_SMEW:
+					if (is_parent_dir(
+					    _this->maildir, URI2PATH(uri)))
+						fprintf(out, "%s\n",
+						    URI2PATH(uri) +
+						    _this->lmaildir + 1);
+					else
+						fprintf(out, "%s\n",
+						    URI2PATH(uri));
+					break;
+				case MAILESTCTL_OUTFORM_COMPAT_VU:
+					fprintf(out, "%d\t%s\n", res[i], uri);
 					break;
 				}
 			}
@@ -1664,7 +1675,8 @@ mailestd_schedule_deldb(struct mailestd *_this, struct rfc822 *msg)
 }
 
 static uint64_t
-mailestd_schedule_search(struct mailestd *_this, ESTCOND *cond)
+mailestd_schedule_search(struct mailestd *_this, ESTCOND *cond,
+    enum MAILESTCTL_OUTFORM outform)
 {
 	struct task_search	*task;
 
@@ -1674,6 +1686,7 @@ mailestd_schedule_search(struct mailestd *_this, ESTCOND *cond)
 	task->type = MAILESTD_TASK_SEARCH;
 	task->cond = cond;
 	task->highprio = true;
+	task->outform = outform;
 
 	return (task_worker_add_task(&_this->dbworker, (struct task *)task));
 }

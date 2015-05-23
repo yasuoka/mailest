@@ -39,6 +39,11 @@ enum MAILESTCTL_CMD {
 	MAILESTCTL_CMD_SMEW
 };
 
+enum MAILESTCTL_OUTFORM {
+	MAILESTCTL_OUTFORM_COMPAT_VU,
+	MAILESTCTL_OUTFORM_SMEW
+};
+
 #define	ATTR_MSGID	"message-id"
 #define	ATTR_PARID	"x-mew-parid"
 #define	ATTR_TITLE	"@title"
@@ -54,6 +59,7 @@ struct mailestctl_update {
 };
 struct mailestctl_search {
 	enum MAILESTCTL_CMD	 command;
+	enum MAILESTCTL_OUTFORM	 outform;
 	int			 max;
 	char			 attrs[8][MAILESTD_MAX_MESSAGE_ID + 80];
 	char			 order[80];

@@ -180,6 +180,7 @@ do_common:
 		run_daemon(cmd, cmdv);
 		memset(&search, 0, sizeof(search));
 		search.command = MAILESTCTL_CMD_SEARCH;
+		search.outform = MAILESTCTL_OUTFORM_COMPAT_VU;
 		if (result->search.max)
 			search.max = result->search.max;
 		else
@@ -238,6 +239,7 @@ wait_resp:
 		run_daemon(cmd, cmdv);
 		memset(&search, 0, sizeof(search));
 		search.command = MAILESTCTL_CMD_SEARCH;
+		search.outform = MAILESTCTL_OUTFORM_SMEW;
 		strlcpy(search.attrs[0], ATTR_MSGID " STREQ ",
 		    sizeof(search.attrs[0]));
 		strlcat(search.attrs[0], result->msgid,
@@ -250,6 +252,7 @@ wait_resp:
 		run_daemon(cmd, cmdv);
 		memset(&search, 0, sizeof(search));
 		search.command = MAILESTCTL_CMD_SEARCH;
+		search.outform = MAILESTCTL_OUTFORM_SMEW;
 		strlcpy(search.attrs[0], ATTR_PARID " STREQ ",
 		    sizeof(search.attrs[0]));
 		strlcat(search.attrs[0], result->msgid,
