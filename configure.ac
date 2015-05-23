@@ -76,6 +76,6 @@ fi
 AC_CONFIG_FILES([GNUmakefile replace/GNUmakefile mailestd/GNUmakefile
     libestdraft/GNUmakefile])
 
-AM_MAINTAINER_MODE([enable])
+AM_MAINTAINER_MODE([disable])
 
 AC_OUTPUT
