@@ -221,7 +221,7 @@ struct gather {
 	u_int			 dels_done;
 	u_int			 folders_done;
 	char			 errmsg[80];
-	char			 target[40];
+	char			 target[PATH_MAX];
 	TAILQ_ENTRY(gather)	 queue;
 };
 

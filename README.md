@@ -95,6 +95,14 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
+0.9.17
+
+- 2015-05-23: yasuoka
+
+  - Fix "update" related logs to show the entire path name.
+    (diff from Hiroki Sato)
+
+
 0.9.16
 
 - 2015-05-23: yasuoka
