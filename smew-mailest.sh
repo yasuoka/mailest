@@ -12,9 +12,9 @@ usage() {
 cmd=smew
 while getopts "pch" ch "$@"; do
 	case $ch in
-	'p')	cmd='parent-id'
+	'p')	cmd='message-id'
 		;;
-	'c')	cmd='message-id'
+	'c')	cmd='parent-id'
 		;;
 	'h')	usage
 		exit 64
