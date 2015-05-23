@@ -54,13 +54,13 @@ struct mailestctl_update {
 struct mailestctl_search {
 	enum MAILESTCTL_CMD	 command;
 	int			 max;
-	char			 attrs[8][80];
+	char			 attrs[8][384];
 	char			 order[80];
 	char			 phrase[BUFSIZ];
 };
 struct mailestctl_smew {
 	enum MAILESTCTL_CMD	 command;
-	char			 msgid[80];
+	char			 msgid[256];
 	char			 folder[PATH_MAX];
 };
 
