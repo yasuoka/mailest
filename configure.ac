@@ -64,9 +64,9 @@ AC_CHECK_FUNCS([kqueue])
 dirmon_sysreq_errmsg="--enable-monitor(default yes) requires the system has \
     kqueue or inotify."
 AM_CONDITIONAL([WITH_MONITOR_KQUEUE],
-    [test $enable_monitor && test $ac_cb_func_kqueue])
+    [test $enable_monitor && test $ac_cv_func_kqueue])
 AM_CONDITIONAL([WITH_MONITOR_INOTIFY],
-    [test $enable_monitor && test $ac_cb_func_inotify])
+    [test $enable_monitor && test $ac_cv_func_inotify])
 if test x"$enable_monitor" != x"no" &&
     test x"$ac_cv_func_inotify_init" != x"yes" &&
     test x"$ac_cv_func_kqueue" != x"yes"; then
