@@ -1353,8 +1353,8 @@ out:
 }
 
 static void
-mailestd_search(struct mailestd *_this, uint64_t task_id, ESTCOND *cond,
-    enum MAILESTCTL_OUTFORM outform)
+mailestd_search(struct mailestd *_this, uint64_t task_id, const char *searchstr,
+    ESTCOND *cond, enum MAILESTCTL_OUTFORM outform)
 {
 	int		 i, rnum, *res, ecode;
 	char		*bufp = NULL;
@@ -1371,11 +1371,11 @@ mailestd_search(struct mailestd *_this, uint64_t task_id, ESTCOND *cond,
 	if (res == NULL) {
 		ecode = est_db_error(_this->db);
 		mailestd_log(LOG_INFO,
-		    "Search(%s) failed: %s", cond->phrase, est_err_msg(ecode));
+		    "Search(%s) failed: %s", searchstr, est_err_msg(ecode));
 		mailestd_schedule_inform(_this, task_id, NULL, 0);
 	} else {
 		mailestd_log(LOG_INFO,
-		    "Searched(%s).  Hit %d", cond->phrase, rnum);
+		    "Searched(%s).  Hit %d", searchstr, rnum);
 		for (i = 0; i < rnum; i++) {
 			doc = est_db_get_doc(_this->db, res[i], ESTGDNOKWD);
 			if (doc == NULL) {
@@ -1675,18 +1675,19 @@ mailestd_schedule_deldb(struct mailestd *_this, struct rfc822 *msg)
 }
 
 static uint64_t
-mailestd_schedule_search(struct mailestd *_this, ESTCOND *cond,
-    enum MAILESTCTL_OUTFORM outform)
+mailestd_schedule_search(struct mailestd *_this, const char *searchstr,
+    ESTCOND *cond, enum MAILESTCTL_OUTFORM outform)
 {
 	struct task_search	*task;
 
-	mailestd_log(LOG_INFO, "Searching(%s)", cond->phrase);
+	mailestd_log(LOG_INFO, "Searching(%s)", searchstr);
 
 	task = xcalloc(1, sizeof(struct task_search));
 	task->type = MAILESTD_TASK_SEARCH;
 	task->cond = cond;
 	task->highprio = true;
 	task->outform = outform;
+	strlcpy(task->str, searchstr, sizeof(task->str));
 
 	return (task_worker_add_task(&_this->dbworker, (struct task *)task));
 }
@@ -2089,7 +2090,7 @@ task_worker_on_proc_db(struct task_worker *_this,
 		search = (struct task_search *)task;
 		if (mailestd_db_open_rd(mailestd) == NULL)
 			break;
-		mailestd_search(mailestd, task->id, search->cond,
+		mailestd_search(mailestd, task->id, search->str, search->cond,
 		    search->outform);
 		break;
 
@@ -2324,20 +2325,27 @@ mailestc_cmd_search(struct mailestc *_this, struct mailestctl_search *search)
 	ESTCOND		*cond;
 	const char	*phrase = search->phrase;
 	int		 i;
+	char		 buf[80];
 
+	strlcpy(buf, "*", sizeof(buf));
 	cond = est_cond_new();
 	if (phrase[0] != '\0') {
 		while (*phrase == '\t' || *phrase == ' ')
 			phrase++;
 		est_cond_set_phrase(cond, phrase);
+		strlcpy(buf, phrase, sizeof(buf));
 	}
-	for (i = 0; i < (int)nitems(search->attrs) && search->attrs[i] != '\0';
-	    i++)
+	for (i = 0; i < (int)nitems(search->attrs) &&
+	    search->attrs[i][0] != '\0'; i++) {
 		est_cond_add_attr(cond, search->attrs[i]);
+		strlcat(buf, ", ", sizeof(buf));
+		strlcat(buf, search->attrs[i], sizeof(buf));
+	}
 	est_cond_set_order(cond, search->order);
 	if (search->max > 0)
 		est_cond_set_max(cond, search->max);
-	_this->monitoring_id = mailestd_schedule_search(mailestd, cond);
+	_this->monitoring_id = mailestd_schedule_search(mailestd, buf, cond,
+	    search->outform);
 	if (_this->monitoring_id == 0)
 		return (-1);
 	_this->monitoring_cmd = MAILESTCTL_CMD_SEARCH;

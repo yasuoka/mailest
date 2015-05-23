@@ -169,6 +169,7 @@ struct task_search {
 	enum MAILESTD_TASK	 type;
 	TAILQ_ENTRY(task)	 queue;
 	bool			 highprio;
+	char			 str[80];
 	enum MAILESTCTL_OUTFORM	 outform;
 	ESTCOND			*cond;
 };
@@ -281,7 +282,7 @@ static int	 mailestd_fts(struct mailestd *, struct gather *, time_t,
 static void	 mailestd_draft(struct mailestd *, struct rfc822 *msg);
 static void	 mailestd_putdb(struct mailestd *, struct rfc822 *);
 static void	 mailestd_deldb(struct mailestd *, struct rfc822 *);
-static void	 mailestd_search(struct mailestd *, uint64_t,
+static void	 mailestd_search(struct mailestd *, uint64_t, const char *,
 		    ESTCOND *, enum MAILESTCTL_OUTFORM);
 static void	 mailestd_guess_parid(struct mailestd *);
 static void	 mailestd_db_informer(const char *, void *);
@@ -294,7 +295,7 @@ static uint64_t	 mailestd_schedule_draft(struct mailestd *, struct gather *,
 static uint64_t  mailestd_schedule_putdb(struct mailestd *, struct task *,
 		    struct rfc822 *);
 static uint64_t	 mailestd_schedule_deldb(struct mailestd *, struct rfc822 *);
-static uint64_t	 mailestd_schedule_search(struct mailestd *,
+static uint64_t	 mailestd_schedule_search(struct mailestd *, const char *,
 		    ESTCOND *, enum MAILESTCTL_OUTFORM);
 static uint64_t	 mailestd_schedule_inform(struct mailestd *, uint64_t,
 		    u_char *, size_t);
