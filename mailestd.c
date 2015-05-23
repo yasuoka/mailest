@@ -2509,7 +2509,7 @@ mailestd_monitor_start(struct mailestd *_this)
 			mailestd_monitor_stop(_this);
 		else {
 			EV_SET(&_this->monitor_kev[nkev], sock,
-			    EVFILT_READ, EV_ADD, NOTE_EOF, 0, NULL);
+			    EVFILT_READ, EV_ADD, 0, 0, NULL);
 			nkev++;
 			if (mailestd_monitor_schedule(_this, &ts0) > 0)
 				ts = &ts0;
