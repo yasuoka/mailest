@@ -24,17 +24,17 @@ Prerequirement:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.14.tar.gz
-    % tar xzf mailest-0.9.14.tar.gz
-    % cd mailest-mailest-0.9.14
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.15.tar.gz
+    % tar xzf mailest-0.9.15.tar.gz
+    % cd mailest-mailest-0.9.15
     % make
     % sudo make install
 
 Other:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.14.tar.gz
-    % tar xzf mailest-0.9.14.tar.gz
-    % cd mailest-mailest-0.9.14
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.15.tar.gz
+    % tar xzf mailest-0.9.15.tar.gz
+    % cd mailest-mailest-0.9.15
     % ./configure
     % make
     % sudo make install
@@ -94,6 +94,15 @@ See [man pages](#man-pages) also.
 
 ChangeLog
 ---------
+
+0.9.15
+
+- 2015-05-23: yasuoka
+
+  - Monitoring were not enabled on some systems (atleast on FreeBSD).
+    Fixed autoconf to choice kqueue() or inotify() properly.  (Pointed
+    out by Yoshiaki Kasahara)
+
 
 0.9.14
 
