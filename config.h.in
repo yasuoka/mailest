@@ -3,6 +3,9 @@
 /* Define to 1 if you have the <estraier.h> header file. */
 #undef HAVE_ESTRAIER_H
 
+/* Define to 1 if you have the `iconv_open' function. */
+#undef HAVE_ICONV_OPEN
+
 /* Define to 1 if you have the `inotify_init' function. */
 #undef HAVE_INOTIFY_INIT
 
@@ -17,6 +20,9 @@
 
 /* Define to 1 if you have the `event' library (-levent). */
 #undef HAVE_LIBEVENT
+
+/* Define to 1 if you have the `iconv' library (-liconv). */
+#undef HAVE_LIBICONV
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
