@@ -47,6 +47,7 @@ AC_CHECK_LIB([estraier], [est_doc_new],,
 AS_IF([test x"$enable_multi_threads" != x"no"],
     AC_CHECK_LIB([pthread], [pthread_create]))
 AC_CHECK_LIB([event], [event_base_loop])
+AC_CHECK_FUNCS([iconv_open], [], AC_CHECK_LIB([iconv], [libiconv_open]))
 
 AC_REPLACE_FUNCS([strlcpy])
 AC_REPLACE_FUNCS([strlcat])
