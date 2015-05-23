@@ -13,8 +13,10 @@ cmd=smew
 while getopts "pch" ch "$@"; do
 	case $ch in
 	'p')	cmd='message-id'
+		flags='-max 1'
 		;;
 	'c')	cmd='parent-id'
+		flags='-max 1'
 		;;
 	'h')	usage
 		exit 64
@@ -33,5 +35,5 @@ mydir=$3
 if [ $cmd = 'smew' ]; then
 	exec $MAILESTCTL $cmd "$msgid" "$mydir"
 else
-	exec $MAILESTCTL $cmd "$msgid"
+	exec $MAILESTCTL $cmd $flags "$msgid"
 fi

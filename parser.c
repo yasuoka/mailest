@@ -59,6 +59,7 @@ static const struct token t_search_ic[];
 static const struct token t_search_attr[];
 static const struct token t_smew[];
 static const struct token t_msgid[];
+static const struct token t_msgid_max[];
 
 static const struct token t_main[] = {
 	{KEYWORD,	"start",	START,		NULL},
@@ -110,7 +111,12 @@ static const struct token t_smew[] = {
 	{ENDTOKEN,	"",		NONE,		NULL}
 };
 static const struct token t_msgid[] = {
+	{SEARCH_PARAM,	"-max",		SEARCH_FLAG_MAX,	t_msgid_max},
 	{MSGID,		"",		NONE,		NULL},
+	{ENDTOKEN,	"",		NONE,		NULL}
+};
+static const struct token t_msgid_max[] = {
+	{SEARCH_MAX,	"",		NONE,		t_msgid},
 	{ENDTOKEN,	"",		NONE,		NULL}
 };
 
