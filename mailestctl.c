@@ -203,7 +203,7 @@ do_common:
 					    result->search.attrs[i]);
 			}
 		}
-		if (search.phrase != NULL) {
+		if (result->search.phrase != NULL) {
 			if (ic_strlcpy(search.phrase, result->search.phrase,
 			    sizeof(search.phrase), result->search.ic)
 			    >= sizeof(search.phrase))
