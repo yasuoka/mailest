@@ -84,6 +84,10 @@ Restart the <a class="link-man" href="mailestd.8.html">mailestd(8)</a> daemon.</
 <dd class="list-tag" style="margin-left: 6.00ex;">
 Search the indexes by the <i class="arg">message-id</i>.</dd>
 <dt class="list-tag" style="margin-top: 1.00em;">
+<b class="flag">parent-id</b> <i class="arg">message-id</i></dt>
+<dd class="list-tag" style="margin-left: 6.00ex;">
+Search the indexes by the parent message's <i class="arg">message-id</i>.</dd>
+<dt class="list-tag" style="margin-top: 1.00em;">
 <b class="flag">csearch</b> [<span class="opt"><b class="flag">-vu</b></span>] [<span class="opt"><b class="flag">-max</b> <i class="arg">max</i></span>] [<span class="opt"><b class="flag">-ord</b> <i class="arg">ord</i></span>] [<span class="opt"><b class="flag">-ic</b> <i class="arg">ic</i></span>] [<span class="opt"><b class="flag">-attr</b> <i class="arg">attr</i></span>] phrase</dt>
 <dd class="list-tag" style="margin-left: 6.00ex;">
 Search the indexes of the mail messages in <a class="link-man" href="estcmd.1.html">estcmd(1)</a> compatible arguments. This command is used by &#8220;Mew&#8221; though the wrapper program <a class="link-man" href="mew-mailest.1.html">mew-mailest(1)</a> to search the file names which include the given <i class="arg">phrase</i>. Specify <b class="flag">-vu</b> always since the other output options are not avaiable. The <a class="link-man" href="mailestd.8.html">mailestd(8)</a> daemon will start automatically if it's not running.</dd>
