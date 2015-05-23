@@ -25,6 +25,7 @@
 	 * The size of the message is needed to be small not to beyond the
 	 * buffer of SOCK_SEQPACKET
 	 */
+#define MAILESTD_MAX_MESSAGE_ID	256
 
 enum MAILESTCTL_CMD {
 	MAILESTCTL_CMD_NONE = 0,
@@ -54,13 +55,13 @@ struct mailestctl_update {
 struct mailestctl_search {
 	enum MAILESTCTL_CMD	 command;
 	int			 max;
-	char			 attrs[8][384];
+	char			 attrs[8][MAILESTD_MAX_MESSAGE_ID + 80];
 	char			 order[80];
 	char			 phrase[BUFSIZ];
 };
 struct mailestctl_smew {
 	enum MAILESTCTL_CMD	 command;
-	char			 msgid[256];
+	char			 msgid[MAILESTD_MAX_MESSAGE_ID];
 	char			 folder[PATH_MAX];
 };
 

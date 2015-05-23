@@ -181,7 +181,7 @@ struct task_smew {
 	enum MAILESTD_TASK	 type;
 	TAILQ_ENTRY(task)	 queue;
 	bool			 highprio;
-	char			 msgid[256];
+	char			 msgid[MAILESTD_MAX_MESSAGE_ID];
 	char			 folder[PATH_MAX];
 };
 
