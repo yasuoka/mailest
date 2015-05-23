@@ -24,17 +24,17 @@ Prerequirement:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.15.tar.gz
-    % tar xzf mailest-0.9.15.tar.gz
-    % cd mailest-mailest-0.9.15
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.16.tar.gz
+    % tar xzf mailest-0.9.16.tar.gz
+    % cd mailest-mailest-0.9.16
     % make
     % sudo make install
 
 Other:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.15.tar.gz
-    % tar xzf mailest-0.9.15.tar.gz
-    % cd mailest-mailest-0.9.15
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.16.tar.gz
+    % tar xzf mailest-0.9.16.tar.gz
+    % cd mailest-mailest-0.9.16
     % ./configure
     % make
     % sudo make install
@@ -94,6 +94,13 @@ See [man pages](#man-pages) also.
 
 ChangeLog
 ---------
+
+0.9.16
+
+- 2015-05-23: yasuoka
+
+  - Fix "smew -p" to work.
+
 
 0.9.15
 
