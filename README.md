@@ -42,6 +42,18 @@ Other:
  On BSD, You may need to use "gmake" instead of "make" to use GNUmakefile
 
 
+Version up
+----------
+
+Terminate the running mailest daemons before using the new version:
+
+  - The mailest communication protocol between its server and its
+    clients may be changed between the versions and the compatibility
+    between the versions is not taken care of.
+  - Use `mailestctl stop` or send a terminal signal (SIGTERM) to stop
+    the mailest programs.
+
+
 How to start
 ------------
 
