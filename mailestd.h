@@ -20,11 +20,7 @@
 
 #define MAILESTD_MAIL_DIR	"Mail"
 #define MAILESTD_SOCK_PATH	".mailest.sock"
-#define MAILESTD_SOCK_MSGSIZ	256
-	/*
-	 * The size of the message is needed to be small not to beyond the
-	 * buffer of SOCK_SEQPACKET
-	 */
+#define MAILESTD_SOCK_MSGSIZ	256	/* response message size */
 #define MAILESTD_MAX_MESSAGE_ID	256
 
 enum MAILESTCTL_CMD {

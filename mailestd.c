@@ -2206,7 +2206,7 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 	char			 msgbuf[MAILESTD_SOCK_MSGSIZ];
 	struct {
 		enum MAILESTCTL_CMD	 command;
-		char			 space[BUFSIZ];
+		char			 space[8192];
 	} cmd;
 	struct mailestctl_smew	*smew = (struct mailestctl_smew *)&cmd;
 	struct mailestctl_update
@@ -2221,6 +2221,11 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 				mailestd_log(LOG_ERR, "%s(): read: %m",
 				    __func__);
 			}
+			goto on_error;
+		}
+		if (siz < sizeof(struct mailestctl)) {
+			mailestd_log(LOG_ERR, "%s(): received message size "
+			    "is too small", __func__);
 			goto on_error;
 		}
 		switch (cmd.command) {
@@ -2258,12 +2263,22 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 			return;
 
 		case MAILESTCTL_CMD_SEARCH:
+			if (siz < sizeof(struct mailestctl_search)) {
+				mailestd_log(LOG_ERR, "%s(): received message "
+				    "size is too small", __func__);
+				goto on_error;
+			}
 			if (mailestc_cmd_search(_this,
 			    (struct mailestctl_search *)&cmd) != 0)
 				goto on_error;
 			break;
 
 		case MAILESTCTL_CMD_SMEW:
+			if (siz < sizeof(struct mailestctl_smew)) {
+				mailestd_log(LOG_ERR, "%s(): received message "
+				    "size is too small", __func__);
+				goto on_error;
+			}
 			_this->monitoring_cmd = MAILESTCTL_CMD_SMEW;
 			_this->monitoring_id =
 			    mailestd_schedule_smew(mailestd,
@@ -2273,6 +2288,11 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 			break;
 
 		case MAILESTCTL_CMD_UPDATE:
+			if (siz < sizeof(struct mailestctl_update)) {
+				mailestd_log(LOG_ERR, "%s(): received message "
+				    "size is too small", __func__);
+				goto on_error;
+			}
 			_this->monitoring_cmd = MAILESTCTL_CMD_UPDATE;
 			_this->monitoring_id = mailestd_schedule_gather(
 			    mailestd, update->folder);
