@@ -246,9 +246,12 @@ wait_resp:
 			strlcpy(search.order, "@cdate NUMA",
 			    sizeof(search.order));
 		}
-		strlcpy(search.attrs[0],
-		    (result->action == MESSAGE_ID)? ATTR_MSGID : ATTR_PARID
-		    " STREQ ", sizeof(search.attrs[0]));
+		if (result->action == MESSAGE_ID)
+			strlcpy(search.attrs[0],
+			    ATTR_MSGID " STREQ ", sizeof(search.attrs[0]));
+		else
+			strlcpy(search.attrs[0],
+			    ATTR_PARID " STREQ ", sizeof(search.attrs[0]));
 		strlcat(search.attrs[0], result->msgid,
 		    sizeof(search.attrs[0]));
 		if (write(mailestc_sock, &search, sizeof(search)) < 0)
