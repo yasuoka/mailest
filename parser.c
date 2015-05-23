@@ -39,7 +39,8 @@ enum token_type {
 	SEARCH_IC,
 	SEARCH_ATTR,
 	SEARCH_PHRASE,
-	MSGID
+	MSGID,
+	PARID
 };
 
 struct token {
@@ -66,6 +67,7 @@ static const struct token t_main[] = {
 	{KEYWORD,	"csearch",	CSEARCH,	t_search},
 	{KEYWORD,	"smew",		SEARCH_SMEW,	t_smew},
 	{KEYWORD,	"message-id",	MESSAGE_ID,	t_msgid},
+	{KEYWORD,	"parent-id",	PARENT_ID,	t_msgid},
 	{KEYWORD,	"update",	UPDATE,		t_folder},
 	{KEYWORD,	"suspend",	SUSPEND,	NULL},
 	{KEYWORD,	"resume",	RESUME,		NULL},

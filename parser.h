@@ -26,7 +26,8 @@ enum actions {
 	RESUME,
 	CSEARCH,	/* estcmd search compatibile search command */
 	MESSAGE_ID,
-	SEARCH_SMEW
+	SEARCH_SMEW,
+	PARENT_ID,
 };
 
 struct parse_result {

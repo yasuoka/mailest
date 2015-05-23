@@ -246,6 +246,18 @@ wait_resp:
 			err(1, "write");
 		goto wait_resp;
 
+	case PARENT_ID:
+		run_daemon(cmd, cmdv);
+		memset(&search, 0, sizeof(search));
+		search.command = MAILESTCTL_CMD_SEARCH;
+		strlcpy(search.attrs[0], ATTR_PARID " STREQ ",
+		    sizeof(search.attrs[0]));
+		strlcat(search.attrs[0], result->msgid,
+		    sizeof(search.attrs[0]));
+		if (write(mailestc_sock, &search, sizeof(search)) < 0)
+			err(1, "write");
+		goto wait_resp;
+
 	case NONE:
 		break;
 	}
