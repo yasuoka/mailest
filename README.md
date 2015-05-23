@@ -97,10 +97,23 @@ ChangeLog
 
 0.9.14
 
+- 2015-05-23: yasuoka
+
+  - Support "smew -p" and "smew -c" so that Mew '^' and '&' work.
+    (pointed out by Yoshiaki Kasahara)
+  - Fix and refine build on FreeBSD (diff from Hiroki Saito)
+  - Fix build on the systems which need -liconv for iconv_open().
+    (diff from Yoshiaki Kasahara)
+  - Internal size for message-id may be too short.  Use 255 for it.
+  - When "guess-parid" failed to find the parent message, add dummy
+    x-mew-parid not to try to find the parent message ever.
+
 - 2015-05-18: yasuoka
 
   - Fixed: "guess-parid" is too slow since mailestd failed to create the
     index of "@title" on startup.
+  - Fixed to create the index for "@title" properly.
+
 
 0.9.13
 
