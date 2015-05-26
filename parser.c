@@ -340,7 +340,7 @@ parse_result_add_attr(struct parse_result *result, const char *word)
 		for (n = 0; result->search.attrs[n]; n++)
 			;
 	}
-	attrs = reallocarray(result->search.attrs, n + 1, sizeof(char *));
+	attrs = reallocarray(result->search.attrs, n + 2, sizeof(char *));
 	if (attrs == NULL) {
 		fprintf(stderr, "realloc_array(): %s", strerror(errno));
 		return (-1);

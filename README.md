@@ -107,6 +107,13 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
+0.9.18 (not yet)
+
+- 2015-05-26: yasuoka
+
+  - Fix off-by-one in mailestctl.  It crashed by using "csearch"
+    (mew-mailest).  (Found and debugged by Yoshiaki Kasahara)
+
 0.9.17
 
 - 2015-05-23: yasuoka
