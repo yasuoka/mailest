@@ -113,6 +113,7 @@ ChangeLog
 
   - Fix off-by-one in mailestctl.  It crashed by using "csearch"
     (mew-mailest).  (Found and debugged by Yoshiaki Kasahara)
+  - Fix ./configure to select kqueue or inotify properly.
 
 0.9.17
 
