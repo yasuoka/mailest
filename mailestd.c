@@ -2447,6 +2447,9 @@ mailestd_monitor_init(struct mailestd *_this)
 	_this->monitor_kev = xcalloc(1, sizeof(struct kevent));
 	_this->monitor_kev_siz = 1;
 #endif
+#ifdef MONITOR_INOTIFY
+	_this->monitor_in = inotify_init();
+#endif
 	RB_INIT(&_this->monitors);
 }
 
@@ -2462,9 +2465,6 @@ mailestd_monitor_start0(void *ctx)
 static void
 mailestd_monitor_run(struct mailestd *_this)
 {
-#ifdef MONITOR_INOTIFY
-	_this->monitor_in = inotify_init();	/* HERE? */
-#endif
 #ifdef MAILESTD_MT
 	_thread_create(&_this->monitorworker.thread, NULL,
 	    mailestd_monitor_start0, _this);
