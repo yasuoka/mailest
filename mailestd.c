@@ -459,7 +459,7 @@ mailestd_on_sigterm(int fd, short evmask, void *ctx)
 {
 	struct mailestd	*_this = ctx;
 
-	mailestd_log(LOG_INFO, "Recevied SIGTERM");
+	mailestd_log(LOG_INFO, "Received SIGTERM");
 	mailestd_stop(_this);
 }
 
@@ -468,7 +468,7 @@ mailestd_on_sigint(int fd, short evmask, void *ctx)
 {
 	struct mailestd	*_this = ctx;
 
-	mailestd_log(LOG_INFO, "Recevied SIGINT");
+	mailestd_log(LOG_INFO, "Received SIGINT");
 	mailestd_stop(_this);
 }
 
