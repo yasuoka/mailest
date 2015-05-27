@@ -24,17 +24,17 @@ Prerequirement:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.18.tar.gz
-    % tar xzf mailest-0.9.18.tar.gz
-    % cd mailest-mailest-0.9.18
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.19.tar.gz
+    % tar xzf mailest-0.9.19.tar.gz
+    % cd mailest-mailest-0.9.19
     % make
     % sudo make install
 
 Other:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.18.tar.gz
-    % tar xzf mailest-0.9.18.tar.gz
-    % cd mailest-mailest-0.9.18
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.19.tar.gz
+    % tar xzf mailest-0.9.19.tar.gz
+    % cd mailest-mailest-0.9.19
     % ./configure
     % make
     % sudo make install
@@ -106,6 +106,15 @@ See [man pages](#man-pages) also.
 
 ChangeLog
 ---------
+
+0.9.19
+
+- 2015-05-27: yasuoka
+
+  - Fix some variables in BSD make not to have DESTDIR doublely.
+  - Remove a debug log output in #ifdef MONITOR_INOTIFY.
+  - Fix typos in log message.
+
 
 0.9.18
 
