@@ -1,7 +1,6 @@
 LOCALBASE?=	/usr/local
-PREFIX?=	${LOCALBASE}
-BINDIR=		${PREFIX}/sbin
-MANDIR=		${PREFIX}/man/man
+BINDIR=		${LOCALBASE}/sbin
+MANDIR=		${LOCALBASE}/man/man
 
 CFLAGS+=	-I${.CURDIR}/.. -I${LOCALBASE}/include
 LIBESTRAIER=	${LOCALBASE}/lib/libestraier.a
