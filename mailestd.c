@@ -2573,7 +2573,6 @@ mailestd_monitor_on_inotify(int fd, short evmask, void *ctx)
 	struct timespec		*ts = NULL, ts0;
 	struct timeval		 tv;
 
-mailestd_log(LOG_INFO, "%s: ", __func__);
 	if (evmask & EV_READ) {
 		if ((siz = read(_this->monitor_in, buf, sizeof(buf))) <= 0){
 			if (siz != 0) {
