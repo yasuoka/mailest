@@ -1147,6 +1147,12 @@ mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
 	if ((subj1 = skip_subject(subj)) == NULL)
 		goto out;
 
+	if (strlen(subj1) < 5) {
+		mailestd_log(LOG_INFO,
+		    "gussing %s failed: subject too short %d", msg->path);
+		goto notexist;
+	}
+
 	cond = est_cond_new();
 
 	strlcpy(condbuf, ATTR_TITLE " " ESTOPSTREW " ", sizeof(condbuf));
@@ -1165,6 +1171,7 @@ mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
 	if (rnum != 1) {
 		mailestd_log(LOG_INFO,
 		    "guess %s's parent message doesn't exist", msg->path);
+notexist:
 		est_doc_add_attr(doc, ATTR_PARID, "notexist");
 		est_db_edit_doc(_this->db, doc);
 		goto out;
