@@ -1149,7 +1149,7 @@ mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
 
 	if (strlen(subj1) < 5) {
 		mailestd_log(LOG_INFO,
-		    "gussing %s failed: subject too short %d", msg->path);
+		    "gussing %s failed: subject too short", msg->path);
 		goto notexist;
 	}
 
