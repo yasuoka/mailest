@@ -208,7 +208,7 @@ mailestd_init(struct mailestd *_this, struct mailestd_conf *conf,
 
 	memset(_this, 0, sizeof(struct mailestd));
 
-	strlcpy(_this->maildir, conf->maildir, sizeof(_this->maildir));
+	realpath(conf->maildir, _this->maildir);
 	_this->lmaildir = strlen(_this->maildir);
 
 	if (debug == 0)
@@ -1551,7 +1551,8 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 			}
 		} else {
 			if (lstat(folder, &st) == 0 && S_ISDIR(st.st_mode)) {
-				mailestd_schedule_gather0(_this, ctx, folder);
+				realpath(folder, path);
+				mailestd_schedule_gather0(_this, ctx, path);
 				found = true;
 			} else
 				strlcpy(path, folder, sizeof(path));
