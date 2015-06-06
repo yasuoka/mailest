@@ -107,9 +107,15 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
-0.9.19
+0.9.20
 
-- 2015-05-27: yasuoka
+  - Use the realpath always for folders not to treat the path with
+    symbolic links and the realpath as different folders.  (Found
+    by Yoshiaki Kasahara)
+  - Improve log and comment a bit.
+
+
+0.9.19
 
   - Fix some variables in BSD make not to have DESTDIR doublely.
   - Remove a debug log output in #ifdef MONITOR_INOTIFY.
@@ -117,8 +123,6 @@ ChangeLog
 
 
 0.9.18
-
-- 2015-05-26: yasuoka
 
   - Fix off-by-one in mailestctl.  It crashed by using "csearch"
     (mew-mailest).  (Found and debugged by Yoshiaki Kasahara)
@@ -128,22 +132,16 @@ ChangeLog
 
 0.9.17
 
-- 2015-05-23: yasuoka
-
   - Fix "update" related logs to show the entire path name.
     (diff from Hiroki Sato)
 
 
 0.9.16
 
-- 2015-05-23: yasuoka
-
   - Fix "smew -p" to work.
 
 
 0.9.15
-
-- 2015-05-23: yasuoka
 
   - Monitoring were not enabled on some systems (atleast on FreeBSD).
     Fixed autoconf to choice kqueue() or inotify() properly.  (Pointed
@@ -151,8 +149,6 @@ ChangeLog
 
 
 0.9.14
-
-- 2015-05-23: yasuoka
 
   - Support "smew -p" and "smew -c" so that Mew '^' and '&' work.
     (pointed out by Yoshiaki Kasahara)
@@ -162,9 +158,6 @@ ChangeLog
   - Internal size for message-id may be too short.  Use 255 for it.
   - When "guess-parid" failed to find the parent message, add dummy
     x-mew-parid not to try to find the parent message ever.
-
-- 2015-05-18: yasuoka
-
   - Fixed: "guess-parid" is too slow since mailestd failed to create the
     index of "@title" on startup.
   - Fixed to create the index for "@title" properly.
@@ -172,7 +165,6 @@ ChangeLog
 
 0.9.13
 
-- 2015-05-16: yasuoka
   - Add "guess-parid" configration option to find the parent message
     for the messages which don't contain "In-Reply-To" or "Reference"
     header by guessing with "Subject" and "Date".  Add the following
@@ -182,37 +174,30 @@ ChangeLog
 
 0.9.12
 
-- 2015-05-12: yasuoka
   - Improve logging
-- 2015-05-11: yasuoka
   - Tweak log levels
   - Fix parsing "monitor" in mailestd.conf
 
 0.9.11
 
-- 2015-05-11: yasuoka
   - Fix not to change current working directory.
   - Fix: invalid memory access in mailestd_db_smew().
 
 0.9.10
 
-- 2015-05-11: yasuoka
   - Fix build on operating system which use kqueue for monitor.
 
 0.9.9
 
-- 2015-05-11: yasuoka
   - Monitor the inodes the directories (by kevent and inotify) and start
     update automatically.
   - Fixed error in replace.h which is to redefine RB_FOREACH_SAFE.
-- 2015-05-08: yasuoka
   - Optimize database when many documents are put or deleted.  As the
     Hyper Estrairer's documet is recomended.
   - Unlimit the resource limit of the data size when process startup.
 
 0.9.8
 
-- 2015-05-08: yasuoka
   - Add 'smew' functionality.  Add `smew` command to mailestctl(1).
     To use 'smew' of 'mailestd', add below lines:
 
@@ -227,7 +212,6 @@ ChangeLog
 
 0.9.7
 
--  2015-05-06: yasuoka
   - Fix: When the database doesn't exists, the database thread stopps
     forever.
   - Fix: When the database is error, the first update causes a lot
@@ -235,7 +219,6 @@ ChangeLog
 
 0.9.6
 
--  2015-05-06: yasuoka
   -  Fix: cannot search non ASCII/UTF-8 mails
   -  Fix: mailestd exits abnormally sometimes when it is stopped during
      syncing DB.
@@ -243,7 +226,6 @@ ChangeLog
 
 0.9.5
 
--  2015-05-06: yasuoka
   -  First "update" to huge database taked long time.  Fix it not to wait
      database cache updating before update starts.
   -  Fix the results of "update" to be passed correctly.
