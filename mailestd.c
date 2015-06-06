@@ -1557,6 +1557,7 @@ mailestd_schedule_gather(struct mailestd *_this, const char *folder)
 				strlcpy(path, folder, sizeof(path));
 		}
 		if (!found) {
+			/* the directory is not found, but it may be cached */
 			len = strlen(path);
 			strlcat(path, "/", sizeof(path));
 			msg0.path = path;
