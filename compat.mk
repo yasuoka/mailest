@@ -20,14 +20,13 @@ SRCS+=		reallocarray.c
 #
 # NetBSD
 #
-MANDIR=		${PREFIX}/man
 NOGCCERROR=	#
+LOCALBASE=	/usr/pkg
+MANDIR=		${LOCALBASE}/man
 CFLAGS+=	-DBSD_COMPAT
 CFLAGS+=	-DHAVE_STRLCPY -DHAVE_STRLCAT
-CFLAGS+=	-I/usr/pkg/include
-LIBESTRAIER=	/usr/pkg/lib/libestraier.a
-CFLAGS+=	-I/usr/pkg/include
-LDFLAGS=	-L/usr/pkg/lib -Wl,-rpath=/usr/pkg/lib
+CFLAGS+=	-I${LOCALBASE}/include
+LDFLAGS+=	-Wl,-rpath=${LOCALBASE}/lib
 SRCS+=		reallocarray.c strtonum.c open_memstream.c
 .PATH:		${.CURDIR}/../replace
 .endif
