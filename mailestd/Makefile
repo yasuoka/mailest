@@ -1,5 +1,7 @@
 MAILESTD_MT=	#
 
+.include <bsd.obj.mk>
+
 PROG=		mailestd
 SRCS=		bytebuf.c mailestd.c mailestctl.c parse.y parser.c
 LINKS=		${BINDIR}/mailestd ${LOCALBASE}/bin/mailestctl
