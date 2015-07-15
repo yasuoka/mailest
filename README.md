@@ -110,6 +110,7 @@ ChangeLog
 
 0.9.21 (not yet)
 
+  - Fix some LOG_DEBUG messages to use a canonical folder name.
   - Fix the way of referencing to libestdir.  Suggested by Hiroki Sato.
   - Fix BSD make.
   - Fix BSD make build on NetBSD.
