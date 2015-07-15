@@ -4,7 +4,11 @@ PROG=		mailestd
 SRCS=		bytebuf.c mailestd.c mailestctl.c parse.y parser.c
 LINKS=		${BINDIR}/mailestd ${LOCALBASE}/bin/mailestctl
 CFLAGS+=	-DHAVE_LIBESTDRAFT -DMONITOR_KQUEUE
-LIBESTDRAFTOBJ!=cd ${.CURDIR}/../libestdraft; ${MAKE} _whereobj
+.if defined(__objdir) && exists(${.CURDIR}/../libestdraft/${__objdir})
+LIBESTDRAFTOBJ=	${.CURDIR}/../libestdraft/${__objdir}
+.else
+LIBESTDRAFTOBJ=	${.OBJDIR}/../libestdraft
+.endif
 LDFLAGS=	-L${LOCALBASE}/lib
 LDADD=		-lestraier -levent -lqdbm
 DPADD=		${LIBESTRAIER} ${LIBEVENT} ${LIBQDBM}
