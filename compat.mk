@@ -21,6 +21,7 @@ SRCS+=		reallocarray.c
 # NetBSD
 #
 MANDIR=		${PREFIX}/man
+NOGCCERROR=	#
 CFLAGS+=	-DBSD_COMPAT
 CFLAGS+=	-DHAVE_STRLCPY -DHAVE_STRLCAT
 CFLAGS+=	-I/usr/pkg/include
