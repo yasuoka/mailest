@@ -107,6 +107,14 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
+0.9.21 (not yet)
+
+  - Fix the way of referencing to libestdir.  Suggested by Hiroki Sato.
+  - Fix BSD make.
+  - Fix BSD make build on NetBSD.
+  - Fix a bug in mailestd.conf(5).
+
+
 0.9.20
 
   - Use the realpath always for folders not to treat the path with
