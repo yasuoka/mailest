@@ -1,12 +1,8 @@
-#USE_BSDMAKE=	#
+# support of BSD make on other than OpenBSD is limited.
+# try ./configure && gmake instead if you can't fix it.
 
 HOSTTYPE!=	uname -s
 
-.ifndef USE_BSDMAKE
-.if (${HOSTTYPE} != "OpenBSD")
-.error	Do "./configure && gmake"
-.endif
-.else
 .if ${HOSTTYPE} == "FreeBSD"
 #
 # FreeBSD
@@ -29,5 +25,4 @@ CFLAGS+=	-I${LOCALBASE}/include
 LDFLAGS+=	-Wl,-rpath=${LOCALBASE}/lib
 SRCS+=		reallocarray.c strtonum.c open_memstream.c
 .PATH:		${.CURDIR}/../replace
-.endif
 .endif
