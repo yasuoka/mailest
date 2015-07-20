@@ -2842,7 +2842,7 @@ mailestd_vlog(int priority, const char *message, va_list args)
 {
 	FILE			*fp = stderr;
 	u_int			 i;
-	int			 fmtoff = 0, state = 0, saved_errno;
+	int			 fmtoff = 0, state = 0, msglen, saved_errno;
 	char			 fmt[1024];
 	struct tm		*lt;
 	time_t			 now;
@@ -2875,16 +2875,16 @@ mailestd_vlog(int priority, const char *message, va_list args)
 	time(&now);
 	lt = localtime(&now);
 
-	for (i = 0; i < strlen(message); i++) {
+	msglen = strlen(message);
+	for (i = 0; i < msglen; i++) {
+		/* 2 chars in this block and 2 chars after this block */
+		if (sizeof(fmt) - fmtoff < 4)
+			break;
 		switch (state) {
 		case 0:
 			switch (message[i]) {
 			case '%':
 				state = 1;
-				goto copy_loop;
-			case '\n':
-				fmt[fmtoff++] = '\n';
-				fmt[fmtoff++] = '\t';
 				goto copy_loop;
 			}
 			break;
@@ -2897,8 +2897,9 @@ mailestd_vlog(int priority, const char *message, va_list args)
 				break;
 			case 'm':
 				saved_errno = errno;
+				/* -1 is to reserve '\n' */
 				if (strerror_r(saved_errno, fmt + fmtoff,
-				    sizeof(fmt) - fmtoff) == 0)
+				    sizeof(fmt) - fmtoff - 1) == 0)
 					fmtoff = strlen(fmt);
 				errno = saved_errno;
 				state = 0;
@@ -2909,11 +2910,7 @@ mailestd_vlog(int priority, const char *message, va_list args)
 copy_loop:
 		continue;
 	}
-	if (fmt[fmtoff-1] == '\t')
-		fmtoff--;
-	if (fmt[fmtoff-1] != '\n')
-		fmt[fmtoff++] = '\n';
-
+	fmt[fmtoff++] = '\n';
 	fmt[fmtoff] = '\0';
 
 	if (!mailestd_log_initialized) {
