@@ -668,7 +668,7 @@ db_noent:
 		}
 		if (!title_found) {
 			mailestd_log(LOG_INFO, "Adding \""ATTR_TITLE"\" index");
-			est_db_add_attr_index(db, ATTR_PARID, ESTIDXATTRSTR);
+			est_db_add_attr_index(db, ATTR_TITLE, ESTIDXATTRSTR);
 		}
 		mailestd_db_close(_this);
 	}
