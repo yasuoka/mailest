@@ -110,6 +110,10 @@ ChangeLog
 
 0.9.21 (not yet)
 
+  - Fix: When mailestd starts up, "DB Sync" splits the messages in some
+    chunks.  The last message in chunk had been mistakenly treated it is
+    a target of "guess-parid".
+  - Fix: index for @title was not created
   - Add size check in log function.  Pointed out by Yuuich Someya for
     npppd.
   - Fix some LOG_DEBUG messages to use a canonical folder name.
