@@ -722,14 +722,6 @@ mailestd_db_sync(struct mailestd *_this)
 			    INT64_MAX, &errstr);
 		}
 
-		if (i >= MAILESTD_DBSYNC_NITER) {
-			free(_this->sync_prev);
-			_this->sync_prev = xstrdup(uri);
-			est_doc_delete(doc);
-			mailestd_schedule_db_sync(_this); /* schedule again */
-			return (0);
-		}
-
 		msg->pariddone =
 		    (est_doc_attr(doc, ATTR_PARID) != NULL)? true : false;
 		if (_this->paridguess && !msg->pariddone) {
@@ -744,6 +736,14 @@ mailestd_db_sync(struct mailestd *_this)
 		}
 		if (_this->paridguess && !msg->pariddone)
 			_this->paridnotdone++;
+
+		if (i >= MAILESTD_DBSYNC_NITER) {
+			free(_this->sync_prev);
+			_this->sync_prev = xstrdup(uri);
+			est_doc_delete(doc);
+			mailestd_schedule_db_sync(_this); /* schedule again */
+			return (0);
+		}
 		est_doc_delete(doc);
 	}
 	free(_this->sync_prev);
