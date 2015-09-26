@@ -1957,7 +1957,10 @@ task_worker_on_proc(struct task_worker *_this)
 			msg = ((struct task_rfc822 *)task)->msg;
 			MAILESTD_ASSERT(msg->draft == NULL);
 			mailestd_draft(mailestd, msg);
-			if (msg->draft != NULL) {
+			if (msg->draft == NULL)
+				/* No draft, no parid */
+				msg->pariddone = true;
+			else {
 				msg->pariddone = estdoc_add_parid(msg->draft);
 				if (mailestd->paridguess && !msg->pariddone) {
 					if (skip_subject(
