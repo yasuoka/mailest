@@ -1192,10 +1192,13 @@ notexist:
 		    msg->path, est_doc_attr(docpar, ESTDATTRURI) + 7);
 		est_doc_add_attr(doc, ATTR_PARID, parid);
 		est_db_edit_doc(_this->db, doc);
-	} else
-		mailestd_log(LOG_WARNING,
-		    "gussing %s failed: search result no msgid %d", msg->path,
-		    res[0]);
+	} else {
+		mailestd_log(LOG_DEBUG,
+		    "guessing %s failed: guessed parent (doc id=%d) has no "
+		    "msgid ", msg->path, res[0]);
+		est_doc_add_attr(doc, ATTR_PARID, "noidparent");
+		est_db_edit_doc(_this->db, doc);
+	}
 	est_doc_delete(docpar);
 out:
 	if (doc != NULL)
