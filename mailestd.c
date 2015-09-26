@@ -1149,7 +1149,7 @@ mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
 
 	if (strlen(subj1) < 5) {
 		mailestd_log(LOG_INFO,
-		    "gussing %s failed: subject too short", msg->path);
+		    "guessing %s failed: subject too short", msg->path);
 		goto notexist;
 	}
 
@@ -1180,7 +1180,7 @@ notexist:
 	docpar = est_db_get_doc(_this->db, res[0], ESTGDNOTEXT);
 	if (docpar == NULL) {
 		mailestd_log(LOG_WARNING,
-		    "gussing %s failed: search result no doc %d", msg->path,
+		    "guessing %s failed: search result no doc %d", msg->path,
 			res[0]);
 		goto out;
 	}
