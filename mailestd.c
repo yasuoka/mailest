@@ -2099,6 +2099,7 @@ task_worker_on_proc_db(struct task_worker *_this,
 			break;
 		mailestd_guess(mailestd, msg);
 		msg->pariddone = true;
+		msg->ontask = false;
 		break;
 
 	case MAILESTD_TASK_SEARCH:
