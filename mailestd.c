@@ -2080,6 +2080,10 @@ task_worker_on_proc_db(struct task_worker *_this,
 		msg->ontask = false;
 		TAILQ_INSERT_TAIL(&mailestd->rfc822_tasks, task, queue);
 		mailestd->rfc822_ntask--;
+		if (msg->db_id == 0) {
+			RB_REMOVE(rfc822_tree, &mailestd->root, msg);
+			rfc822_free(msg);
+		}
 		break;
 
 	case MAILESTD_TASK_RFC822_DELDB:

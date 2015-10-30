@@ -110,6 +110,9 @@ ChangeLog
 
 0.9.21 (not yet)
 
+  - Fix mailestd not to mistakenly delete a message from the database,
+    as a result, it stopps working since it presumes the database is
+    broken.  (Reported by by Yoshiaki Kasahara)
   - Fix: When mailestd starts up, "DB Sync" splits the messages in some
     chunks.  The last message in chunk had been mistakenly treated it is
     a target of "guess-parid".
