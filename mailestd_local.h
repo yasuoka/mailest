@@ -75,7 +75,7 @@ struct mailestd {
 	struct task_worker	  dbworker;
 	struct task_worker	  mainworker;
 	struct task_worker	  monitorworker;
-	struct task_worker	 *workers[4];
+	struct task_worker	 *workers[4];	/* array of all workers */
 	struct gather_queue	  gathers;
 	struct task_queue	  gather_pendings;
 
