@@ -1869,15 +1869,23 @@ task_worker_stop(struct task_worker *_this)
 static uint64_t
 task_worker_add_task(struct task_worker *_this, struct task *task)
 {
+	struct task	*tske;
 	uint64_t	 id;
 
 	task->id = mailestd_new_id(_this->mailestd_this);
 	id = task->id;
 
 	_thread_mutex_lock(&_this->lock);
-	if (task->highprio)
-		TAILQ_INSERT_HEAD(&_this->head, task, queue);
-	else
+	if (task->highprio) {
+		TAILQ_FOREACH(tske, &_this->head, queue) {
+			if (!tske->highprio)
+				break;
+		}
+		if (tske != NULL)
+			TAILQ_INSERT_BEFORE(tske, task, queue);
+		else
+			TAILQ_INSERT_HEAD(&_this->head, task, queue);
+	} else
 		TAILQ_INSERT_TAIL(&_this->head, task, queue);
 	_thread_mutex_unlock(&_this->lock);
 
