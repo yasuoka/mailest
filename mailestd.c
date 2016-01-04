@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 YASUOKA Masahiko <yasuoka@yasuoka.net>
+ * Copyright (c) 2015, 2016 YASUOKA Masahiko <yasuoka@yasuoka.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
