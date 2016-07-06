@@ -481,7 +481,6 @@ mailestc_on_ctl_event(int fd, short evmask, void *ctx)
 	struct mailestd		*_this = ctx;
 	struct mailestc		*ctl;
 
-	MAILESTD_DBG((LOG_DEBUG, "%s()", __func__));
 	if (evmask & EV_READ) {
 		slen = sizeof(sun);
 		if ((sock = accept(_this->sock_ctl, (struct sockaddr *)&sun,
