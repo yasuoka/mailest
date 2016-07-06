@@ -2135,7 +2135,6 @@ task_worker_on_proc_db(struct task_worker *_this,
 		if (mailestd->paridguess && mailestd->paridnotdone > 0) {
 			mailestd_guess_parid(mailestd);
 			mailestd->paridnotdone = 0;
-			return (true);
 		}
 		if (ctx->puts + ctx->dels > 0 &&
 		    est_db_used_cache_size(mailestd->db) > MAILESTD_DBFLUSHSIZ){
