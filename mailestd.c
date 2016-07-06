@@ -2140,7 +2140,7 @@ task_worker_on_proc_db(struct task_worker *_this,
 		if (ctx->puts + ctx->dels > 0 &&
 		    est_db_used_cache_size(mailestd->db) > MAILESTD_DBFLUSHSIZ){
 			/*
-			 * When we wrote somthing, flush the DB first.  Since
+			 * When we wrote something, flush the DB first.  Since
 			 * closing DB takes long time.  Flush before close
 			 * to make the other tasks can interrupt.
 			 */
