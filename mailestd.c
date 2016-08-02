@@ -1259,8 +1259,7 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 	for (i = 0, msgid = smew->msgid; msgid != NULL; i++) {
 		strlcpy(buf, ATTR_MSGID	" " ESTOPSTREQ " ", sizeof(buf));
 		strlcat(buf, msgid, sizeof(buf));
-		if ((cond = est_cond_new()) == NULL)
-			break;
+		cond = est_cond_new();
 		est_cond_add_attr(cond, buf);
 		res = est_db_search(db, cond, &rnum, NULL);
 		est_cond_delete(cond);
@@ -1317,8 +1316,7 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 			continue;	/* can't become parent */
 		strlcpy(buf, ATTR_PARID	" " ESTOPSTREQ " ", sizeof(buf));
 		strlcat(buf, doce->msgid, sizeof(buf));
-		if ((cond = est_cond_new()) == NULL)
-			break;
+		cond = est_cond_new();
 		est_cond_add_attr(cond, buf);
 		res = est_db_search(db, cond, &rnum, NULL);
 		est_cond_delete(cond);
