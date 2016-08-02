@@ -1232,7 +1232,6 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 	int		 i, cnt = 0, *res, rnum, lfolder;
 	const char	*uri, *msgid;
 	char		 buf[BUFSIZ], *bufp = NULL;
-	bool		 keepthis;
 	size_t		 bufsiz = 0;
 	FILE		*out;
 	ESTDB		*db;
@@ -1284,6 +1283,35 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 	/* search descendants */
 	while ((doce = TAILQ_FIRST(&children)) != NULL) {
 		TAILQ_REMOVE(&children, doce, queue);
+		TAILQ_FOREACH_SAFE(docc, &ancestors, queue, doct) {
+			if (doce->msgid != NULL && docc->msgid != NULL &&
+			    strcmp(doce->msgid, docc->msgid) == 0)
+				break;
+		}
+		if (docc != NULL) {
+			/*
+			 * Keep ancestors list unique.
+			 */
+			if (docc->uri == NULL)
+				docc->uri = uri2normalpath(_this,
+				    est_doc_attr(docc->doc, ESTDATTRURI));
+			if (lfolder > 0 &&
+			    !strncmp(docc->uri, smew->folder, lfolder) &&
+			    docc->uri[lfolder] == '/') {
+				/*
+				 * existing member, docc, imatches the given
+				 * folder.  Keep it.
+				 */
+				est_doc_delete(doce->doc);
+				free(doce);
+			} else {
+				TAILQ_REMOVE(&ancestors, docc, queue);
+				est_doc_delete(docc->doc);
+				free(docc);
+				TAILQ_INSERT_TAIL(&ancestors, doce, queue);
+			}
+			continue;
+		}
 		TAILQ_INSERT_TAIL(&ancestors, doce, queue);
 		if (doce->msgid == NULL)
 			continue;	/* can't become parent */
@@ -1305,48 +1333,11 @@ mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 		}
 	}
 
-	/* make the list unique */
-	TAILQ_FOREACH_SAFE(doce, &ancestors, queue, doct) {
-		keepthis = false;
-		uri = est_doc_attr(doce->doc, ESTDATTRURI);
-		if (uri != NULL) {
-			if (is_parent_dir(_this->maildir, URI2PATH(uri))) {
-				doce->uri = uri + _this->lmaildir + 8;
-				if (lfolder > 0 &&
-				    !strncmp(doce->uri, smew->folder, lfolder)
-				    && doce->uri[lfolder] == '/')
-					/*
-					 * When removing the duplcated
-					 * messages, keep the messages in the
-					 * folder specified.
-					 */
-					keepthis = true;
-			} else
-				doce->uri = URI2PATH(uri);
-		}
-
-		/* removing duplicated messges */
-		TAILQ_FOREACH(docc, &ancestors, queue) {
-			if (doce == docc)
-				break;
-			if (doce->msgid != NULL && docc->msgid != NULL &&
-			    strcmp(doce->msgid, docc->msgid) == 0) {
-				if (!keepthis) {
-					TAILQ_REMOVE(&ancestors, doce, queue);
-					est_doc_delete(doce->doc);
-					free(doce);
-				} else {
-					TAILQ_REMOVE(&ancestors, docc, queue);
-					est_doc_delete(docc->doc);
-					free(docc);
-				}
-				break;
-			}
-		}
-	}
-
 	TAILQ_FOREACH_SAFE(doce, &ancestors, queue, doct) {
 		TAILQ_REMOVE(&ancestors, doce, queue);
+		if (doce->uri == NULL)
+			doce->uri = uri2normalpath(_this,
+			    (const char *)est_doc_attr(doce->doc, ESTDATTRURI));
 		fprintf(out, "%s\n", doce->uri);
 		est_doc_delete(doce->doc);
 		free(doce);
@@ -3212,6 +3203,17 @@ skip_subject(const char *subj)
 	while (isspace(*subj))
 		subj++;
 	return (subj);
+}
+
+static const char *
+uri2normalpath(struct mailestd *_this, const char *uri)
+{
+	if (uri == NULL)
+		return (NULL);
+	if (is_parent_dir(_this->maildir, URI2PATH(uri)))
+		return (uri + _this->lmaildir + 8);
+	else
+		return (URI2PATH(uri));
 }
 
 RB_GENERATE_STATIC(rfc822_tree, rfc822, tree, rfc822_compar);

@@ -110,6 +110,7 @@ ChangeLog
 
 0.9.21 (not yet)
 
+  - Fix smew not to loop infinately
   - Fix mailestd not to mistakenly delete a message from the database,
     as a result, it stopps working since it presumes the database is
     broken.  (Reported by by Yoshiaki Kasahara)

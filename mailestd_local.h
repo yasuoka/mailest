@@ -358,6 +358,8 @@ static bool	 valid_msgid(const char *);
 static bool	 is_parent_dir(const char *, const char *);
 static const char *
 		 skip_subject(const char *);
+static const char *
+		 uri2normalpath(struct mailestd *, const char *);
 
 #ifndef	nitems
 #define nitems(_n)	(sizeof((_n)) / sizeof((_n)[0]))
