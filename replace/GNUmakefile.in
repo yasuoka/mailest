@@ -78,7 +78,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = replace
 DIST_COMMON = $(srcdir)/GNUmakefile.in $(srcdir)/GNUmakefile.am \
-	strlcat.c strtonum.c open_memstream.c reallocarray.c strlcpy.c \
+	strlcat.c reallocarray.c open_memstream.c strtonum.c strlcpy.c \
 	$(top_srcdir)/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
