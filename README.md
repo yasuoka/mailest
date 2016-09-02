@@ -108,9 +108,13 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
-0.9.21
+0.9.22
 
   - Fix smew not to loop infinately
+
+
+0.9.21
+
   - Fix mailestd not to mistakenly delete a message from the database,
     as a result, it stopps working since it presumes the database is
     broken.  (Reported by by Yoshiaki Kasahara)
