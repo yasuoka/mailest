@@ -108,7 +108,7 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
-0.9.21 (not yet)
+0.9.21
 
   - Fix mailestd not to mistakenly delete a message from the database,
     as a result, it stopps working since it presumes the database is
