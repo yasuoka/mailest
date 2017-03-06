@@ -2105,8 +2105,10 @@ task_worker_on_proc_db(struct task_worker *_this,
 
 	case MAILESTD_TASK_SEARCH:
 		search = (struct task_search *)task;
-		if (mailestd_db_open_rd(mailestd) == NULL)
+		if (mailestd_db_open_rd(mailestd) == NULL) {
+			mailestd_schedule_inform(mailestd, task->id, NULL, 0);
 			break;
+		}
 		mailestd_search(mailestd, task->id, search->str, search->cond,
 		    search->outform);
 		break;

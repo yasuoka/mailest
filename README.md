@@ -110,6 +110,9 @@ ChangeLog
 
 0.9.23 (not yet)
 
+  - Mew had freezed by `csearch` command from `mailestctl` when the
+    database is unusable since `mailestd` didn't response anything when
+    the database is unusable.
   - Make guess-parid work even for a message which doesn't have a "Date"
     field.
 
