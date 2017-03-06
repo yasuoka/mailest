@@ -1141,10 +1141,9 @@ mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
 		goto out;
 	subj = est_doc_attr(doc, ATTR_TITLE);
 	cdate = est_doc_attr(doc, ATTR_CDATE);
-	if (subj == NULL || cdate == NULL)
-		goto out;
-	if ((subj1 = skip_subject(subj)) == NULL)
-		goto out;
+	MAILESTD_ASSERT(subj != NULL);
+	subj1 = skip_subject(subj);
+	MAILESTD_ASSERT(subj1 != NULL);
 
 	if (strlen(subj1) < 5) {
 		mailestd_log(LOG_INFO,
@@ -1158,9 +1157,11 @@ mailestd_guess(struct mailestd *_this, struct rfc822 *msg)
 	strlcat(condbuf, subj1, sizeof(condbuf));
 	est_cond_add_attr(cond, condbuf);
 
-	strlcpy(condbuf, ATTR_CDATE" " ESTOPNUMLT " ", sizeof(condbuf));
-	strlcat(condbuf, cdate, sizeof(condbuf));
-	est_cond_add_attr(cond, condbuf);
+	if (cdate != NULL) {
+		strlcpy(condbuf, ATTR_CDATE" " ESTOPNUMLT " ", sizeof(condbuf));
+		strlcat(condbuf, cdate, sizeof(condbuf));
+		est_cond_add_attr(cond, condbuf);
+	}
 
 	strlcpy(condbuf, ATTR_CDATE " " ESTORDNUMD, sizeof(condbuf));
 	est_cond_set_order(cond, condbuf);

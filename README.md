@@ -108,6 +108,12 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
+0.9.23 (not yet)
+
+  - Make guess-parid work even for a message which doesn't have a "Date"
+    field.
+
+
 0.9.22
 
   - Fix smew not to loop infinately
