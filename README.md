@@ -18,6 +18,9 @@ and maintains its id index database.
 Install
 -------
 
+On OpenBSD or FreeBSD, pre-compiled package is available.  The following
+procedure is the way to compile it from source code.
+
 Prerequisite:
 
 - "hyperestraier" and "qdbm" installed
