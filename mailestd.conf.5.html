@@ -1,121 +1,149 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8"/>
-<style>
-table.head, table.foot { width: 100%; }
-td.head-rtitle, td.foot-os { text-align: right; }
-td.head-vol { text-align: center; }
-table.foot td { width: 50%; }
-table.head td { width: 33%; }
-div.spacer { margin: 1em 0; }
-</style>
-<title>
-MAILESTD.CONF(5)</title>
+  <meta charset="utf-8"/>
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    div.Pp { margin: 1ex 0ex; }
+  </style>
+  <title>MAILESTD.CONF(5)</title>
 </head>
 <body>
-<div class="mandoc">
 <table class="head">
-<tbody>
-<tr>
-<td class="head-ltitle">
-MAILESTD.CONF(5)</td>
-<td class="head-vol">
-File Formats Manual</td>
-<td class="head-rtitle">
-MAILESTD.CONF(5)</td>
-</tr>
-</tbody>
+  <tr>
+    <td class="head-ltitle">MAILESTD.CONF(5)</td>
+    <td class="head-vol">File Formats Manual</td>
+    <td class="head-rtitle">MAILESTD.CONF(5)</td>
+  </tr>
 </table>
-<div class="section">
-<h1 id="x4e414d45">NAME</h1> <b class="name">mailestd.conf</b> &#8212; <span class="desc"><a class="link-man" href="mailestd.8.html">mailestd(8)</a> configuration file</span></div>
-<div class="section">
-<h1 id="x4445534352495054494f4e">DESCRIPTION</h1> <b class="name">mailestd.conf</b> is the configuration file for the <a class="link-man" href="mailestd.8.html">mailestd(8)</a> daemon.<div class="spacer">
-</div>
-The following options can be set:<dl style="margin-top: 0.00em;margin-bottom: 0.00em;" class="list list-tag">
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">maildir</b> <i class="arg">directory</i></dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-The base directory instead of the default <i class="file">${HOME}/Mail</i>. <a class="link-man" href="mailestd.8.html">mailestd(8)</a> creates indexes for the mail message in the folders under this directory and uses some files under from this directory.</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">socket</b> <i class="arg">path</i></dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-The <span class="unix">UNIX</span>-domain socket for communication from <a class="link-man" href="mailectl.1.html">mailectl(1)</a>. As the default relateve path <i class="file">.mailestd.sock</i> from the <i class="arg">maildir</i> is used.</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">tasks</b> <i class="arg">number</i></dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-The number of tasks allowed to prepare for indexing paralelly. The default value is &#8220;4&#8221;. Specifying a large number may improve the peformance, but cosumes the memory resource. On typical environments, since indexing the mail messages and putting them into the datbase will be the performance bottle neck, this variable is not so important.</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">monitor</b> [<span class="opt"><b class="cmd">disable</b></span>] [<span class="opt"><b class="cmd">delay</b> <i class="arg">delay</i></span>]</dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-The monitor is enabled unless <b class="cmd">disable</b> is specified. When the monitor is enabled, <b class="name">mailestd</b> will start indexing automatically when changes are made on the folder already indexed. Specify <i class="arg">delay</i> in milli seconds instead of the default value 1500 which the <b class="name">mailestd</b> waits for until it starts indexing.</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">guess-parid</b></dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-This option makes <b class="name">mailestd</b> to create a parent message id (&#8220;x-mew-parid&#8221;) attribue in the database, when it finds a message which failed to create the parent message-id in the normal way by guessing guessing by the &#8220;Subject&#8221; and &#8220;Date&#8221;.</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">suffixes</b> <i class="arg">suffix ...</i></dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-The file name suffixes of the mail messages gathered for indexing. The default is &#8220;&#8221; (none).</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">folders</b> <i class="arg">folder ...</i></dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-The folder name patterns <a class="link-man" href="emailestd.8.html">emailestd(8)</a> creates index for. An shell pattern (&#8220;openbsd-*&#8221; for example) is usable. If the <i class="arg">folder</i> starts with &#8220;!&#8221;, matched folders are ignored. Folders not matched any are target for indexing. The default is &#8220;!trash !casket !casket_replica&#8221;.</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">log</b> <b class="cmd">path</b> <i class="arg">path</i></dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-The log file path. As the default, the relative path <i class="file">mailestd.log</i> to <i class="arg">maildir</i> is used.</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">log</b> <b class="cmd">rotate</b> [<span class="opt"><b class="cmd">count</b> <i class="arg">count</i></span>] [<span class="opt"><b class="cmd">size</b> <i class="arg">size</i></span>]</dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-The log rotation behaviour. As the default, &#8220;8&#8221; for the <i class="arg">count</i> and &#8220;30720&#8221; (30K bytes) are used.</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">database</b> <b class="cmd">path</b> <i class="arg">path</i></dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-Thd database directory. As the default, the relative path <i class="file">casket</i> is used.</dd>
-<dt class="list-tag" style="margin-top: 1.00em;">
-<b class="cmd">debug</b> <b class="cmd">level</b> <i class="arg">debug-level</i></dt>
-<dd class="list-tag" style="margin-left: 6.00ex;">
-The debug level instead of the default value &#8220;0&#8221;.</dd>
+<div class="manual-text">
+<h1 class="Sh" title="Sh" id="NAME"><a class="selflink" href="#NAME">NAME</a></h1>
+<b class="Nm" title="Nm">mailestd.conf</b> &#8212;
+  <span class="Nd" title="Nd"><a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
+  configuration file</span>
+<h1 class="Sh" title="Sh" id="DESCRIPTION"><a class="selflink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<b class="Nm" title="Nm">mailestd.conf</b> is the configuration file for the
+  <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> daemon.
+<div class="Pp"></div>
+The following options can be set:
+<dl class="Bl-tag" style="margin-left: 6.60ex;">
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#maildir"><b class="Ic" title="Ic" id="maildir">maildir</b></a>
+    <var class="Ar" title="Ar">directory</var></dt>
+  <dd class="It-tag">The base directory instead of the default
+      <i class="Pa" title="Pa">${HOME}/Mail</i>.
+      <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> creates
+      indexes for the mail message in the folders under this directory and uses
+      some files under from this directory.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#socket"><b class="Ic" title="Ic" id="socket">socket</b></a>
+    <var class="Ar" title="Ar">path</var></dt>
+  <dd class="It-tag">The <span class="Ux">UNIX</span>-domain socket for
+      communication from
+      <a class="Xr" title="Xr" href="mailectl.1.html">mailectl(1)</a>. As the
+      default relateve path <i class="Pa" title="Pa">.mailestd.sock</i> from the
+      <var class="Ar" title="Ar">maildir</var> is used.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#tasks"><b class="Ic" title="Ic" id="tasks">tasks</b></a>
+    <var class="Ar" title="Ar">number</var></dt>
+  <dd class="It-tag">The number of tasks allowed to prepare for indexing
+      paralelly. The default value is &#8220;4&#8221;. Specifying a large number
+      may improve the peformance, but cosumes the memory resource. On typical
+      environments, since indexing the mail messages and putting them into the
+      datbase will be the performance bottle neck, this variable is not so
+      important.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#monitor"><b class="Ic" title="Ic" id="monitor">monitor</b></a>
+    [<span class="Op"><b class="Ic" title="Ic">disable</b></span>]
+    [<span class="Op"><b class="Ic" title="Ic">delay</b>
+    <var class="Ar" title="Ar">delay</var></span>]</dt>
+  <dd class="It-tag">The monitor is enabled unless
+      <b class="Ic" title="Ic">disable</b> is specified. When the monitor is
+      enabled, <b class="Nm" title="Nm">mailestd</b> will start indexing
+      automatically when changes are made on the folder already indexed. Specify
+      <var class="Ar" title="Ar">delay</var> in milli seconds instead of the
+      default value 1500 which the <b class="Nm" title="Nm">mailestd</b> waits
+      for until it starts indexing.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#guess-parid"><b class="Ic" title="Ic" id="guess-parid">guess-parid</b></a></dt>
+  <dd class="It-tag">This option makes <b class="Nm" title="Nm">mailestd</b> to
+      create a parent message id (&#8220;x-mew-parid&#8221;) attribue in the
+      database, when it finds a message which failed to create the parent
+      message-id in the normal way by guessing guessing by the
+      &#8220;Subject&#8221; and &#8220;Date&#8221;.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#trim-size"><b class="Ic" title="Ic" id="trim-size">trim-size</b></a>
+    <var class="Ar" title="Ar">size</var></dt>
+  <dd class="It-tag">Specify <var class="Ar" title="Ar">size</var> at which
+      <b class="Nm" title="Nm">mailestd</b> trims the mail message before
+      creating an index for the message. Thd default value is
+      &#8220;131072&#8221; (128K) bytes.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#suffixes"><b class="Ic" title="Ic" id="suffixes">suffixes</b></a>
+    <var class="Ar" title="Ar">suffix ...</var></dt>
+  <dd class="It-tag">The file name suffixes of the mail messages gathered for
+      indexing. The default is &#8220;&#8221; (none).</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#folders"><b class="Ic" title="Ic" id="folders">folders</b></a>
+    <var class="Ar" title="Ar">folder ...</var></dt>
+  <dd class="It-tag">The folder name patterns
+      <a class="Xr" title="Xr" href="emailestd.8.html">emailestd(8)</a> creates
+      index for. An shell pattern (&#8220;openbsd-*&#8221; for example) is
+      usable. If the <var class="Ar" title="Ar">folder</var> starts with
+      &#8220;!&#8221;, matched folders are ignored. Folders not matched any are
+      target for indexing. The default is &#8220;!trash !casket
+      !casket_replica&#8221;.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#log"><b class="Ic" title="Ic" id="log">log</b></a>
+    <b class="Ic" title="Ic">path</b> <var class="Ar" title="Ar">path</var></dt>
+  <dd class="It-tag">The log file path. As the default, the relative path
+      <i class="Pa" title="Pa">mailestd.log</i> to
+      <var class="Ar" title="Ar">maildir</var> is used.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#log"><b class="Ic" title="Ic" id="log">log</b></a>
+    <b class="Ic" title="Ic">rotate</b>
+    [<span class="Op"><b class="Ic" title="Ic">count</b>
+    <var class="Ar" title="Ar">count</var></span>]
+    [<span class="Op"><b class="Ic" title="Ic">size</b>
+    <var class="Ar" title="Ar">size</var></span>]</dt>
+  <dd class="It-tag">The log rotation behaviour. As the default, &#8220;8&#8221;
+      for the <var class="Ar" title="Ar">count</var> and &#8220;30720&#8221;
+      (30K) bytes are used.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#database"><b class="Ic" title="Ic" id="database">database</b></a>
+    <b class="Ic" title="Ic">path</b> <var class="Ar" title="Ar">path</var></dt>
+  <dd class="It-tag">Thd database directory. As the default, the relative path
+      <i class="Pa" title="Pa">casket</i> is used.</dd>
+  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#debug"><b class="Ic" title="Ic" id="debug">debug</b></a>
+    <b class="Ic" title="Ic">level</b>
+    <var class="Ar" title="Ar">debug-level</var></dt>
+  <dd class="It-tag">The debug level instead of the default value
+      &#8220;0&#8221;.</dd>
 </dl>
-<div class="spacer">
+<div class="Pp"></div>
+The current line can be extended over multiple lines using a backslash
+  (&#8216;\&#8217;). Comments can be put anywhere in the file using a hash mark
+  (&#8216;#&#8217;), and extend to the end of the current line. Care should be
+  taken when commenting out multi-line text: the comment is effective until the
+  end of the entire block.
+<div class="Pp"></div>
+Argument names not beginning with a letter, digit, or underscore must be quoted.
+<div class="Pp"></div>
+Additional configuration files can be included with the
+  <b class="Ic" title="Ic">include</b> keyword, for example:
+<div class="Pp"></div>
+<div class="Bd" style="margin-left: 5.00ex;">
+<pre class="Li">
+include &quot;/etc/mailestd.conf&quot;
+</pre>
 </div>
-The current line can be extended over multiple lines using a backslash (&#8216;\&#8217;). Comments can be put anywhere in the file using a hash mark (&#8216;#&#8217;), and extend to the end of the current line. Care should be taken when commenting out multi-line text: the comment is effective until the end of the entire block.<div class="spacer">
-</div>
-Argument names not beginning with a letter, digit, or underscore must be quoted.<div class="spacer">
-</div>
-Additional configuration files can be included with the <b class="cmd">include</b> keyword, for example:<div class="spacer">
-</div>
-<pre style="margin-left: 5.00ex;" class="lit display">
-include &quot;/etc/mailestd.conf&quot;</pre>
-</div>
-<div class="section">
-<h1 id="x53454520414c534f">SEE ALSO</h1> <a class="link-man" href="mailestd.8.html">mailestd(8)</a></div>
-<div class="section">
-<h1 id="x46494c4553">FILES</h1><dl style="margin-top: 0.00em;margin-bottom: 0.00em;" class="list list-tag">
-<dt class="list-tag" style="margin-top: 0.00em;">
-<i class="file">${HOME}/Mail</i></dt>
-<dd class="list-tag" style="margin-left: 25.00ex;">
-The default <i class="arg">maildir</i>.</dd>
-<dt class="list-tag" style="margin-top: 0.00em;">
-<i class="file">(maildir)/mailestd.conf</i></dt>
-<dd class="list-tag" style="margin-left: 25.00ex;">
-The default configuration file name.</dd>
+<h1 class="Sh" title="Sh" id="SEE_ALSO"><a class="selflink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
+<h1 class="Sh" title="Sh" id="FILES"><a class="selflink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag" style="margin-left: 27.50ex;">
+  <dt class="It-tag" style="margin-left: -27.50ex;"><i class="Pa" title="Pa">${HOME}/Mail</i></dt>
+  <dd class="It-tag">The default <var class="Ar" title="Ar">maildir</var>.</dd>
+  <dt class="It-tag" style="margin-left: -27.50ex;"><i class="Pa" title="Pa">(maildir)/mailestd.conf</i></dt>
+  <dd class="It-tag">The default configuration file name.</dd>
 </dl>
 </div>
-<div class="section">
-<h1 id="x415554484f5253">AUTHORS</h1> The <b class="name">mailestd.conf</b> program was written by <span class="author">YASUOKA Masahiko</span> &lt;<a class="link-mail" href="mailto:yasuoka@yasuoka.net">yasuoka@yasuoka.net</a>&gt;.</div>
 <table class="foot">
-<tbody>
-<tr>
-<td class="foot-date">
-April 4, 2015</td>
-<td class="foot-os">
-OpenBSD 5.8</td>
-</tr>
-</tbody>
+  <tr>
+    <td class="foot-date">April 4, 2015</td>
+    <td class="foot-os">OpenBSD 6.1</td>
+  </tr>
 </table>
-</div>
 </body>
 </html>
-
