@@ -62,17 +62,17 @@ The monitor is enabled unless
 .Ic disable
 is specified.
 When the monitor is enabled,
-.Nm mailestd
+.Xr mailestd 8
 will start indexing automatically when changes are made on the folder
 already indexed.
 Specify
 .Ar delay
 in milli seconds instead of the default value 1500 which the
-.Nm mailestd
+.Xr mailestd 8
 waits for until it starts indexing.
 .It Ic guess-parid
 This option makes
-.Nm mailestd
+.Xr mailestd 8
 to create a parent message id
 .Po Do x-mew-parid Dc Pc
 attribue in the database,
@@ -85,7 +85,7 @@ and
 Specify
 .Ar size
 at which
-.Nm mailestd
+.Xr mailestd 8
 trims the mail message before creating an index for the message.
 Thd default value is
 .Dq 131072
@@ -98,7 +98,7 @@ The default is
 .Pq none .
 .It Ic folders Ar folder ...
 The folder name patterns
-.Xr emailestd 8
+.Xr mailestd 8
 creates index for.
 An shell pattern
 .Po Qo openbsd-* Qc for example Pc
