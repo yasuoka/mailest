@@ -57,23 +57,25 @@ The following options can be set:
     <var class="Ar" title="Ar">delay</var></span>]</dt>
   <dd class="It-tag">The monitor is enabled unless
       <b class="Ic" title="Ic">disable</b> is specified. When the monitor is
-      enabled, <b class="Nm" title="Nm">mailestd</b> will start indexing
-      automatically when changes are made on the folder already indexed. Specify
-      <var class="Ar" title="Ar">delay</var> in milli seconds instead of the
-      default value 1500 which the <b class="Nm" title="Nm">mailestd</b> waits
-      for until it starts indexing.</dd>
+      enabled, <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
+      will start indexing automatically when changes are made on the folder
+      already indexed. Specify <var class="Ar" title="Ar">delay</var> in milli
+      seconds instead of the default value 1500 which the
+      <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> waits for
+      until it starts indexing.</dd>
   <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#guess-parid"><b class="Ic" title="Ic" id="guess-parid">guess-parid</b></a></dt>
-  <dd class="It-tag">This option makes <b class="Nm" title="Nm">mailestd</b> to
-      create a parent message id (&#8220;x-mew-parid&#8221;) attribue in the
-      database, when it finds a message which failed to create the parent
-      message-id in the normal way by guessing guessing by the
-      &#8220;Subject&#8221; and &#8220;Date&#8221;.</dd>
+  <dd class="It-tag">This option makes
+      <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> to create
+      a parent message id (&#8220;x-mew-parid&#8221;) attribue in the database,
+      when it finds a message which failed to create the parent message-id in
+      the normal way by guessing guessing by the &#8220;Subject&#8221; and
+      &#8220;Date&#8221;.</dd>
   <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#trim-size"><b class="Ic" title="Ic" id="trim-size">trim-size</b></a>
     <var class="Ar" title="Ar">size</var></dt>
   <dd class="It-tag">Specify <var class="Ar" title="Ar">size</var> at which
-      <b class="Nm" title="Nm">mailestd</b> trims the mail message before
-      creating an index for the message. Thd default value is
-      &#8220;131072&#8221; (128K) bytes.</dd>
+      <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> trims the
+      mail message before creating an index for the message. Thd default value
+      is &#8220;131072&#8221; (128K) bytes.</dd>
   <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#suffixes"><b class="Ic" title="Ic" id="suffixes">suffixes</b></a>
     <var class="Ar" title="Ar">suffix ...</var></dt>
   <dd class="It-tag">The file name suffixes of the mail messages gathered for
@@ -81,7 +83,7 @@ The following options can be set:
   <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#folders"><b class="Ic" title="Ic" id="folders">folders</b></a>
     <var class="Ar" title="Ar">folder ...</var></dt>
   <dd class="It-tag">The folder name patterns
-      <a class="Xr" title="Xr" href="emailestd.8.html">emailestd(8)</a> creates
+      <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> creates
       index for. An shell pattern (&#8220;openbsd-*&#8221; for example) is
       usable. If the <var class="Ar" title="Ar">folder</var> starts with
       &#8220;!&#8221;, matched folders are ignored. Folders not matched any are
