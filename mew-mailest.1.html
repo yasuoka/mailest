@@ -1,114 +1,125 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8"/>
-<style>
-table.head, table.foot { width: 100%; }
-td.head-rtitle, td.foot-os { text-align: right; }
-td.head-vol { text-align: center; }
-table.foot td { width: 50%; }
-table.head td { width: 33%; }
-div.spacer { margin: 1em 0; }
-</style>
-<title>
-MEW-MAILEST(1)</title>
+  <meta charset="utf-8"/>
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    div.Pp { margin: 1ex 0ex; }
+  </style>
+  <title>MEW-MAILEST(1)</title>
 </head>
 <body>
-<div class="mandoc">
 <table class="head">
-<tbody>
-<tr>
-<td class="head-ltitle">
-MEW-MAILEST(1)</td>
-<td class="head-vol">
-General Commands Manual</td>
-<td class="head-rtitle">
-MEW-MAILEST(1)</td>
-</tr>
-</tbody>
+  <tr>
+    <td class="head-ltitle">MEW-MAILEST(1)</td>
+    <td class="head-vol">General Commands Manual</td>
+    <td class="head-rtitle">MEW-MAILEST(1)</td>
+  </tr>
 </table>
-<div class="section">
-<h1 id="x4e414d45">NAME</h1> <b class="name">mew-mailest</b>, <b class="name">cmew-mailest</b> <b class="name">smew-mailest</b> &#8212; <span class="desc">mailest wrapper programs for Mew</span></div>
-<div class="section">
-<h1 id="x53594e4f50534953">SYNOPSIS</h1><table class="synopsis">
-<col style="width: 11.00ex;"/>
-<col/>
-<tbody>
-<tr>
-<td>
-mew-mailest</td>
-<td>
-search [<span class="opt"><b class="flag">-vu</b></span>] [<span class="opt"><b class="flag">-max</b> <i class="arg">max</i></span>] [<span class="opt"><b class="flag">-ord</b> <i class="arg">ord</i></span>] [<span class="opt"><b class="flag">-ic</b> <i class="arg">ic</i></span>] [<span class="opt"><b class="flag">-attr</b> <i class="arg">attr</i></span>] <i class="arg">phrase</i></td>
-</tr>
-</tbody>
-</table>
-<br/>
-<table class="synopsis">
-<col style="width: 11.00ex;"/>
-<col/>
-<tbody>
-<tr>
-<td>
-mew-mailest</td>
-<td>
-[<span class="opt"><b class="flag">-s</b> <i class="arg">suffix</i></span>] [<span class="opt"><b class="flag">-m</b> <i class="arg">maildir</i></span>] [<span class="opt"><i class="arg">folder</i></span>]</td>
-</tr>
-</tbody>
+<div class="manual-text">
+<h1 class="Sh" title="Sh" id="NAME"><a class="selflink" href="#NAME">NAME</a></h1>
+<b class="Nm" title="Nm">mew-mailest</b>,
+  <b class="Nm" title="Nm">cmew-mailest</b>
+  <b class="Nm" title="Nm">smew-mailest</b> &#8212;
+  <span class="Nd" title="Nd">mailest wrapper programs for Mew</span>
+<h1 class="Sh" title="Sh" id="SYNOPSIS"><a class="selflink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<table class="Nm">
+  <colgroup>
+    <col style="width: 13.00ex;"/>
+    <col/>
+  </colgroup>
+  <tr>
+    <td><b class="Nm" title="Nm">mew-mailest</b></td>
+    <td>search [<span class="Op"><b class="Fl" title="Fl">-vu</b></span>]
+      [<span class="Op"><b class="Fl" title="Fl">-max</b>
+      <var class="Ar" title="Ar">max</var></span>]
+      [<span class="Op"><b class="Fl" title="Fl">-ord</b>
+      <var class="Ar" title="Ar">ord</var></span>]
+      [<span class="Op"><b class="Fl" title="Fl">-ic</b>
+      <var class="Ar" title="Ar">ic</var></span>]
+      [<span class="Op"><b class="Fl" title="Fl">-attr</b>
+      <var class="Ar" title="Ar">attr</var></span>]
+      <var class="Ar" title="Ar">phrase</var></td>
+  </tr>
 </table>
 <br/>
-<table class="synopsis">
-<col style="width: 11.00ex;"/>
-<col/>
-<tbody>
-<tr>
-<td>
-cmew-mailest</td>
-<td>
-</td>
-</tr>
-</tbody>
+<table class="Nm">
+  <colgroup>
+    <col style="width: 13.00ex;"/>
+    <col/>
+  </colgroup>
+  <tr>
+    <td><b class="Nm" title="Nm">mew-mailest</b></td>
+    <td>[<span class="Op"><b class="Fl" title="Fl">-s</b>
+      <var class="Ar" title="Ar">suffix</var></span>]
+      [<span class="Op"><b class="Fl" title="Fl">-m</b>
+      <var class="Ar" title="Ar">maildir</var></span>]
+      [<span class="Op"><var class="Ar" title="Ar">folder</var></span>]</td>
+  </tr>
 </table>
 <br/>
-<table class="synopsis">
-<col style="width: 11.00ex;"/>
-<col/>
-<tbody>
-<tr>
-<td>
-smew-mailest</td>
-<td>
-[<span class="opt"><b class="flag">-pch</b></span>] <i class="arg">message-id</i> [<span class="opt"><i class="arg">db</i></span>] [<span class="opt"><i class="arg">mydir</i></span>]</td>
-</tr>
-</tbody>
+<table class="Nm">
+  <colgroup>
+    <col style="width: 14.00ex;"/>
+    <col/>
+  </colgroup>
+  <tr>
+    <td><b class="Nm" title="Nm">cmew-mailest</b></td>
+    <td></td>
+  </tr>
 </table>
-</div>
-<div class="section">
-<h1 id="x4445534352495054494f4e">DESCRIPTION</h1> The <b class="name">mew-mailest</b>, <b class="name">cmew-mailest</b>, and <b class="name">smew-mailest</b> provide the same functionalities of the existing Mew programs (&#8220;<i class="file">mewest</i>&#8221;, &#8220;<i class="file">estcmd search</i>&#8221; &#8220;<i class="file">cmew</i>&#8221; or &#8220;<i class="file">smew</i>&#8221;) by using <a class="link-man" href="mailestctl.1.html">mailestctl(1)</a> program as the backend program.</div>
-<div class="section">
-<h1 id="x4558414d504c4553">EXAMPLES</h1> To use the <b class="name">mew-mailest</b> by replacing the existing programs of Mew, add following lines to <i class="file">${HOME}/.emacs</i>.<div class="spacer">
-</div>
-<pre style="margin-left: 0.00ex;" class="lit display">
+<br/>
+<table class="Nm">
+  <colgroup>
+    <col style="width: 14.00ex;"/>
+    <col/>
+  </colgroup>
+  <tr>
+    <td><b class="Nm" title="Nm">smew-mailest</b></td>
+    <td>[<span class="Op"><b class="Fl" title="Fl">-pch</b></span>]
+      <var class="Ar" title="Ar">message-id</var>
+      [<span class="Op"><var class="Ar" title="Ar">db</var></span>]
+      [<span class="Op"><var class="Ar" title="Ar">mydir</var></span>]</td>
+  </tr>
+</table>
+<h1 class="Sh" title="Sh" id="DESCRIPTION"><a class="selflink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+The <b class="Nm" title="Nm">mew-mailest</b>,
+  <b class="Nm" title="Nm">cmew-mailest</b>, and
+  <b class="Nm" title="Nm">smew-mailest</b> provide the same functionalities of
+  the existing Mew programs (&#8220;<i class="Pa" title="Pa">mewest</i>&#8221;,
+  &#8220;<i class="Pa" title="Pa">estcmd search</i>&#8221;
+  &#8220;<i class="Pa" title="Pa">cmew</i>&#8221; or
+  &#8220;<i class="Pa" title="Pa">smew</i>&#8221;) by using
+  <a class="Xr" title="Xr" href="mailestctl.1.html">mailestctl(1)</a> program as
+  the backend program.
+<h1 class="Sh" title="Sh" id="EXAMPLES"><a class="selflink" href="#EXAMPLES">EXAMPLES</a></h1>
+To use the <b class="Nm" title="Nm">mew-mailest</b> by replacing the existing
+  programs of Mew, add following lines to
+  <i class="Pa" title="Pa">${HOME}/.emacs</i>.
+<div class="Pp"></div>
+<div class="Bd" style="margin-left: 0.00ex;">
+<pre class="Li">
 (defvar mew-prog-est        &quot;mew-mailest&quot;) 
 (defvar mew-prog-est-update &quot;mew-mailest&quot;) 
 (defvar mew-prog-cmew       &quot;cmew-mailest&quot;) 
 (defvar mew-prog-smew       &quot;smew-mailest&quot;) 
-(defvar mew-id-db-file      &quot;.mailest.sock&quot;)</pre>
+(defvar mew-id-db-file      &quot;.mailest.sock&quot;)
+</pre>
 </div>
-<div class="section">
-<h1 id="x53454520414c534f">SEE ALSO</h1> <a class="link-man" href="mailestctl.1.html">mailestctl(1)</a></div>
-<div class="section">
-<h1 id="x415554484f5253">AUTHORS</h1> The <b class="name">mew-mailest</b> program was written by <span class="author">YASUOKA Masahiko</span> &lt;<a class="link-mail" href="mailto:yasuoka@yasuoka.net">yasuoka@yasuoka.net</a>&gt;.</div>
+<h1 class="Sh" title="Sh" id="SEE_ALSO"><a class="selflink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<a class="Xr" title="Xr" href="mailestctl.1.html">mailestctl(1)</a>
+<h1 class="Sh" title="Sh" id="AUTHORS"><a class="selflink" href="#AUTHORS">AUTHORS</a></h1>
+The <b class="Nm" title="Nm">mew-mailest</b> program was written by
+  <span class="An" title="An">YASUOKA Masahiko</span>
+  &lt;<a class="Mt" title="Mt" href="mailto:yasuoka@yasuoka.net">yasuoka@yasuoka.net</a>&gt;.</div>
 <table class="foot">
-<tbody>
-<tr>
-<td class="foot-date">
-April 4, 2015</td>
-<td class="foot-os">
-OpenBSD 5.7</td>
-</tr>
-</tbody>
+  <tr>
+    <td class="foot-date">April 4, 2015</td>
+    <td class="foot-os">OpenBSD 6.1</td>
+  </tr>
 </table>
-</div>
 </body>
 </html>
-
