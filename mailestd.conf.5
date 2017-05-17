@@ -81,6 +81,16 @@ normal way by guessing guessing by the
 .Dq Subject
 and
 .Dq Date .
+.It Ic trim-size Ar size
+Specify
+.Ar size
+at which
+.Nm mailestd
+trims the mail message before creating an index for the message.
+Thd default value is
+.Dq 131072
+.Pq 128K
+bytes.
 .It Ic suffixes Ar suffix ...
 The file name suffixes of the mail messages gathered for indexing.
 The default is
