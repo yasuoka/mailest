@@ -113,8 +113,9 @@ ChangeLog
 
 0.9.23 (not yet)
 
-  - Create mail drafts on the main thread always.  It was mistakenly
-    executed on the same thread of the thread for db.
+  - In design, creating drafts is done not at the busiest database
+    thread but at the main thread, but this wasn't implemented correctly.
+    Fixed it to be done in the correct way.
   - Improve the man page.  Description for `trim-size` is added.
   - Mew had freezed by `csearch` command from `mailestctl` when the
     database is unusable since `mailestd` didn't response anything when
