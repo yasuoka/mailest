@@ -2173,7 +2173,7 @@ task_worker_on_proc_db(struct task_worker *_this,
 		break;
 	}
 
-	if (ctx->resche && mailestd->rfc822_ntask >=
+	if (ctx->resche && mailestd->rfc822_ntask <
 	    mailestd->rfc822_task_max / 2) {
 		mailestd_reschedule_draft(mailestd);
 		ctx->resche = 0;
