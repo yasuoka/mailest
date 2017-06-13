@@ -1643,7 +1643,7 @@ mailestd_reschedule_draft(struct mailestd *_this)
 		task->type = MAILESTD_TASK_RFC822_DRAFT;
 		_this->rfc822_ntask++;
 
-		return (task_worker_add_task(&_this->dbworker, task));
+		return (task_worker_add_task(&_this->mainworker, task));
 	}
 
 	return (0);
