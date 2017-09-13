@@ -1346,7 +1346,7 @@ static void
 mailestd_db_smew(struct mailestd *_this, struct task_smew *smew)
 {
 	int		 i, cnt = 0, *res, rnum, lfolder;
-	const char	*uri, *msgid;
+	const char	*msgid;
 	char		 buf[BUFSIZ], *bufp = NULL;
 	size_t		 bufsiz = 0;
 	FILE		*out;
