@@ -123,6 +123,7 @@ enum MAILESTD_TASK {
 	MAILESTD_TASK_INFORM,
 	MAILESTD_TASK_SEARCH,
 	MAILESTD_TASK_SMEW,
+	MAILESTD_TASK_GATHER_START,
 	MAILESTD_TASK_GATHER,
 	MAILESTD_TASK_SYNCDB,
 	MAILESTD_TASK_RFC822_DRAFT,
@@ -289,7 +290,11 @@ static void	 mailestd_db_informer(const char *, void *);
 static void	 mailestd_db_error(struct mailestd *);
 
 static uint64_t	 mailestd_schedule_db_sync(struct mailestd *);
-static uint64_t  mailestd_schedule_gather(struct mailestd *, const char *);
+static bool      mailestd_folder_match(struct mailestd *, const char *);
+static uint64_t  mailestd_schedule_gather_start(struct mailestd *,
+		    const char *);
+static uint64_t  mailestd_schedule_gather(struct mailestd *, struct gather *,
+		    const char *);
 static uint64_t	 mailestd_schedule_draft(struct mailestd *, struct gather *,
 		    struct rfc822 *);
 static uint64_t  mailestd_schedule_putdb(struct mailestd *, struct task *,

@@ -793,6 +793,119 @@ mailestd_db_sync(struct mailestd *_this)
 }
 
 static int
+mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
+{
+	char			 folder[PATH_MAX];
+	int			 i, len;
+	char			 path[PATH_MAX];
+	glob_t			 gl;
+	struct stat		 st;
+	DIR			*dp;
+	struct dirent		*de;
+	struct gather		*ctx;
+	uint64_t		 ctx_id;
+	struct folder_tree	 folders;
+	struct folder		*flde, *fldt, fld0;
+	bool			 found = false;
+	struct rfc822		 msg0;
+
+	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
+
+	strlcpy(folder, task->folder, sizeof(folder));
+	ctx = xcalloc(1, sizeof(struct gather));
+	ctx->id = task->gather_id;
+
+	if (isnull(folder))
+		strlcpy(ctx->target, "all", sizeof(ctx->target));
+	else
+		mailestd_folder_name(_this, folder, ctx->target,
+		    sizeof(ctx->target));
+
+	ctx_id = ctx->id;	/* need this backup */
+	TAILQ_INSERT_TAIL(&_this->gathers, ctx, queue);
+
+	if (folder[0] != '\0') {
+		if (folder[0] != '/') {
+			memset(&gl, 0, sizeof(gl));
+			strlcpy(path, _this->maildir, sizeof(path));
+			strlcat(path, "/", sizeof(path));
+			strlcat(path, folder, sizeof(path));
+			if (glob(path, GLOB_BRACE, NULL, &gl) == 0) {
+				for (i = 0; i < gl.gl_pathc; i++) {
+					if (lstat(gl.gl_pathv[i], &st) != 0 ||
+					    !S_ISDIR(st.st_mode))
+						continue;
+					if (!mailestd_folder_match(_this,
+					    gl.gl_pathv[i] +
+						    _this->lmaildir + 1))
+						continue;
+					mailestd_schedule_gather(_this, ctx,
+					    gl.gl_pathv[i] + _this->lmaildir
+						    + 1);
+				}
+				globfree(&gl);
+				found = true;
+			}
+		} else {
+			if (lstat(folder, &st) == 0 && S_ISDIR(st.st_mode)) {
+				realpath(folder, path);
+				mailestd_schedule_gather(_this, ctx, path);
+				found = true;
+			} else
+				strlcpy(path, folder, sizeof(path));
+		}
+		if (!found) {
+			/* the directory is not found, but it may be cached */
+			len = strlen(path);
+			strlcat(path, "/", sizeof(path));
+			msg0.path = path;
+			if (RB_NFIND(rfc822_tree, &_this->root, &msg0) != NULL){
+				path[len] = '\0';
+				mailestd_schedule_gather(_this, ctx, path);
+			}
+		}
+	} else {
+		if ((dp = opendir(_this->maildir)) == NULL)
+			mailestd_log(LOG_ERR, "%s: %m", _this->maildir);
+		else {
+			RB_INIT(&folders);
+			mailestd_get_all_folders(_this, &folders);
+			while ((de = readdir(dp)) != NULL) {
+				if (de->d_type != DT_DIR ||
+				    strcmp(de->d_name, ".") == 0 ||
+				    strcmp(de->d_name, "..") == 0)
+					continue;
+				if (!mailestd_folder_match(_this, de->d_name))
+					continue;
+				mailestd_schedule_gather(_this, ctx,
+				    de->d_name);
+				fld0.path = de->d_name;
+				flde = RB_FIND(folder_tree, &folders, &fld0);
+				if (flde != NULL) {
+					RB_REMOVE(folder_tree, &folders, flde);
+					folder_free(flde);
+				}
+			}
+			closedir(dp);
+			RB_FOREACH_SAFE(flde, folder_tree, &folders, fldt) {
+				RB_REMOVE(folder_tree, &folders, flde);
+				mailestd_schedule_gather(_this, ctx,
+				    flde->path);
+				folder_free(flde);
+			}
+		}
+		if (_this->monitor)
+			mailestd_schedule_monitor(_this, _this->maildir);
+	}
+	if (ctx->folders == 0) {
+		strlcpy(ctx->errmsg, "grabing folders", sizeof(ctx->errmsg));
+		mailestd_gather_inform(_this, NULL, ctx); /* ctx is freed */
+	}
+
+	return (0);
+}
+
+static int
 mailestd_gather(struct mailestd *_this, struct task_gather *task)
 {
 	int		 lrdir, update = 0, delete = 0, total = 0;
@@ -806,8 +919,10 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 	struct folder_tree
 			 folders;
 
+	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 	RB_INIT(&folders);
 	ctx = mailestd_get_gather(_this, task->gather_id);
+	MAILESTD_ASSERT(ctx != NULL);
 	if (folder[0] == '/')
 		strlcpy(rdir, folder, sizeof(rdir));
 	else {
@@ -1477,7 +1592,23 @@ mailestd_folder_match(struct mailestd *_this, const char *folder)
 }
 
 static uint64_t
-mailestd_schedule_gather0(struct mailestd *_this, struct gather *ctx,
+mailestd_schedule_gather_start(struct mailestd *_this, const char *folder)
+{
+	struct task_gather	*task;
+
+	task = xcalloc(1, sizeof(struct task_gather));
+	task->type = MAILESTD_TASK_GATHER_START;
+	task->highprio = true;
+	task->gather_id = mailestd_new_id(_this);
+	strlcpy(task->folder, folder, sizeof(task->folder));
+
+	task_worker_add_task(&_this->dbworker, (struct task *)task);
+
+	return (task->gather_id);
+}
+
+static uint64_t
+mailestd_schedule_gather(struct mailestd *_this, struct gather *ctx,
     const char *folder)
 {
 	struct task_gather	*task;
@@ -1490,114 +1621,6 @@ mailestd_schedule_gather0(struct mailestd *_this, struct gather *ctx,
 	strlcpy(task->folder, folder, sizeof(task->folder));
 
 	return (task_worker_add_task(&_this->dbworker, (struct task *)task));
-}
-
-static uint64_t
-mailestd_schedule_gather(struct mailestd *_this, const char *folder)
-{
-	int			 i, len;
-	char			 path[PATH_MAX];
-	glob_t			 gl;
-	struct stat		 st;
-	DIR			*dp;
-	struct dirent		*de;
-	struct gather		*ctx;
-	uint64_t		 ctx_id;
-	struct folder_tree	 folders;
-	struct folder		*flde, *fldt, fld0;
-	bool			 found = false;
-	struct rfc822		 msg0;
-
-	ctx = xcalloc(1, sizeof(struct gather));
-	ctx->id = mailestd_new_id(_this);
-	if (isnull(folder))
-		strlcpy(ctx->target, "all", sizeof(ctx->target));
-	else
-		mailestd_folder_name(_this, folder, ctx->target,
-		    sizeof(ctx->target));
-
-	ctx_id = ctx->id;	/* need this backup */
-	TAILQ_INSERT_TAIL(&_this->gathers, ctx, queue);
-
-	if (folder[0] != '\0') {
-		if (folder[0] != '/') {
-			memset(&gl, 0, sizeof(gl));
-			strlcpy(path, _this->maildir, sizeof(path));
-			strlcat(path, "/", sizeof(path));
-			strlcat(path, folder, sizeof(path));
-			if (glob(path, GLOB_BRACE, NULL, &gl) == 0) {
-				for (i = 0; i < gl.gl_pathc; i++) {
-					if (lstat(gl.gl_pathv[i], &st) != 0 ||
-					    !S_ISDIR(st.st_mode))
-						continue;
-					if (!mailestd_folder_match(_this,
-					    gl.gl_pathv[i] +
-						    _this->lmaildir + 1))
-						continue;
-					mailestd_schedule_gather0(_this, ctx,
-					    gl.gl_pathv[i] + _this->lmaildir
-						    + 1);
-				}
-				globfree(&gl);
-				found = true;
-			}
-		} else {
-			if (lstat(folder, &st) == 0 && S_ISDIR(st.st_mode)) {
-				realpath(folder, path);
-				mailestd_schedule_gather0(_this, ctx, path);
-				found = true;
-			} else
-				strlcpy(path, folder, sizeof(path));
-		}
-		if (!found) {
-			/* the directory is not found, but it may be cached */
-			len = strlen(path);
-			strlcat(path, "/", sizeof(path));
-			msg0.path = path;
-			if (RB_NFIND(rfc822_tree, &_this->root, &msg0) != NULL){
-				path[len] = '\0';
-				mailestd_schedule_gather0(_this, ctx, path);
-			}
-		}
-	} else {
-		if ((dp = opendir(_this->maildir)) == NULL)
-			mailestd_log(LOG_ERR, "%s: %m", _this->maildir);
-		else {
-			RB_INIT(&folders);
-			mailestd_get_all_folders(_this, &folders);
-			while ((de = readdir(dp)) != NULL) {
-				if (de->d_type != DT_DIR ||
-				    strcmp(de->d_name, ".") == 0 ||
-				    strcmp(de->d_name, "..") == 0)
-					continue;
-				if (!mailestd_folder_match(_this, de->d_name))
-					continue;
-				mailestd_schedule_gather0(_this, ctx,
-				    de->d_name);
-				fld0.path = de->d_name;
-				flde = RB_FIND(folder_tree, &folders, &fld0);
-				if (flde != NULL) {
-					RB_REMOVE(folder_tree, &folders, flde);
-					folder_free(flde);
-				}
-			}
-			closedir(dp);
-			RB_FOREACH_SAFE(flde, folder_tree, &folders, fldt) {
-				RB_REMOVE(folder_tree, &folders, flde);
-				mailestd_schedule_gather0(_this, ctx,
-				    flde->path);
-				folder_free(flde);
-			}
-		}
-		if (_this->monitor)
-			mailestd_schedule_monitor(_this, _this->maildir);
-	}
-	if (ctx->folders == 0) {
-		strlcpy(ctx->errmsg, "grabing folders", sizeof(ctx->errmsg));
-		mailestd_gather_inform(_this, NULL, ctx); /* ctx is freed */
-	}
-
-	return (ctx_id);
 }
 
 static uint64_t
@@ -1997,6 +2020,11 @@ task_worker_on_proc(struct task_worker *_this)
 			mailestd_db_sync(mailestd);
 			break;
 
+		case MAILESTD_TASK_GATHER_START:
+			mailestd_gather_start(mailestd,
+			    (struct task_gather *)task);
+			break;
+
 		case MAILESTD_TASK_GATHER:
 			mailestd_gather(mailestd, (struct task_gather *)task);
 			if (mailestd->db_sync_time == 0) {
@@ -2312,7 +2340,7 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 				goto on_error;
 			}
 			_this->monitoring_cmd = MAILESTCTL_CMD_UPDATE;
-			_this->monitoring_id = mailestd_schedule_gather(
+			_this->monitoring_id = mailestd_schedule_gather_start(
 			    mailestd, update->folder);
 			if (_this->monitoring_id == 0)
 				goto on_error;
@@ -2790,7 +2818,8 @@ mailestd_monitor_schedule(struct mailestd *_this, struct timespec *wait)
 				mailestd_log(LOG_INFO, "Gathering %s by "
 				    "monitor", mailestd_folder_name(_this,
 				    dir0->path, buf, sizeof(buf)));
-				mailestd_schedule_gather(_this, dir0->path);
+				mailestd_schedule_gather_start(_this,
+				    dir0->path);
 			}
 			if (dir0->fd <= 0) {
 				mailestd_log(LOG_DEBUG,
