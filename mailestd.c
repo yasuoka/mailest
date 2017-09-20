@@ -803,7 +803,6 @@ mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
 	DIR			*dp;
 	struct dirent		*de;
 	struct gather		*ctx;
-	uint64_t		 ctx_id;
 	struct folder_tree	 folders;
 	struct folder		*flde, *fldt, fld0;
 	bool			 found = false;
@@ -820,8 +819,6 @@ mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
 	else
 		mailestd_folder_name(_this, folder, ctx->target,
 		    sizeof(ctx->target));
-
-	ctx_id = ctx->id;	/* need this backup */
 	TAILQ_INSERT_TAIL(&_this->gathers, ctx, queue);
 
 	if (folder[0] != '\0') {
