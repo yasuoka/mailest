@@ -807,8 +807,11 @@ mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
 	struct folder		*flde, *fldt, fld0;
 	bool			 found = false;
 	struct rfc822		 msg0;
+	struct task_queue	 tskq;
+	struct task		*tske, *tskt;
 
 	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
+	TAILQ_INIT(&tskq);
 
 	strlcpy(folder, task->folder, sizeof(folder));
 	ctx = xcalloc(1, sizeof(struct gather));
@@ -836,7 +839,7 @@ mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
 					    gl.gl_pathv[i] +
 						    _this->lmaildir + 1))
 						continue;
-					mailestd_schedule_gather(_this, ctx,
+					mailestd_gather_enqueue(&tskq, ctx,
 					    gl.gl_pathv[i] + _this->lmaildir
 						    + 1);
 				}
@@ -846,7 +849,7 @@ mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
 		} else {
 			if (lstat(folder, &st) == 0 && S_ISDIR(st.st_mode)) {
 				realpath(folder, path);
-				mailestd_schedule_gather(_this, ctx, path);
+				mailestd_gather_enqueue(&tskq, ctx, path);
 				found = true;
 			} else
 				strlcpy(path, folder, sizeof(path));
@@ -858,7 +861,7 @@ mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
 			msg0.path = path;
 			if (RB_NFIND(rfc822_tree, &_this->root, &msg0) != NULL){
 				path[len] = '\0';
-				mailestd_schedule_gather(_this, ctx, path);
+				mailestd_gather_enqueue(&tskq, ctx, path);
 			}
 		}
 	} else {
@@ -874,8 +877,7 @@ mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
 					continue;
 				if (!mailestd_folder_match(_this, de->d_name))
 					continue;
-				mailestd_schedule_gather(_this, ctx,
-				    de->d_name);
+				mailestd_gather_enqueue(&tskq, ctx, de->d_name);
 				fld0.path = de->d_name;
 				flde = RB_FIND(folder_tree, &folders, &fld0);
 				if (flde != NULL) {
@@ -886,17 +888,28 @@ mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
 			closedir(dp);
 			RB_FOREACH_SAFE(flde, folder_tree, &folders, fldt) {
 				RB_REMOVE(folder_tree, &folders, flde);
-				mailestd_schedule_gather(_this, ctx,
-				    flde->path);
+				mailestd_gather_enqueue(&tskq, ctx, flde->path);
 				folder_free(flde);
 			}
 		}
 		if (_this->monitor)
 			mailestd_schedule_monitor(_this, _this->maildir);
 	}
+
 	if (ctx->folders == 0) {
+		MAILESTD_ASSERT(TAILQ_EMPTY(&tskq));
 		strlcpy(ctx->errmsg, "grabing folders", sizeof(ctx->errmsg));
 		mailestd_gather_inform(_this, NULL, ctx); /* ctx is freed */
+	}
+
+	/*
+	 * Since this function is called from the main or monitor thread we
+	 * need to schedule all tasks at once here to avoid conflicts
+	 * accessing "ctx" which is common object in the tasks.
+	 */
+	TAILQ_FOREACH_SAFE(tske, &tskq, queue, tskt) {
+		TAILQ_REMOVE(&tskq, tske, queue);
+		task_worker_add_task(&_this->dbworker, tske);
 	}
 
 	return (0);
@@ -1604,8 +1617,8 @@ mailestd_schedule_gather_start(struct mailestd *_this, const char *folder)
 	return (task->gather_id);
 }
 
-static uint64_t
-mailestd_schedule_gather(struct mailestd *_this, struct gather *ctx,
+static void
+mailestd_gather_enqueue(struct task_queue *q, struct gather *ctx,
     const char *folder)
 {
 	struct task_gather	*task;
@@ -1617,7 +1630,7 @@ mailestd_schedule_gather(struct mailestd *_this, struct gather *ctx,
 	ctx->folders++;
 	strlcpy(task->folder, folder, sizeof(task->folder));
 
-	return (task_worker_add_task(&_this->dbworker, (struct task *)task));
+	TAILQ_INSERT_TAIL(q, (struct task *)task, queue);
 }
 
 static uint64_t

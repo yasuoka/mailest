@@ -293,7 +293,7 @@ static uint64_t	 mailestd_schedule_db_sync(struct mailestd *);
 static bool      mailestd_folder_match(struct mailestd *, const char *);
 static uint64_t  mailestd_schedule_gather_start(struct mailestd *,
 		    const char *);
-static uint64_t  mailestd_schedule_gather(struct mailestd *, struct gather *,
+static void	 mailestd_gather_enqueue(struct task_queue *, struct gather *,
 		    const char *);
 static uint64_t	 mailestd_schedule_draft(struct mailestd *, struct gather *,
 		    struct rfc822 *);
