@@ -1806,7 +1806,7 @@ mailestd_schedule_guess_parid(struct mailestd *_this, struct rfc822 *msg)
 {
 	struct task_rfc822	*task;
 
-	task = calloc(1, sizeof(struct task_rfc822));
+	task = xcalloc(1, sizeof(struct task_rfc822));
 	/* given task is a member of mailestd.rfc822_tasks */
 	task->type = MAILESTD_TASK_RFC822_GUESS;
 	task->msg = msg;
