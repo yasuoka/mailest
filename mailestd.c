@@ -2011,7 +2011,7 @@ task_worker_on_proc(struct task_worker *_this)
 			 * a draft failed.  (since it's not dbworker)
 			 */
 			mailestd_schedule_putdb(mailestd, task, msg);
-			task = NULL;	/* recycled */
+			task = NULL;	/* reused */
 			break;
 
 		case MAILESTD_TASK_RFC822_GUESS:
