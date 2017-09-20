@@ -1538,6 +1538,7 @@ mailestd_guess_parid(struct mailestd *_this)
 {
 	struct rfc822	*msg;
 
+	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 	RB_FOREACH(msg, rfc822_tree, &_this->root) {
 		if (!msg->ontask && !msg->pariddone)
 			mailestd_schedule_guess_parid(_this, msg);
