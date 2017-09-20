@@ -1539,7 +1539,7 @@ mailestd_guess_parid(struct mailestd *_this)
 	struct rfc822	*msg;
 
 	RB_FOREACH(msg, rfc822_tree, &_this->root) {
-		if (!msg->pariddone)
+		if (!msg->ontask && !msg->pariddone)
 			mailestd_schedule_guess_parid(_this, msg);
 	}
 }
