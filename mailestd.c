@@ -965,10 +965,13 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 		if (strncmp(msge->path, rdir, lrdir) != 0)
 			break;
 		total++;
-		if (msge->fstime != curr_time && !msge->ontask) {
-			delete++;
+		if (msge->fstime != curr_time) {
 			MAILESTD_ASSERT(msge->db_id != 0);
-			mailestd_schedule_deldb(_this, ctx, msge);
+			delete++;
+			if (msge->ontask)
+				/* other task is running */;
+			else
+				mailestd_schedule_deldb(_this, ctx, msge);
 		}
 	}
 
