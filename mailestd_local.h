@@ -299,7 +299,8 @@ static uint64_t	 mailestd_schedule_draft(struct mailestd *, struct gather *,
 		    struct rfc822 *);
 static uint64_t  mailestd_schedule_putdb(struct mailestd *, struct task *,
 		    struct rfc822 *);
-static uint64_t	 mailestd_schedule_deldb(struct mailestd *, struct rfc822 *);
+static uint64_t	 mailestd_schedule_deldb(struct mailestd *, struct gather *,
+		    struct rfc822 *);
 static uint64_t	 mailestd_schedule_search(struct mailestd *, const char *,
 		    ESTCOND *, enum MAILESTCTL_OUTFORM);
 static uint64_t	 mailestd_schedule_inform(struct mailestd *, uint64_t,

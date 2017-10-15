@@ -765,7 +765,7 @@ mailestd_db_sync(struct mailestd *_this)
 			if (strncmp(msg->path, dir, ldir) != 0)
 				break;
 			if (msg->fstime == 0 && !msg->ontask) {
-				mailestd_schedule_deldb(_this, msg);
+				mailestd_schedule_deldb(_this, NULL, msg);
 				delete++;
 			}
 		}
@@ -968,11 +968,7 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 		if (msge->fstime != curr_time && !msge->ontask) {
 			delete++;
 			MAILESTD_ASSERT(msge->db_id != 0);
-			if (ctx != NULL) {
-				ctx->dels++;
-				msge->gather_id = ctx->id;
-			}
-			mailestd_schedule_deldb(_this, msge);
+			mailestd_schedule_deldb(_this, ctx, msge);
 		}
 	}
 
@@ -1695,7 +1691,8 @@ mailestd_schedule_putdb(struct mailestd *_this, struct task *task,
 }
 
 static uint64_t
-mailestd_schedule_deldb(struct mailestd *_this, struct rfc822 *msg)
+mailestd_schedule_deldb(struct mailestd *_this, struct gather *ctx,
+    struct rfc822 *msg)
 {
 	struct task	*task;
 
@@ -1705,6 +1702,11 @@ mailestd_schedule_deldb(struct mailestd *_this, struct rfc822 *msg)
 	task = xcalloc(1, sizeof(struct task_rfc822));
 	task->type = MAILESTD_TASK_RFC822_DELDB;
 	((struct task_rfc822 *)task)->msg = msg;
+
+	if (ctx != NULL) {
+		msg->gather_id = ctx->id;
+		ctx->dels++;
+	}
 
 	return (task_worker_add_task(&_this->dbworker, task));
 }
