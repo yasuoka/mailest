@@ -94,6 +94,11 @@ Usage
 - "mailest" daemon will be invoked by the following operations on Mew
   - Search or virutal folder operations (`V`, `k/` and so on)
   - Making index operations (`km` or `kM`)
+- or you can use "@reboot" in your crontab like the following line if
+  you want start it automatically when boot.
+
+      @reboot mailestctl start
+
 - After the daemon starts, it monitors the changes on the folders
   which have already been indexed.
 - Upon `kM`, "mailest" starts monitoring for newly created folders
