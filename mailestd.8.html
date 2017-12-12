@@ -20,14 +20,10 @@
 </table>
 <div class="manual-text">
 <h1 class="Sh" title="Sh" id="NAME"><a class="selflink" href="#NAME">NAME</a></h1>
-<b class="Nm" title="Nm">mailestd</b> &#8212;
+<b class="Nm" title="Nm">mailestd</b> &#x2014;
   <span class="Nd" title="Nd">mailest daemon</span>
 <h1 class="Sh" title="Sh" id="SYNOPSIS"><a class="selflink" href="#SYNOPSIS">SYNOPSIS</a></h1>
 <table class="Nm">
-  <colgroup>
-    <col style="width: 10.00ex;"/>
-    <col/>
-  </colgroup>
   <tr>
     <td><b class="Nm" title="Nm">mailestd</b></td>
     <td>[<span class="Op"><b class="Fl" title="Fl">-dnh</b></span>]
@@ -40,25 +36,25 @@
 </table>
 <h1 class="Sh" title="Sh" id="DESCRIPTION"><a class="selflink" href="#DESCRIPTION">DESCRIPTION</a></h1>
 The <b class="Nm" title="Nm">mailestd</b> is a daemon which provides the
-  &#8220;search&#8221; functionality for mail messages using and managing a
+  &#x201C;search&#x201D; functionality for mail messages using and managing a
   Hyper Estraier's database. Currently the <b class="Nm" title="Nm">mailestd</b>
-  can be use as a &#8220;search&#8221; backend of the &#8220;Mew&#8221;. To use
-  the <b class="Nm" title="Nm">mailest</b> for the search backend for the Mew
-  program, see the <i class="Em" title="Em">EXAMPLE</i> section in
+  can be use as a &#x201C;search&#x201D; backend of the &#x201C;Mew&#x201D;. To
+  use the <b class="Nm" title="Nm">mailest</b> for the search backend for the
+  Mew program, see the <i class="Em" title="Em">EXAMPLE</i> section in
   <a class="Xr" title="Xr" href="mew-mailest.1.html">mew-mailest(1)</a>.
 <div class="Pp"></div>
 The options are as follows:
-<dl class="Bl-tag" style="margin-left: 6.60ex;">
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#d"><b class="Fl" title="Fl" id="d">-d</b></a></dt>
+<dl class="Bl-tag">
+  <dt class="It-tag"><a class="selflink" href="#d"><b class="Fl" title="Fl" id="d">-d</b></a></dt>
   <dd class="It-tag">Increase debug level. Do not daemonize and log to the
       <i class="Em" title="Em">stderr</i>.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#n"><b class="Fl" title="Fl" id="n">-n</b></a></dt>
+  <dt class="It-tag"><a class="selflink" href="#n"><b class="Fl" title="Fl" id="n">-n</b></a></dt>
   <dd class="It-tag">Do not actually start the daemon. But checks the
       configuration file.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#S"><b class="Fl" title="Fl" id="S">-S</b></a>
+  <dt class="It-tag"><a class="selflink" href="#S"><b class="Fl" title="Fl" id="S">-S</b></a>
     <var class="Ar" title="Ar">suffix</var></dt>
-  <dd class="It-tag" style="width: auto;">&#160;</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#f"><b class="Fl" title="Fl" id="f">-f</b></a>
+  <dd class="It-tag" style="width: auto;">&#x00A0;</dd>
+  <dt class="It-tag"><a class="selflink" href="#f"><b class="Fl" title="Fl" id="f">-f</b></a>
     <var class="Ar" title="Ar">file</var></dt>
   <dd class="It-tag">Use the <var class="Ar" title="Ar">file</var> as the
       configuration file instead of the default
@@ -66,33 +62,33 @@ The options are as follows:
       <var class="Ar" title="Ar">maildir</var> is specified together, related
       path <i class="Pa" title="Pa">mailestd.conf</i> to the
       <var class="Ar" title="Ar">maildir</var> is used.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><var class="Ar" title="Ar">maildir</var></dt>
+  <dt class="It-tag"><var class="Ar" title="Ar">maildir</var></dt>
   <dd class="It-tag">The base directory instead of the default
       <i class="Pa" title="Pa">${HOME}/Mail</i>. The directories below the
       <var class="Ar" title="Ar">maildir</var> are the targets for the search
       functionality of the <b class="Nm" title="Nm">mailestd</b>.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#h"><b class="Fl" title="Fl" id="h">-h</b></a></dt>
+  <dt class="It-tag"><a class="selflink" href="#h"><b class="Fl" title="Fl" id="h">-h</b></a></dt>
   <dd class="It-tag">Show the usage.</dd>
 </dl>
 <h1 class="Sh" title="Sh" id="FILES"><a class="selflink" href="#FILES">FILES</a></h1>
-<dl class="Bl-tag" style="margin-left: 26.40ex;">
-  <dt class="It-tag" style="margin-left: -26.40ex;"><i class="Pa" title="Pa">${HOME}/Mail</i></dt>
+<dl class="Bl-tag Bl-compact" style="margin-left: 31.80ex;">
+  <dt class="It-tag" style="margin-left: -31.80ex;"><i class="Pa" title="Pa">${HOME}/Mail</i></dt>
   <dd class="It-tag">The default <var class="Ar" title="Ar">maildir</var>.</dd>
-  <dt class="It-tag" style="margin-left: -26.40ex;"><i class="Pa" title="Pa">(maildir)/mailestd.conf</i></dt>
+  <dt class="It-tag" style="margin-left: -31.80ex;"><i class="Pa" title="Pa">(maildir)/mailestd.conf</i></dt>
   <dd class="It-tag">The default configuration file. The related path
       <i class="Pa" title="Pa">mailestd.conf</i> to the
       <var class="Ar" title="Ar">maildir</var> is used.</dd>
-  <dt class="It-tag" style="margin-left: -26.40ex;"><i class="Pa" title="Pa">(maildir)/mailestd.log</i></dt>
+  <dt class="It-tag" style="margin-left: -31.80ex;"><i class="Pa" title="Pa">(maildir)/mailestd.log</i></dt>
   <dd class="It-tag">The default log file. The related path
       <i class="Pa" title="Pa">mailestd.log</i> to the
       <var class="Ar" title="Ar">maildir</var> is used.</dd>
-  <dt class="It-tag" style="margin-left: -26.40ex;"><i class="Pa" title="Pa">(maildir)/.mailest.sock</i></dt>
+  <dt class="It-tag" style="margin-left: -31.80ex;"><i class="Pa" title="Pa">(maildir)/.mailest.sock</i></dt>
   <dd class="It-tag">The default <span class="Ux">UNIX</span>-domain socket for
       communication from
       <a class="Xr" title="Xr" href="mailectl.1.html">mailectl(1)</a>. The
       related path <i class="Pa" title="Pa">.mailestd.sock</i> to the
       <var class="Ar" title="Ar">maildir</var> is used.</dd>
-  <dt class="It-tag" style="margin-left: -26.40ex;"><i class="Pa" title="Pa">(maildir)/casket</i></dt>
+  <dt class="It-tag" style="margin-left: -31.80ex;"><i class="Pa" title="Pa">(maildir)/casket</i></dt>
   <dd class="It-tag">The default database directory. The related path
       <i class="Pa" title="Pa">casket</i> to the
       <var class="Ar" title="Ar">maildir</var> is used.</dd>
@@ -108,7 +104,7 @@ The <b class="Nm" title="Nm">mailestd</b> program was written by
 <table class="foot">
   <tr>
     <td class="foot-date">April 4, 2015</td>
-    <td class="foot-os">OpenBSD 6.1</td>
+    <td class="foot-os">OpenBSD 6.2</td>
   </tr>
 </table>
 </body>

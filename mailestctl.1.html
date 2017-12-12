@@ -20,14 +20,10 @@
 </table>
 <div class="manual-text">
 <h1 class="Sh" title="Sh" id="NAME"><a class="selflink" href="#NAME">NAME</a></h1>
-<b class="Nm" title="Nm">mailestctl</b> &#8212;
+<b class="Nm" title="Nm">mailestctl</b> &#x2014;
   <span class="Nd" title="Nd">control the mailest</span>
 <h1 class="Sh" title="Sh" id="SYNOPSIS"><a class="selflink" href="#SYNOPSIS">SYNOPSIS</a></h1>
 <table class="Nm">
-  <colgroup>
-    <col style="width: 12.00ex;"/>
-    <col/>
-  </colgroup>
   <tr>
     <td><b class="Nm" title="Nm">mailestctl</b></td>
     <td>[<span class="Op"><b class="Fl" title="Fl">-h</b></span>]
@@ -49,55 +45,55 @@ The <b class="Nm" title="Nm">mailestctl</b> program controls the
   <a class="Xr" title="Xr" href="mew-mailest.1.html">mew-mailest(1)</a>.
 <div class="Pp"></div>
 The options are as follows:
-<dl class="Bl-tag" style="margin-left: 6.60ex;">
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#S"><b class="Fl" title="Fl" id="S">-S</b></a>
+<dl class="Bl-tag">
+  <dt class="It-tag"><a class="selflink" href="#S"><b class="Fl" title="Fl" id="S">-S</b></a>
     <var class="Ar" title="Ar">suffix</var></dt>
   <dd class="It-tag">The suffix of the mail files instead of the default
       <i class="Pa" title="Pa">.mew</i>. This option is only used only when the
       <b class="Nm" title="Nm">mailestctl</b> invoking
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> to pass
       the suffix configuration. This option exists to keep the compatibility
-      with the existing &#8220;mewest&#8221;, and it doesn't change the suffix
+      with the existing &#x201C;mewest&#x201D;, and it doesn't change the suffix
       configuration of the running
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>. See the
       <a class="Xr" title="Xr" href="mailestd.conf.5.html">mailestd.conf(5)</a>
       to configure in proper way.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#s"><b class="Fl" title="Fl" id="s">-s</b></a>
+  <dt class="It-tag"><a class="selflink" href="#s"><b class="Fl" title="Fl" id="s">-s</b></a>
     <var class="Ar" title="Ar">socket</var></dt>
   <dd class="It-tag">Use the socket instead of the default
       <i class="Pa" title="Pa">(maildir)/.mailest.sock</i> to comunicate with
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#m"><b class="Fl" title="Fl" id="m">-m</b></a>
+  <dt class="It-tag"><a class="selflink" href="#m"><b class="Fl" title="Fl" id="m">-m</b></a>
     <var class="Ar" title="Ar">maildir</var></dt>
   <dd class="It-tag">The base directory of the mail folders instead of the
       default <i class="Pa" title="Pa">${HOME}/Mail</i>.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#h"><b class="Fl" title="Fl" id="h">-h</b></a></dt>
+  <dt class="It-tag"><a class="selflink" href="#h"><b class="Fl" title="Fl" id="h">-h</b></a></dt>
   <dd class="It-tag">Show the usage.</dd>
 </dl>
 <div class="Pp"></div>
 The following commands are available:
-<dl class="Bl-tag" style="margin-left: 6.60ex;">
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#start"><b class="Cm" title="Cm" id="start">start</b></a></dt>
+<dl class="Bl-tag">
+  <dt class="It-tag"><a class="selflink" href="#start"><b class="Cm" title="Cm" id="start">start</b></a></dt>
   <dd class="It-tag">Start the
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
     daemon.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#stop"><b class="Cm" title="Cm" id="stop">stop</b></a></dt>
+  <dt class="It-tag"><a class="selflink" href="#stop"><b class="Cm" title="Cm" id="stop">stop</b></a></dt>
   <dd class="It-tag">Stop the running
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
     daemon.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#restart"><b class="Cm" title="Cm" id="restart">restart</b></a></dt>
+  <dt class="It-tag"><a class="selflink" href="#restart"><b class="Cm" title="Cm" id="restart">restart</b></a></dt>
   <dd class="It-tag">Restart the
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
     daemon.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#message-id"><b class="Cm" title="Cm" id="message-id">message-id</b></a>
+  <dt class="It-tag"><a class="selflink" href="#message-id"><b class="Cm" title="Cm" id="message-id">message-id</b></a>
     <var class="Ar" title="Ar">message-id</var></dt>
   <dd class="It-tag">Search the indexes by the
       <var class="Ar" title="Ar">message-id</var>.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#parent-id"><b class="Cm" title="Cm" id="parent-id">parent-id</b></a>
+  <dt class="It-tag"><a class="selflink" href="#parent-id"><b class="Cm" title="Cm" id="parent-id">parent-id</b></a>
     <var class="Ar" title="Ar">message-id</var></dt>
   <dd class="It-tag">Search the indexes by the parent message's
       <var class="Ar" title="Ar">message-id</var>.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#csearch"><b class="Cm" title="Cm" id="csearch">csearch</b></a>
+  <dt class="It-tag"><a class="selflink" href="#csearch"><b class="Cm" title="Cm" id="csearch">csearch</b></a>
     [<span class="Op"><b class="Fl" title="Fl">-vu</b></span>]
     [<span class="Op"><b class="Fl" title="Fl">-max</b>
     <var class="Ar" title="Ar">max</var></span>]
@@ -109,7 +105,7 @@ The following commands are available:
     <var class="Ar" title="Ar">attr</var></span>] phrase</dt>
   <dd class="It-tag">Search the indexes of the mail messages in
       <a class="Xr" title="Xr" href="estcmd.1.html">estcmd(1)</a> compatible
-      arguments. This command is used by &#8220;Mew&#8221; though the wrapper
+      arguments. This command is used by &#x201C;Mew&#x201D; though the wrapper
       program
       <a class="Xr" title="Xr" href="mew-mailest.1.html">mew-mailest(1)</a> to
       search the file names which include the given
@@ -118,38 +114,38 @@ The following commands are available:
       not avaiable. The
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> daemon
       will start automatically if it's not running.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#update"><b class="Cm" title="Cm" id="update">update</b></a>
+  <dt class="It-tag"><a class="selflink" href="#update"><b class="Cm" title="Cm" id="update">update</b></a>
     [<span class="Op"><var class="Ar" title="Ar">folder</var></span>]</dt>
   <dd class="It-tag">Start the indexes of the messages. If the
       <var class="Ar" title="Ar">folder</var> is specified, the indexing is done
       in the specified folder, otherwise index all folders following the
       configuration of
       <a class="Xr" title="Xr" href="mailestd.1.html">mailestd</a>. A shell
-      globing pattern (like &#8220;openbsd-*&#8221;) is usable for the
+      globing pattern (like &#x201C;openbsd-*&#x201D;) is usable for the
       <var class="Ar" title="Ar">folder</var>. The
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> daemon
       will start automatically if it's not running.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#suspend"><b class="Cm" title="Cm" id="suspend">suspend</b></a></dt>
+  <dt class="It-tag"><a class="selflink" href="#suspend"><b class="Cm" title="Cm" id="suspend">suspend</b></a></dt>
   <dd class="It-tag">Suspend the indexing.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#resume"><b class="Cm" title="Cm" id="resume">resume</b></a></dt>
+  <dt class="It-tag"><a class="selflink" href="#resume"><b class="Cm" title="Cm" id="resume">resume</b></a></dt>
   <dd class="It-tag">Resume the indexing.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#debug"><b class="Cm" title="Cm" id="debug">debug</b></a></dt>
+  <dt class="It-tag"><a class="selflink" href="#debug"><b class="Cm" title="Cm" id="debug">debug</b></a></dt>
   <dd class="It-tag">Increase the debug level of the
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
     daemon.</dd>
-  <dt class="It-tag" style="margin-left: -6.60ex;"><a class="selflink" href="#-"><b class="Fl" title="Fl" id="-">--</b></a>
+  <dt class="It-tag"><a class="selflink" href="#-"><b class="Fl" title="Fl" id="-">--</b></a>
     <b class="Cm" title="Cm">-debug</b></dt>
   <dd class="It-tag">Decrease the debug level of the
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> daemon.
-      &#8220;<b class="Fl" title="Fl">--</b>&#8221; is needed to speparate this
-      command from treating as the <b class="Nm" title="Nm">mailestctl</b>
+      &#x201C;<b class="Fl" title="Fl">--</b>&#x201D; is needed to speparate
+      this command from treating as the <b class="Nm" title="Nm">mailestctl</b>
       program's option.</dd>
 </dl>
 <h1 class="Sh" title="Sh" id="FILES"><a class="selflink" href="#FILES">FILES</a></h1>
-<dl class="Bl-tag" style="margin-left: 25.30ex;">
-  <dt class="It-tag" style="margin-left: -25.30ex;">${HOME}/Mail</dt>
+<dl class="Bl-tag Bl-compact" style="margin-left: 30.60ex;">
+  <dt class="It-tag" style="margin-left: -30.60ex;">${HOME}/Mail</dt>
   <dd class="It-tag">Default <var class="Ar" title="Ar">maildir</var>.</dd>
-  <dt class="It-tag" style="margin-left: -25.30ex;">(maildir)/.mailest.sock</dt>
+  <dt class="It-tag" style="margin-left: -30.60ex;">(maildir)/.mailest.sock</dt>
   <dd class="It-tag"><span class="Ux">UNIX</span>-domain socket used for
       communication with
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a></dd>
@@ -165,7 +161,7 @@ The <b class="Nm" title="Nm">mailestctl</b> program was written by
 <table class="foot">
   <tr>
     <td class="foot-date">April 4, 2015</td>
-    <td class="foot-os">OpenBSD 6.1</td>
+    <td class="foot-os">OpenBSD 6.2</td>
   </tr>
 </table>
 </body>
