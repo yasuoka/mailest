@@ -119,9 +119,6 @@ ChangeLog
   - Fix a bug which may refer the tree for all messages during its
     modification.  If this happens the daemon crashes with ASSERT if it
     is enabled.
-  - In design, creating drafts is done not at the busiest database
-    thread but at the main thread, but this wasn't implemented correctly.
-    Fixed it to be done in the correct way.
   - Improve the man page.  Description for `trim-size` is added.
   - Mew had freezed by `csearch` command from `mailestctl` because the
     command doesn't get any response when the database is unusable.
