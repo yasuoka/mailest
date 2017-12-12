@@ -113,6 +113,9 @@ ChangeLog
 
 0.9.23
 
+  - Fix the creating draft tasks to be run not on the busiest database
+    thread but on the main thread.  This had been desired by design, but
+    it hadn't been implemented correctly.
   - Fix a bug which may refer the tree for all messages during its
     modification.  If this happens the daemon crashes with ASSERT if it
     is enabled.
@@ -120,9 +123,8 @@ ChangeLog
     thread but at the main thread, but this wasn't implemented correctly.
     Fixed it to be done in the correct way.
   - Improve the man page.  Description for `trim-size` is added.
-  - Mew had freezed by `csearch` command from `mailestctl` when the
-    database is unusable since `mailestd` didn't response anything when
-    the database is unusable.
+  - Mew had freezed by `csearch` command from `mailestctl` because the
+    command doesn't get any response when the database is unusable.
   - Make guess-parid work even for a message which doesn't have a "Date"
     field.
 
