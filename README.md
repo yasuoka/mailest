@@ -29,17 +29,17 @@ Prerequisite:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.20.tar.gz
-    % tar xzf mailest-0.9.20.tar.gz
-    % cd mailest-mailest-0.9.20
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.23.tar.gz
+    % tar xzf mailest-0.9.23.tar.gz
+    % cd mailest-mailest-0.9.23.
     % make
     % sudo make install
 
 Others:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.20.tar.gz
-    % tar xzf mailest-0.9.20.tar.gz
-    % cd mailest-mailest-0.9.20
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.23.tar.gz
+    % tar xzf mailest-0.9.23.tar.gz
+    % cd mailest-mailest-0.9.23.
     % ./configure
     % make
     % sudo make install
@@ -111,7 +111,7 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
-0.9.23 (not yet)
+0.9.23
 
   - Fix a bug which may refer the tree for all messages during its
     modification.  If this happens the daemon crashes with ASSERT if it
