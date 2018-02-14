@@ -233,6 +233,9 @@ struct folder {
 	RB_ENTRY(folder)	 tree;
 };
 
+#define mailestd_is_db_sync_done(_mailestd)	\
+	(((_mailestd)->db_sync_time != 0)? true : false)
+
 #ifdef	MAILESTD_DEBUG
 #define MAILESTD_DBG(_msg)	 mailestd_log _msg;
 #define MAILESTD_ASSERT(_cond)						\

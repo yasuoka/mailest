@@ -1114,7 +1114,7 @@ mailestd_fts(struct mailestd *_this, struct gather *ctx, time_t curr_time,
 			msg->path = xstrdup(ftse->fts_path);
 			RB_INSERT(rfc822_tree, &_this->root, msg);
 			strlcpy(uri + 7, ftse->fts_path, sizeof(uri) - 7);
-			if (_this->db_sync_time == 0 &&
+			if (!mailestd_is_db_sync_done(_this) &&
 			    mailestd_db_open_rd(_this) != NULL &&
 			    (db_id = est_db_uri_to_id(_this->db, uri)) != -1 &&
 			    (doc = est_db_get_doc(_this->db, db_id,
@@ -1969,7 +1969,8 @@ task_worker_on_proc(struct task_worker *_this)
 		_thread_mutex_lock(&_this->lock);
 		task = TAILQ_FIRST_ITEM(&_this->head);
 		if (task != NULL) {
-			if (_this->suspend && mailestd->db_sync_time == 0 &&
+			if (_this->suspend &&
+			    !mailestd_is_db_sync_done(mailestd) &&
 			    task->type == MAILESTD_TASK_GATHER)
 				/*
 				 * gathering before the first db_sync
@@ -2045,7 +2046,7 @@ task_worker_on_proc(struct task_worker *_this)
 
 		case MAILESTD_TASK_GATHER:
 			mailestd_gather(mailestd, (struct task_gather *)task);
-			if (mailestd->db_sync_time == 0) {
+			if (!mailestd_is_db_sync_done(mailestd)) {
 				TAILQ_INSERT_TAIL(&mailestd->gather_pendings,
 				    task, queue);
 				task = NULL;
