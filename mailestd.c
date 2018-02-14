@@ -423,7 +423,7 @@ mailestd_fini(struct mailestd *_this)
 static struct gather *
 mailestd_get_gather(struct mailestd *_this, uint64_t id)
 {
-	static struct gather	*gathere;
+	struct gather	*gathere;
 
 	TAILQ_FOREACH(gathere, &_this->gathers, queue) {
 		if (gathere->id == id)
