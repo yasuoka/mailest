@@ -116,6 +116,11 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
+0.9.24 (not yet)
+
+  - Fix a wrong ASSERT() introduced at 0.9.23 (e5076c8a)
+
+
 0.9.23
 
   - Fix the creating draft tasks to be run not on the busiest database
