@@ -29,17 +29,17 @@ Prerequisite:
 
 OpenBSD:
 
-    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.23.tar.gz
-    % tar xzf mailest-0.9.23.tar.gz
-    % cd mailest-mailest-0.9.23.
+    % ftp https://github.com/yasuoka/mailest/archive/mailest-0.9.24.tar.gz
+    % tar xzf mailest-0.9.24.tar.gz
+    % cd mailest-mailest-0.9.24.
     % make
     % sudo make install
 
 Others:
 
-    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.23.tar.gz
-    % tar xzf mailest-0.9.23.tar.gz
-    % cd mailest-mailest-0.9.23.
+    % wget https://github.com/yasuoka/mailest/archive/mailest-0.9.24.tar.gz
+    % tar xzf mailest-0.9.24.tar.gz
+    % cd mailest-mailest-0.9.24.
     % ./configure
     % make
     % sudo make install
@@ -116,9 +116,10 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
-0.9.24 (not yet)
+0.9.24
 
   - Fix a wrong ASSERT() introduced at 0.9.23 (e5076c8a)
+  - Apply many fixes for parse.y on OpenBSD
 
 
 0.9.23
