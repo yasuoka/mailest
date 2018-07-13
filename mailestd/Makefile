@@ -12,8 +12,8 @@ LIBESTDRAFTOBJ=	${.CURDIR}/../libestdraft/${__objdir}
 LIBESTDRAFTOBJ=	${.OBJDIR}/../libestdraft
 .endif
 LDFLAGS=	-L${LOCALBASE}/lib
-LDADD=		-lestraier -levent -lqdbm
-DPADD=		${LIBESTRAIER} ${LIBEVENT} ${LIBQDBM}
+LDADD=		-liconv -lestraier -levent -lqdbm
+DPADD=		${LIBICONV} ${LIBESTRAIER} ${LIBEVENT} ${LIBQDBM}
 MAN=		mailestctl.1 mailestd.8 mailestd.conf.5 mew-mailest.1
 MLINKS=		mew-mailest.1 cmew-mailest.1
 MLINKS+=	mew-mailest.1 smew-mailest.1
