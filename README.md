@@ -116,6 +116,11 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
+0.9.25 (not yet)
+
+  - Fix links in man pages.
+
+
 0.9.24
 
   - Fix a wrong ASSERT() introduced at 0.9.23 (e5076c8a)
