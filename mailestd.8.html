@@ -8,6 +8,7 @@
     td.head-vol { text-align: center; }
     div.Pp { margin: 1ex 0ex; }
   </style>
+  <link rel="stylesheet" href="mandoc.css" type="text/css" media="all"/>
   <title>MAILESTD(8)</title>
 </head>
 <body>
@@ -45,12 +46,18 @@ The <b class="Nm" title="Nm">mailestd</b> is a daemon which provides the
 <div class="Pp"></div>
 The options are as follows:
 <dl class="Bl-tag">
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#d"><b class="Fl" title="Fl" id="d">-d</b></a></dt>
   <dd class="It-tag">Increase debug level. Do not daemonize and log to the
       <i class="Em" title="Em">stderr</i>.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#n"><b class="Fl" title="Fl" id="n">-n</b></a></dt>
   <dd class="It-tag">Do not actually start the daemon. But checks the
       configuration file.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#S"><b class="Fl" title="Fl" id="S">-S</b></a>
     <var class="Ar" title="Ar">suffix</var></dt>
   <dd class="It-tag" style="width: auto;">&#x00A0;</dd>
@@ -62,11 +69,15 @@ The options are as follows:
       <var class="Ar" title="Ar">maildir</var> is specified together, related
       path <i class="Pa" title="Pa">mailestd.conf</i> to the
       <var class="Ar" title="Ar">maildir</var> is used.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><var class="Ar" title="Ar">maildir</var></dt>
   <dd class="It-tag">The base directory instead of the default
       <i class="Pa" title="Pa">${HOME}/Mail</i>. The directories below the
       <var class="Ar" title="Ar">maildir</var> are the targets for the search
       functionality of the <b class="Nm" title="Nm">mailestd</b>.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#h"><b class="Fl" title="Fl" id="h">-h</b></a></dt>
   <dd class="It-tag">Show the usage.</dd>
 </dl>
@@ -104,7 +115,7 @@ The <b class="Nm" title="Nm">mailestd</b> program was written by
 <table class="foot">
   <tr>
     <td class="foot-date">April 4, 2015</td>
-    <td class="foot-os">OpenBSD 6.2</td>
+    <td class="foot-os">OpenBSD 6.3</td>
   </tr>
 </table>
 </body>

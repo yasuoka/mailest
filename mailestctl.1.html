@@ -8,6 +8,7 @@
     td.head-vol { text-align: center; }
     div.Pp { margin: 1ex 0ex; }
   </style>
+  <link rel="stylesheet" href="mandoc.css" type="text/css" media="all"/>
   <title>MAILESTCTL(1)</title>
 </head>
 <body>
@@ -46,6 +47,8 @@ The <b class="Nm" title="Nm">mailestctl</b> program controls the
 <div class="Pp"></div>
 The options are as follows:
 <dl class="Bl-tag">
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#S"><b class="Fl" title="Fl" id="S">-S</b></a>
     <var class="Ar" title="Ar">suffix</var></dt>
   <dd class="It-tag">The suffix of the mail files instead of the default
@@ -58,41 +61,59 @@ The options are as follows:
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>. See the
       <a class="Xr" title="Xr" href="mailestd.conf.5.html">mailestd.conf(5)</a>
       to configure in proper way.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#s"><b class="Fl" title="Fl" id="s">-s</b></a>
     <var class="Ar" title="Ar">socket</var></dt>
   <dd class="It-tag">Use the socket instead of the default
       <i class="Pa" title="Pa">(maildir)/.mailest.sock</i> to comunicate with
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#m"><b class="Fl" title="Fl" id="m">-m</b></a>
     <var class="Ar" title="Ar">maildir</var></dt>
   <dd class="It-tag">The base directory of the mail folders instead of the
       default <i class="Pa" title="Pa">${HOME}/Mail</i>.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#h"><b class="Fl" title="Fl" id="h">-h</b></a></dt>
   <dd class="It-tag">Show the usage.</dd>
 </dl>
 <div class="Pp"></div>
 The following commands are available:
 <dl class="Bl-tag">
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#start"><b class="Cm" title="Cm" id="start">start</b></a></dt>
   <dd class="It-tag">Start the
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
     daemon.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#stop"><b class="Cm" title="Cm" id="stop">stop</b></a></dt>
   <dd class="It-tag">Stop the running
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
     daemon.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#restart"><b class="Cm" title="Cm" id="restart">restart</b></a></dt>
   <dd class="It-tag">Restart the
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
     daemon.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#message-id"><b class="Cm" title="Cm" id="message-id">message-id</b></a>
     <var class="Ar" title="Ar">message-id</var></dt>
   <dd class="It-tag">Search the indexes by the
       <var class="Ar" title="Ar">message-id</var>.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#parent-id"><b class="Cm" title="Cm" id="parent-id">parent-id</b></a>
     <var class="Ar" title="Ar">message-id</var></dt>
   <dd class="It-tag">Search the indexes by the parent message's
       <var class="Ar" title="Ar">message-id</var>.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#csearch"><b class="Cm" title="Cm" id="csearch">csearch</b></a>
     [<span class="Op"><b class="Fl" title="Fl">-vu</b></span>]
     [<span class="Op"><b class="Fl" title="Fl">-max</b>
@@ -114,6 +135,8 @@ The following commands are available:
       not avaiable. The
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> daemon
       will start automatically if it's not running.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#update"><b class="Cm" title="Cm" id="update">update</b></a>
     [<span class="Op"><var class="Ar" title="Ar">folder</var></span>]</dt>
   <dd class="It-tag">Start the indexes of the messages. If the
@@ -125,14 +148,22 @@ The following commands are available:
       <var class="Ar" title="Ar">folder</var>. The
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> daemon
       will start automatically if it's not running.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#suspend"><b class="Cm" title="Cm" id="suspend">suspend</b></a></dt>
   <dd class="It-tag">Suspend the indexing.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#resume"><b class="Cm" title="Cm" id="resume">resume</b></a></dt>
   <dd class="It-tag">Resume the indexing.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#debug"><b class="Cm" title="Cm" id="debug">debug</b></a></dt>
   <dd class="It-tag">Increase the debug level of the
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a>
     daemon.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#-"><b class="Fl" title="Fl" id="-">--</b></a>
     <b class="Cm" title="Cm">-debug</b></dt>
   <dd class="It-tag">Decrease the debug level of the
@@ -161,7 +192,7 @@ The <b class="Nm" title="Nm">mailestctl</b> program was written by
 <table class="foot">
   <tr>
     <td class="foot-date">April 4, 2015</td>
-    <td class="foot-os">OpenBSD 6.2</td>
+    <td class="foot-os">OpenBSD 6.3</td>
   </tr>
 </table>
 </body>

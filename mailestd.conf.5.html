@@ -8,6 +8,7 @@
     td.head-vol { text-align: center; }
     div.Pp { margin: 1ex 0ex; }
   </style>
+  <link rel="stylesheet" href="mandoc.css" type="text/css" media="all"/>
   <title>MAILESTD.CONF(5)</title>
 </head>
 <body>
@@ -29,6 +30,8 @@
 <div class="Pp"></div>
 The following options can be set:
 <dl class="Bl-tag">
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#maildir"><b class="Ic" title="Ic" id="maildir">maildir</b></a>
     <var class="Ar" title="Ar">directory</var></dt>
   <dd class="It-tag">The base directory instead of the default
@@ -36,6 +39,8 @@ The following options can be set:
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> creates
       indexes for the mail message in the folders under this directory and uses
       some files under from this directory.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#socket"><b class="Ic" title="Ic" id="socket">socket</b></a>
     <var class="Ar" title="Ar">path</var></dt>
   <dd class="It-tag">The <span class="Ux">UNIX</span>-domain socket for
@@ -43,6 +48,8 @@ The following options can be set:
       <a class="Xr" title="Xr" href="mailectl.1.html">mailectl(1)</a>. As the
       default relateve path <i class="Pa" title="Pa">.mailestd.sock</i> from the
       <var class="Ar" title="Ar">maildir</var> is used.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#tasks"><b class="Ic" title="Ic" id="tasks">tasks</b></a>
     <var class="Ar" title="Ar">number</var></dt>
   <dd class="It-tag">The number of tasks allowed to prepare for indexing
@@ -51,6 +58,8 @@ The following options can be set:
       typical environments, since indexing the mail messages and putting them
       into the datbase will be the performance bottle neck, this variable is not
       so important.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#monitor"><b class="Ic" title="Ic" id="monitor">monitor</b></a>
     [<span class="Op"><b class="Ic" title="Ic">disable</b></span>]
     [<span class="Op"><b class="Ic" title="Ic">delay</b>
@@ -63,6 +72,8 @@ The following options can be set:
       seconds instead of the default value 1500 which the
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> waits for
       until it starts indexing.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#guess-parid"><b class="Ic" title="Ic" id="guess-parid">guess-parid</b></a></dt>
   <dd class="It-tag">This option makes
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> to create
@@ -70,16 +81,22 @@ The following options can be set:
       database, when it finds a message which failed to create the parent
       message-id in the normal way by guessing guessing by the
       &#x201C;Subject&#x201D; and &#x201C;Date&#x201D;.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#trim-size"><b class="Ic" title="Ic" id="trim-size">trim-size</b></a>
     <var class="Ar" title="Ar">size</var></dt>
   <dd class="It-tag">Specify <var class="Ar" title="Ar">size</var> at which
       <a class="Xr" title="Xr" href="mailestd.8.html">mailestd(8)</a> trims the
       mail message before creating an index for the message. Thd default value
       is &#x201C;131072&#x201D; (128K) bytes.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#suffixes"><b class="Ic" title="Ic" id="suffixes">suffixes</b></a>
     <var class="Ar" title="Ar">suffix ...</var></dt>
   <dd class="It-tag">The file name suffixes of the mail messages gathered for
       indexing. The default is &#x201C;&#x201D; (none).</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#folders"><b class="Ic" title="Ic" id="folders">folders</b></a>
     <var class="Ar" title="Ar">folder ...</var></dt>
   <dd class="It-tag">The folder name patterns
@@ -89,11 +106,15 @@ The following options can be set:
       &#x201C;!&#x201D;, matched folders are ignored. Folders not matched any
       are target for indexing. The default is &#x201C;!trash !casket
       !casket_replica&#x201D;.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#log"><b class="Ic" title="Ic" id="log">log</b></a>
     <b class="Ic" title="Ic">path</b> <var class="Ar" title="Ar">path</var></dt>
   <dd class="It-tag">The log file path. As the default, the relative path
       <i class="Pa" title="Pa">mailestd.log</i> to
       <var class="Ar" title="Ar">maildir</var> is used.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#log"><b class="Ic" title="Ic" id="log">log</b></a>
     <b class="Ic" title="Ic">rotate</b>
     [<span class="Op"><b class="Ic" title="Ic">count</b>
@@ -103,10 +124,14 @@ The following options can be set:
   <dd class="It-tag">The log rotation behaviour. As the default,
       &#x201C;8&#x201D; for the <var class="Ar" title="Ar">count</var> and
       &#x201C;30720&#x201D; (30K) bytes are used.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#database"><b class="Ic" title="Ic" id="database">database</b></a>
     <b class="Ic" title="Ic">path</b> <var class="Ar" title="Ar">path</var></dt>
   <dd class="It-tag">Thd database directory. As the default, the relative path
       <i class="Pa" title="Pa">casket</i> is used.</dd>
+  <dt class="It-tag">&#x00A0;</dt>
+  <dd class="It-tag">&#x00A0;</dd>
   <dt class="It-tag"><a class="selflink" href="#debug"><b class="Ic" title="Ic" id="debug">debug</b></a>
     <b class="Ic" title="Ic">level</b>
     <var class="Ar" title="Ar">debug-level</var></dt>
@@ -144,7 +169,7 @@ include &quot;/etc/mailestd.conf&quot;
 <table class="foot">
   <tr>
     <td class="foot-date">April 4, 2015</td>
-    <td class="foot-os">OpenBSD 6.2</td>
+    <td class="foot-os">OpenBSD 6.3</td>
   </tr>
 </table>
 </body>

@@ -2,7 +2,7 @@ MAILESTDIR=	${.CURDIR}/../mailest
 MAN!=		cd ${MAILESTDIR}; ls *.[0-8]
 MANHTML=	${MAN:S/$/.html/}
 CLEANFILES=	${MAN:S/$/.html/}
-MANDOCFLAGS=	-Oman="%N.%S.html"
+MANDOCFLAGS=	-O man=%N.%S.html,style=mandoc.css
 
 all:		${MANHTML}
 
