@@ -28,6 +28,7 @@ enum actions {
 	MESSAGE_ID,
 	SEARCH_SMEW,
 	PARENT_ID,
+	GUESS
 };
 
 struct parse_result {

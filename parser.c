@@ -71,6 +71,7 @@ static const struct token t_main[] = {
 	{KEYWORD,	"update",	UPDATE,		t_folder},
 	{KEYWORD,	"suspend",	SUSPEND,	NULL},
 	{KEYWORD,	"resume",	RESUME,		NULL},
+	{KEYWORD,	"guess",	GUESS,		NULL},
 	{KEYWORD,	"debug",	DEBUGI,		NULL},
 	{KEYWORD,	"-debug",	DEBUGD,		NULL},
 	{ENDTOKEN,	"",		NONE,		NULL}

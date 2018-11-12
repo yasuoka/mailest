@@ -130,7 +130,8 @@ enum MAILESTD_TASK {
 	MAILESTD_TASK_RFC822_PUTDB,
 	MAILESTD_TASK_RFC822_DELDB,
 	MAILESTD_TASK_RFC822_GUESS,
-	MAILESTD_TASK_MONITOR_FOLDER
+	MAILESTD_TASK_MONITOR_FOLDER,
+	MAILESTD_TASK_GUESS_AGAIN
 };
 
 struct task {
@@ -288,6 +289,7 @@ static void	 mailestd_putdb(struct mailestd *, struct rfc822 *);
 static void	 mailestd_deldb(struct mailestd *, struct rfc822 *);
 static void	 mailestd_search(struct mailestd *, uint64_t, const char *,
 		    ESTCOND *, enum MAILESTCTL_OUTFORM);
+static void	 mailestd_db_guess_again(struct mailestd *, struct task *);
 static void	 mailestd_guess_parid(struct mailestd *);
 static void	 mailestd_db_informer(const char *, void *);
 static void	 mailestd_db_error(struct mailestd *);
@@ -306,6 +308,8 @@ static uint64_t	 mailestd_schedule_deldb(struct mailestd *, struct gather *,
 		    struct rfc822 *);
 static uint64_t	 mailestd_schedule_search(struct mailestd *, const char *,
 		    ESTCOND *, enum MAILESTCTL_OUTFORM);
+static uint64_t	 mailestd_schedule_message_dbworker(struct mailestd *,
+		    enum MAILESTD_TASK);
 static uint64_t	 mailestd_schedule_inform(struct mailestd *, uint64_t,
 		    u_char *, size_t);
 static void	 mailestd_schedule_message_all(struct mailestd *,

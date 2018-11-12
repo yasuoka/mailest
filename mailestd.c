@@ -1534,6 +1534,53 @@ mailestd_search(struct mailestd *_this, uint64_t task_id, const char *searchstr,
 }
 
 static void
+mailestd_db_guess_again(struct mailestd *_this, struct task *task)
+{
+	int		*res, i, rnum, num = 0;
+	ESTCOND		*cond;
+	ESTDOC		*doc;
+	struct rfc822	*msg, msg0;
+	const char	*uri;
+	char		 buf[80];
+
+	if (!_this->paridguess) {
+		snprintf(buf, sizeof(buf), "\"guess-parid\" is not enabled.\n");
+		goto out;
+	}
+	if (mailestd_db_open_rd(_this) == NULL) {
+		snprintf(buf, sizeof(buf), "Opening DB is failed");
+		goto out;
+	}
+
+	cond = est_cond_new();
+	est_cond_add_attr(cond, ATTR_PARID " " ESTOPSTREQ " notexist");
+	res = est_db_search(_this->db, cond, &rnum, NULL);
+	est_cond_delete(cond);
+	for (i = 0; i < rnum; i++) {
+		doc = est_db_get_doc(_this->db, res[i], ESTGDNOKWD);
+		if (doc == NULL)
+			continue;
+		uri = est_doc_attr(doc, ESTDATTRURI);
+		msg0.path = (char *)URI2PATH(uri);
+		msg = RB_FIND(rfc822_tree, &_this->root, &msg0);
+		if (msg != NULL && msg->pariddone) {
+			msg->pariddone = false;
+			_this->paridnotdone++;
+			num++;
+		}
+		est_doc_delete(doc);
+	}
+	if (num > 0)
+		snprintf(buf, sizeof(buf),
+		    "Guessing parent is scheduled for %d messages.\n", num);
+	else
+		snprintf(buf, sizeof(buf),
+		    "No message which needs to find its parent.\n");
+out:
+	mailestd_schedule_inform(_this, task->id, buf, strlen(buf));
+}
+
+static void
 mailestd_guess_parid(struct mailestd *_this)
 {
 	struct rfc822	*msg;
@@ -1749,6 +1796,19 @@ mailestd_schedule_smew(struct mailestd *_this, const char *msgid,
 	task->type = MAILESTD_TASK_SMEW;
 	strlcpy(task->msgid, msgid, sizeof(task->msgid));
 	strlcpy(task->folder, folder, sizeof(task->folder));
+	task->highprio = true;
+
+	return (task_worker_add_task(&_this->dbworker, (struct task *)task));
+}
+
+static uint64_t
+mailestd_schedule_message_dbworker(struct mailestd *_this,
+    enum MAILESTD_TASK tsk_type)
+{
+	struct task	*task;
+
+	task = xcalloc(1, sizeof(struct task));
+	task->type = tsk_type;
 	task->highprio = true;
 
 	return (task_worker_add_task(&_this->dbworker, (struct task *)task));
@@ -2028,6 +2088,7 @@ task_worker_on_proc(struct task_worker *_this)
 		case MAILESTD_TASK_RFC822_DELDB:
 		case MAILESTD_TASK_SEARCH:
 		case MAILESTD_TASK_SMEW:
+		case MAILESTD_TASK_GUESS_AGAIN:
 			MAILESTD_ASSERT(thread_this ==
 			    mailestd->dbworker.thread);
 			task_worker_on_proc_db(_this, &dbctx, task);
@@ -2164,16 +2225,20 @@ task_worker_on_proc_db(struct task_worker *_this,
 		mailestd_db_smew(mailestd, (struct task_smew *)task);
 		break;
 
+	case MAILESTD_TASK_GUESS_AGAIN:
+		mailestd_db_guess_again(mailestd, task);
+		break;
+
 	case MAILESTD_TASK_NONE:
 		if (ctx->resche)
 			mailestd_reschedule_draft(mailestd);
-		if (mailestd->db == NULL || !mailestd->db_wr)
-			/* Keep the read only db connection */
-			break;
 		if (mailestd->paridguess && mailestd->paridnotdone > 0) {
 			mailestd_guess_parid(mailestd);
 			mailestd->paridnotdone = 0;
 		}
+		if (mailestd->db == NULL || !mailestd->db_wr)
+			/* Keep the read only db connection */
+			break;
 		if (ctx->puts + ctx->dels > 0 &&
 		    est_db_used_cache_size(mailestd->db) > MAILESTD_DBFLUSHSIZ){
 			/*
@@ -2364,6 +2429,15 @@ mailestc_on_event(int fd, short evmask, void *ctx)
 			if (_this->monitoring_id == 0)
 				goto on_error;
 			break;
+
+		case MAILESTCTL_CMD_GUESS_AGAIN:
+			_this->monitoring_cmd = MAILESTCTL_CMD_GUESS_AGAIN;
+			_this->monitoring_id =
+			    mailestd_schedule_message_dbworker(mailestd,
+				MAILESTD_TASK_GUESS_AGAIN);
+			if (_this->monitoring_id == 0)
+				goto on_error;
+			break;
 		}
 	}
 
@@ -2465,6 +2539,7 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
 		break;
 	case MAILESTCTL_CMD_SMEW:
 	case MAILESTCTL_CMD_SEARCH:
+	case MAILESTCTL_CMD_GUESS_AGAIN:
 		if (informsiz == 0)
 			mailestc_stop(_this);
 		else

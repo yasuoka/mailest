@@ -119,6 +119,9 @@ ChangeLog
 0.9.25 (not yet)
 
   - Fix links in man pages.
+  - Add "guess" command to mailestctl(1).  Which orders mailestd to
+    start guessing parent messages again to find the parents which have
+    appeared after the last guessing.
 
 
 0.9.24

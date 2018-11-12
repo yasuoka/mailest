@@ -69,6 +69,7 @@ mailestctl_main(int argc, char *argv[])
 	struct mailestctl_search search;
 	struct mailestctl_smew	 smew;
 	struct mailestctl_update update;
+	bool			 wait_resp = false;
 
 	cmd = argv[0];
 	cmdv[cmdc++] = "mailestd";
@@ -146,6 +147,10 @@ do_common:
 		}
 		if (write(mailestc_sock, &ctl, sizeof(ctl)) < 0)
 			err(1, "write");
+		if (wait_resp)
+			while ((sz =
+			    read(mailestc_sock, msgbuf, sizeof(msgbuf))) > 0)
+				fwrite(msgbuf, 1, sz, stdout);
 		break;
 
 	case DEBUGI:
@@ -257,6 +262,11 @@ wait_resp:
 		if (write(mailestc_sock, &search, sizeof(search)) < 0)
 			err(1, "write");
 		goto wait_resp;
+
+	case GUESS:
+		ctl.command = MAILESTCTL_CMD_GUESS_AGAIN;
+		wait_resp = true;
+		goto do_common;
 
 	case NONE:
 		break;
