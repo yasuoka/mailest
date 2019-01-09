@@ -299,10 +299,10 @@ ChangeLog
 Man pages
 ---------
 
-- [mailestctl(1)](http://yasuoka.github.io/mailest/mailestctl.1.html)
-- [mailestd(8)](http://yasuoka.github.io/mailest/mailestd.8.html)
-- [mailestd.conf(5)](http://yasuoka.github.io/mailest/mailestd.conf.5.html)
-- [mew-mailest(8)](http://yasuoka.github.io/mailest/mew-mailest.1.html)
+- [mailestctl(1)](https://yasuoka.github.io/mailest/mailestctl.1.html)
+- [mailestd(8)](https://yasuoka.github.io/mailest/mailestd.8.html)
+- [mailestd.conf(5)](https://yasuoka.github.io/mailest/mailestd.conf.5.html)
+- [mew-mailest(8)](https://yasuoka.github.io/mailest/mew-mailest.1.html)
 
 
 Differences from `mewest`
