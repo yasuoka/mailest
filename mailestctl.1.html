@@ -36,15 +36,15 @@
 <table class="Nm">
   <tr>
     <td><code class="Nm" title="Nm">mailestctl</code></td>
-    <td>[<div class="Op"><code class="Fl" title="Fl">-h</code></div>]
-      [<div class="Op"><code class="Fl" title="Fl">-S</code>
-      <var class="Ar" title="Ar">suffix</var></div>]
-      [<div class="Op"><code class="Fl" title="Fl">-s</code>
-      <var class="Ar" title="Ar">socket</var></div>]
-      [<div class="Op"><code class="Fl" title="Fl">-m</code>
-      <var class="Ar" title="Ar">maildir</var></div>]
-      <var class="Ar" title="Ar">command</var>
-      [<div class="Op"><var class="Ar" title="Ar">args ...</var></div>]</td>
+    <td>[<code class="Fl" title="Fl">-h</code>]
+      [<code class="Fl" title="Fl">-S</code>
+      <var class="Ar" title="Ar">suffix</var>]
+      [<code class="Fl" title="Fl">-s</code>
+      <var class="Ar" title="Ar">socket</var>]
+      [<code class="Fl" title="Fl">-m</code>
+      <var class="Ar" title="Ar">maildir</var>]
+      <var class="Ar" title="Ar">command</var> [<var class="Ar" title="Ar">args
+      ...</var>]</td>
   </tr>
 </table>
 <h1 class="Sh" title="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
@@ -53,8 +53,7 @@ The <code class="Nm" title="Nm">mailestctl</code> program controls the
   the <code class="Nm" title="Nm">mailest</code> for the search backend for the
   Mew program, see the <i class="Em" title="Em">EXAMPLE</i> section in
   <a class="Xr" title="Xr" href="mew-mailest.1.html">mew-mailest(1)</a>.
-<div class="Pp"></div>
-The options are as follows:
+<p class="Pp">The options are as follows:</p>
 <dl class="Bl-tag">
   <dt>&#x00A0;</dt>
   <dd>&#x00A0;</dd>
@@ -88,8 +87,7 @@ The options are as follows:
   <dt><a class="permalink" href="#h"><code class="Fl" title="Fl" id="h">-h</code></a></dt>
   <dd>Show the usage.</dd>
 </dl>
-<div class="Pp"></div>
-The following commands are available:
+<p class="Pp">The following commands are available:</p>
 <dl class="Bl-tag">
   <dt>&#x00A0;</dt>
   <dd>&#x00A0;</dd>
@@ -123,15 +121,14 @@ The following commands are available:
   <dt>&#x00A0;</dt>
   <dd>&#x00A0;</dd>
   <dt><a class="permalink" href="#csearch"><code class="Cm" title="Cm" id="csearch">csearch</code></a>
-    [<div class="Op"><code class="Fl" title="Fl">-vu</code></div>]
-    [<div class="Op"><code class="Fl" title="Fl">-max</code>
-    <var class="Ar" title="Ar">max</var></div>]
-    [<div class="Op"><code class="Fl" title="Fl">-ord</code>
-    <var class="Ar" title="Ar">ord</var></div>]
-    [<div class="Op"><code class="Fl" title="Fl">-ic</code>
-    <var class="Ar" title="Ar">ic</var></div>]
-    [<div class="Op"><code class="Fl" title="Fl">-attr</code>
-    <var class="Ar" title="Ar">attr</var></div>] phrase</dt>
+    [<code class="Fl" title="Fl">-vu</code>]
+    [<code class="Fl" title="Fl">-max</code>
+    <var class="Ar" title="Ar">max</var>]
+    [<code class="Fl" title="Fl">-ord</code>
+    <var class="Ar" title="Ar">ord</var>]
+    [<code class="Fl" title="Fl">-ic</code> <var class="Ar" title="Ar">ic</var>]
+    [<code class="Fl" title="Fl">-attr</code>
+    <var class="Ar" title="Ar">attr</var>] phrase</dt>
   <dd>Search the indexes of the mail messages in
       <a class="Xr" title="Xr" href="estcmd.1.html">estcmd(1)</a> compatible
       arguments. This command is used by &#x201C;Mew&#x201D; though the wrapper
@@ -146,7 +143,7 @@ The following commands are available:
   <dt>&#x00A0;</dt>
   <dd>&#x00A0;</dd>
   <dt><a class="permalink" href="#update"><code class="Cm" title="Cm" id="update">update</code></a>
-    [<div class="Op"><var class="Ar" title="Ar">folder</var></div>]</dt>
+    [<var class="Ar" title="Ar">folder</var>]</dt>
   <dd>Start the indexes of the messages. If the
       <var class="Ar" title="Ar">folder</var> is specified, the indexing is done
       in the specified folder, otherwise index all folders following the
