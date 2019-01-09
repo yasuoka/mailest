@@ -321,6 +321,7 @@ static uint64_t	 mailestd_schedule_guess_parid(struct mailestd *,
 static void	 task_worker_init(struct task_worker *, struct mailestd *);
 static void	 task_worker_start(struct task_worker *);
 static void	 task_worker_stop(struct task_worker *);
+static void	 task_worker_fini(struct task_worker *);
 static void	 task_worker_run(struct task_worker *) __used;
 static uint64_t	 task_worker_add_task(struct task_worker *, struct task *);
 static void	 task_worker_on_itc_event(int, short, void *);

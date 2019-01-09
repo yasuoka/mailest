@@ -118,6 +118,10 @@ ChangeLog
 
 0.9.25 (not yet)
 
+  - Fix a wrong behaviour when stopping the process.  There had been a
+    race between threads when stopping the process.  The race had
+    triggered "task_worker_add_task: write(): Bad file descriptor"
+    warning or crash by memory corruption.
   - Fix links in man pages.
   - Add "guess" command to mailestctl(1).  Which orders mailestd to
     start guessing parent messages again to find the parents which have

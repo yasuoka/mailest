@@ -370,6 +370,7 @@ mailestd_stop(struct mailestd *_this)
 	for (i = 0; _this->workers[i] != NULL; i++) {
 		if (_thread_self() != _this->workers[i]->thread)
 			    _thread_join(_this->workers[i]->thread, NULL);
+		task_worker_fini(_this->workers[i]);
 	}
 	/* entered single thread */
 
@@ -1943,6 +1944,8 @@ task_worker_stop(struct task_worker *_this)
 	struct task	*tske, *tskt;
 
 	MAILESTD_ASSERT(_thread_self() == _this->thread);
+
+	_thread_mutex_lock(&_this->lock);
 	if (_this->sock >= 0) {
 		if (event_initialized(&_this->evsock))
 			event_del(&_this->evsock);
@@ -1950,10 +1953,17 @@ task_worker_stop(struct task_worker *_this)
 		close(_this->sock_itc);
 		_this->sock = _this->sock_itc = -1;
 	}
-	_thread_mutex_destroy(&_this->lock);
 	TAILQ_FOREACH_SAFE(tske, &_this->head, queue, tskt) {
+		TAILQ_REMOVE(&_this->head, tske, queue);
 		free(tske);
 	}
+	_thread_mutex_unlock(&_this->lock);
+}
+
+static void
+task_worker_fini(struct task_worker *_this)
+{
+	_thread_mutex_destroy(&_this->lock);
 }
 
 static uint64_t
@@ -1966,23 +1976,25 @@ task_worker_add_task(struct task_worker *_this, struct task *task)
 	id = task->id;
 
 	_thread_mutex_lock(&_this->lock);
-	if (task->highprio) {
-		TAILQ_FOREACH(tske, &_this->head, queue) {
-			if (!tske->highprio)
-				break;
+	if (_this->sock_itc >= 0) {
+		if (task->highprio) {
+			TAILQ_FOREACH(tske, &_this->head, queue) {
+				if (!tske->highprio)
+					break;
+			}
+			if (tske != NULL)
+				TAILQ_INSERT_BEFORE(tske, task, queue);
+			else
+				TAILQ_INSERT_HEAD(&_this->head, task, queue);
+		} else
+			TAILQ_INSERT_TAIL(&_this->head, task, queue);
+		if (write(_this->sock_itc, "A", 1) < 0) {
+			if (errno != EAGAIN)
+				mailestd_log(LOG_WARNING, "%s: write(): %m",
+				__func__);
 		}
-		if (tske != NULL)
-			TAILQ_INSERT_BEFORE(tske, task, queue);
-		else
-			TAILQ_INSERT_HEAD(&_this->head, task, queue);
-	} else
-		TAILQ_INSERT_TAIL(&_this->head, task, queue);
-	_thread_mutex_unlock(&_this->lock);
-
-	if (write(_this->sock_itc, "A", 1) < 0) {
-		if (errno != EAGAIN)
-			mailestd_log(LOG_WARNING, "%s: write(): %m", __func__);
 	}
+	_thread_mutex_unlock(&_this->lock);
 
 	return (id);
 }
