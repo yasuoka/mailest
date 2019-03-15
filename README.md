@@ -118,6 +118,9 @@ ChangeLog
 
 0.9.25 (not yet)
 
+  - Schedule monitors earlier than before.  It happens during creating
+    the database cache now.  Before, it had happened after the database
+    cache is updated.
   - Fix a wrong behaviour when stopping the process.  There had been a
     race between threads when stopping the process.  The race had
     triggered "task_worker_add_task: write(): Bad file descriptor"

@@ -680,14 +680,11 @@ mailestd_db_sync(struct mailestd *_this)
 	ESTDB		*db;
 	int		 i, id, ldir, delete;
 	char		 dir[PATH_MAX + 128];
-	const char	*prev, *fn, *uri, *errstr, *folder;
+	const char	*prev, *fn, *uri, *errstr, *folder, *ps;
 	ESTDOC		*doc;
-	struct rfc822	*msg, msg0;
+	struct rfc822	*msg, msg0, *msg1, *msg2;
 	struct tm	 tm;
 	struct task	*tske, *tskt;
-	struct folder	*flde, *fldt;
-	struct folder_tree
-			 folders;
 
 	MAILESTD_ASSERT(_thread_self() == _this->dbworker.thread);
 
@@ -712,6 +709,22 @@ mailestd_db_sync(struct mailestd *_this)
 			msg = xcalloc(1, sizeof(struct rfc822));
 			msg->path = xstrdup(fn);
 			RB_INSERT(rfc822_tree, &_this->root, msg);
+			if (_this->monitor) {
+				/* schedule monitor if the directory is new */
+				ps = strrchr(fn, '/');
+				MAILESTD_ASSERT(ps != NULL);
+				ldir = ps - fn;
+				msg1 = RB_NEXT(rfc822_tree, &_this->root, msg);
+				msg2 = RB_PREV(rfc822_tree, &_this->root, msg);
+				if ((msg1 == NULL || strncmp(msg->path,
+				    msg1->path, ldir + 1) != 0) &&
+				    (msg2 == NULL || strncmp(msg->path,
+				    msg2->path, ldir + 1) != 0)) {
+					memcpy(dir, msg->path, ldir);
+					dir[ldir] = '\0';
+					mailestd_schedule_monitor(_this, dir);
+				}
+			}
 		}
 		if (!msg->ontask && msg->db_id == 0) {
 			strptime(est_doc_attr(doc, ESTDATTRMDATE),
@@ -776,15 +789,6 @@ mailestd_db_sync(struct mailestd *_this)
 		free(tske);
 	}
 	_this->db_sync_time = _this->curr_time;
-	if (_this->monitor) {
-		RB_INIT(&folders);
-		mailestd_get_all_folders(_this, &folders);
-		RB_FOREACH_SAFE(flde, folder_tree, &folders, fldt) {
-			RB_REMOVE(folder_tree, &folders, flde);
-			mailestd_schedule_monitor(_this, flde->path);
-			folder_free(flde);
-		}
-	}
 	if (_this->paridguess) {
 		mailestd_guess_parid(_this);
 		_this->paridnotdone = 0;
