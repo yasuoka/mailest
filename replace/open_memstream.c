@@ -75,7 +75,7 @@ static off_t
 memstream_seek(void *v, off_t off, int whence)
 {
 	struct state	*st = v;
-	ssize_t		 base = 0;
+	size_t		 base = 0;
 
 	switch (whence) {
 	case SEEK_SET:
@@ -88,7 +88,7 @@ memstream_seek(void *v, off_t off, int whence)
 		break;
 	}
 
-	if (off > SIZE_MAX - base || off < -base) {
+	if ((off > 0 && off > SIZE_MAX - base) || (off < 0 && base < -off)) {
 		errno = EOVERFLOW;
 		return (-1);
 	}
