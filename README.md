@@ -129,6 +129,7 @@ ChangeLog
   - Add "guess" command to mailestctl(1).  Which orders mailestd to
     start guessing parent messages again to find the parents which have
     appeared after the last guessing.
+  - Some minor fixes for replace/open_memstream.c
 
 
 0.9.24
