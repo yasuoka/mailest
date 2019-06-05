@@ -126,7 +126,6 @@ open_memstream(char **pbuf, size_t *psize)
 	st->size = BUFSIZ;
 	if ((st->string = calloc(1, st->size)) == NULL) {
 		free(st);
-		fp->_flags = 0;
 		return (NULL);
 	}
 
