@@ -2270,7 +2270,7 @@ task_worker_on_proc_db(struct task_worker *_this,
 			}
 			est_db_flush(mailestd->db, MAILESTD_DBFLUSHSIZ);
 			if (debug > 1) {
-				mailestd_log(LOG_DEBUG, "Flusinged DB %d",
+				mailestd_log(LOG_DEBUG, "Flushed DB %d",
 				    est_db_used_cache_size(mailestd->db));
 				est_db_set_informer(mailestd->db, NULL, NULL);
 			}
