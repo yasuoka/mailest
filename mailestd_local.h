@@ -284,6 +284,7 @@ static void	 mailestd_gather_inform(struct mailestd *, struct task *,
 		    struct gather *);
 static int	 mailestd_fts(struct mailestd *, struct gather *, time_t,
 		    FTS *, FTSENT *, struct folder_tree *);
+static int	 mailestd_fts_compar(const FTSENT **, const FTSENT **);
 static void	 mailestd_draft(struct mailestd *, struct rfc822 *msg);
 static void	 mailestd_putdb(struct mailestd *, struct rfc822 *);
 static void	 mailestd_deldb(struct mailestd *, struct rfc822 *);

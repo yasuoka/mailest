@@ -118,6 +118,8 @@ ChangeLog
 
 0.9.25 (not yet)
 
+  - Traverse files in a directory in numeric order.  This make "guess"
+    can find the parent more.
   - Schedule monitors earlier than before.  It happens during creating
     the database cache now.  Before, it had happened after the database
     cache is updated.

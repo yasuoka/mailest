@@ -920,6 +920,9 @@ mailestd_gather_start(struct mailestd *_this, struct task_gather *task)
 	return (0);
 }
 
+
+
+
 static int
 mailestd_gather(struct mailestd *_this, struct task_gather *task)
 {
@@ -951,7 +954,8 @@ mailestd_gather(struct mailestd *_this, struct task_gather *task)
 	paths[1] = NULL;
 	lrdir = strlen(rdir);
 
-	if ((fts = fts_open(paths, FTS_LOGICAL | FTS_NOCHDIR, NULL)) == NULL) {
+	if ((fts = fts_open(paths, FTS_LOGICAL | FTS_NOCHDIR,
+	    mailestd_fts_compar)) == NULL) {
 		mailestd_log(LOG_ERR, "fts_open(%s): %m", folder);
 		goto out;
 	}
@@ -1152,6 +1156,31 @@ mailestd_fts(struct mailestd *_this, struct gather *ctx, time_t curr_time,
 	} while ((ftse = fts_read(fts)) != NULL);
 
 	return (update);
+}
+
+static int
+mailestd_fts_compar(const FTSENT **a, const FTSENT **b)
+{
+	int	 cmp;
+	u_int	 seqa, seqb;
+	const char *errstr;
+
+	if ((*a)->fts_parent != (*b)->fts_parent)
+		return (strcmp((*a)->fts_parent->fts_name,
+		    (*b)->fts_parent->fts_name));
+
+	seqa = strtonum((*a)->fts_name, 1, UINT_MAX, &errstr);
+	if (errstr != NULL)
+		seqa = UINT_MAX;
+
+	seqb = strtonum((*b)->fts_name, 1, UINT_MAX, &errstr);
+	if (errstr != NULL)
+		seqb = UINT_MAX;
+
+	cmp = (seqa - seqb);
+	if (cmp != 0)
+		return (cmp);
+	return (strcmp((*a)->fts_name, (*b)->fts_name));
 }
 
 static void
