@@ -1,0 +1,27 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2     
+    - name: Install libqdbm
+      run: sudo apt-get install libqdbm-dev
+    - name: Install libevent-dev
+      run: sudo apt-get install libevent-dev
+    - name: Search hyperestraier
+      run: sudo apt-cache search hyperestraier
+    - name: Search libestraier
+      run: sudo apt-cache search estraier
+    - name: Install libestraier-dev
+      run: sudo apt-get install libestraier-dev
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make
+    - name: make distcheck
+      run: make distcheck
