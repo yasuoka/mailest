@@ -132,6 +132,8 @@ ChangeLog
     start guessing parent messages again to find the parents which have
     appeared after the last guessing.
   - Some minor fixes for replace/open_memstream.c
+  - Add missing -liconv.  Pointed out on OpenBSD ports by
+    naddy at openbsd.org.
 
 
 0.9.24
