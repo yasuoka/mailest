@@ -1967,7 +1967,14 @@ static void
 task_worker_run(struct task_worker *_this)
 {
 #ifdef MAILESTD_MT
+	sigset_t ss_old, ss_new;
+
+	sigemptyset(&ss_new);
+	sigaddset(&ss_new, SIGINT);
+	sigaddset(&ss_new, SIGTERM);
+	sigprocmask(SIG_BLOCK, &ss_new, &ss_old);
 	_thread_create(&_this->thread, NULL, task_worker_start0, _this);
+	sigprocmask(SIG_SETMASK, &ss_old, NULL);
 #endif
 }
 

@@ -134,6 +134,7 @@ ChangeLog
   - Some minor fixes for replace/open_memstream.c
   - Add missing -liconv.  Pointed out on OpenBSD ports by
     naddy at openbsd.org.
+  - Mask signals on threads other than main
 
 
 0.9.24
