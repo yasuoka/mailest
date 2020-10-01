@@ -5,20 +5,16 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     
     steps:
     - uses: actions/checkout@v2     
-    - name: Install libqdbm
-      run: sudo apt-get install libqdbm-dev
     - name: Install libevent-dev
-      run: sudo apt-get install libevent-dev
-    - name: Search hyperestraier
-      run: sudo apt-cache search hyperestraier
-    - name: Search libestraier
-      run: sudo apt-cache search estraier
+      run: sudo apt-get install -y libevent-dev
     - name: Install libestraier-dev
-      run: sudo apt-get install libestraier-dev
+      run: sudo apt-get install -y libestraier-dev
+    - name: Install bison
+      run: sudo apt-get install -y bison
     - name: configure
       run: ./configure
     - name: make
