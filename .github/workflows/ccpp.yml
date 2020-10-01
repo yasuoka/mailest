@@ -17,8 +17,8 @@ jobs:
       run: sudo apt-cache search hyperestraier
     - name: Search libestraier
       run: sudo apt-cache search estraier
-    - name: Install libestraier-dev
-      run: sudo apt-get install libestraier-dev
+#    - name: Install libestraier-dev
+#      run: sudo apt-get install libestraier-dev
     - name: configure
       run: ./configure
     - name: make
