@@ -78,7 +78,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = replace
 DIST_COMMON = $(srcdir)/GNUmakefile.in $(srcdir)/GNUmakefile.am \
-	strlcat.c strtonum.c open_memstream.c strlcpy.c reallocarray.c \
+	strlcpy.c reallocarray.c strtonum.c strlcat.c open_memstream.c \
 	$(top_srcdir)/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -237,6 +237,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -248,6 +249,7 @@ top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libreplace.a
 libreplace_a_SOURCES = replace.h
 libreplace_a_LIBADD = @LIBOBJS@
+EXTRA_DIST = sys
 all: all-am
 
 .SUFFIXES:
