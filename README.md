@@ -118,6 +118,7 @@ ChangeLog
 
 0.9.25 (not yet)
 
+  - sys/tree.h and sys/queue.h were missed in the distribution
   - Traverse files in a directory in numeric order.  This make "guess"
     can find the parent more.
   - Schedule monitors earlier than before.  It happens during creating

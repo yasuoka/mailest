@@ -1,3 +1,4 @@
 noinst_LIBRARIES = libreplace.a
 libreplace_a_SOURCES = replace.h
 libreplace_a_LIBADD = @LIBOBJS@
+EXTRA_DIST = sys
