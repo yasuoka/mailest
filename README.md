@@ -118,7 +118,7 @@ ChangeLog
 
 0.9.25 (not yet)
 
-  - sys/tree.h and sys/queue.h were missed in the distribution
+  - sys/tree.h and sys/queue.h were missed in the distribution.
   - Traverse files in a directory in numeric order.  This make "guess"
     can find the parent more.
   - Schedule monitors earlier than before.  It happens during creating
@@ -135,7 +135,7 @@ ChangeLog
   - Some minor fixes for replace/open_memstream.c
   - Add missing -liconv.  Pointed out on OpenBSD ports by
     naddy at openbsd.org.
-  - Mask signals on threads other than main
+  - Mask signals on threads other than main.
   - Fix a write after free bug.
 
 
