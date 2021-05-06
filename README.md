@@ -136,6 +136,7 @@ ChangeLog
   - Add missing -liconv.  Pointed out on OpenBSD ports by
     naddy at openbsd.org.
   - Mask signals on threads other than main
+  - Fix a write after free bug.
 
 
 0.9.24

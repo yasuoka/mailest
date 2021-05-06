@@ -2592,9 +2592,10 @@ mailestc_task_inform(struct mailestc *_this, uint64_t task_id, u_char *inform,
 	case MAILESTCTL_CMD_SMEW:
 	case MAILESTCTL_CMD_SEARCH:
 	case MAILESTCTL_CMD_GUESS_AGAIN:
-		if (informsiz == 0)
+		if (informsiz == 0) {
 			mailestc_stop(_this);
-		else
+			break;
+		} else
 			mailestc_send_message(_this, inform, informsiz);
 		_this->monitoring_stop = true;
 		break;
