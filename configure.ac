@@ -12,6 +12,8 @@ AC_PROG_CC
 AC_PROG_YACC
 AC_PROG_RANLIB
 
+AM_PROG_AR
+
 CFLAGS="$CFLAGS -I/usr/local/include"
 CFLAGS="$CFLAGS -I/usr/include/qdbm -I/usr/include/estraier"
 LDFLAGS="$LDFLAGS -L/usr/local/lib"
