@@ -117,6 +117,7 @@ ChangeLog
 ---------
 
 0.9.25
+~~~~~~
 
   - sys/tree.h and sys/queue.h were missed in the distribution.
   - Traverse files in a directory in numeric order.  This make "guess"
@@ -140,12 +141,14 @@ ChangeLog
 
 
 0.9.24
+~~~~~~
 
   - Fix a wrong ASSERT() introduced at 0.9.23 (e5076c8a)
   - Apply many fixes for parse.y on OpenBSD
 
 
 0.9.23
+~~~~~~
 
   - Fix the creating draft tasks to be run not on the busiest database
     thread but on the main thread.  This had been desired by design, but
@@ -161,11 +164,13 @@ ChangeLog
 
 
 0.9.22
+~~~~~~
 
   - Fix smew not to loop infinately
 
 
 0.9.21
+~~~~~~
 
   - Fix mailestd not to mistakenly delete a message from the database,
     as a result, it stopps working since it presumes the database is
@@ -184,6 +189,7 @@ ChangeLog
 
 
 0.9.20
+~~~~~~
 
   - Use the realpath always for folders not to treat the path with
     symbolic links and the realpath as different folders.  (Found
@@ -192,6 +198,7 @@ ChangeLog
 
 
 0.9.19
+~~~~~~
 
   - Fix some variables in BSD make not to have DESTDIR doublely.
   - Remove a debug log output in #ifdef MONITOR_INOTIFY.
@@ -199,6 +206,7 @@ ChangeLog
 
 
 0.9.18
+~~~~~~
 
   - Fix off-by-one in mailestctl.  It crashed by using "csearch"
     (mew-mailest).  (Found and debugged by Yoshiaki Kasahara)
@@ -207,17 +215,20 @@ ChangeLog
 
 
 0.9.17
+~~~~~~
 
   - Fix "update" related logs to show the entire path name.
     (diff from Hiroki Sato)
 
 
 0.9.16
+~~~~~~
 
   - Fix "smew -p" to work.
 
 
 0.9.15
+~~~~~~
 
   - Monitoring were not enabled on some systems (atleast on FreeBSD).
     Fixed autoconf to choice kqueue() or inotify() properly.  (Pointed
@@ -225,6 +236,7 @@ ChangeLog
 
 
 0.9.14
+~~~~~~
 
   - Support "smew -p" and "smew -c" so that Mew '^' and '&' work.
     (pointed out by Yoshiaki Kasahara)
@@ -240,6 +252,7 @@ ChangeLog
 
 
 0.9.13
+~~~~~~
 
   - Add "guess-parid" configration option to find the parent message
     for the messages which don't contain "In-Reply-To" or "Reference"
@@ -249,21 +262,25 @@ ChangeLog
         guess-parid
 
 0.9.12
+~~~~~~
 
   - Improve logging
   - Tweak log levels
   - Fix parsing "monitor" in mailestd.conf
 
 0.9.11
+~~~~~~
 
   - Fix not to change current working directory.
   - Fix: invalid memory access in mailestd_db_smew().
 
 0.9.10
+~~~~~~
 
   - Fix build on operating system which use kqueue for monitor.
 
 0.9.9
+~~~~~
 
   - Monitor the inodes the directories (by kevent and inotify) and start
     update automatically.
@@ -273,6 +290,7 @@ ChangeLog
   - Unlimit the resource limit of the data size when process startup.
 
 0.9.8
+~~~~~
 
   - Add 'smew' functionality.  Add `smew` command to mailestctl(1).
     To use 'smew' of 'mailestd', add below lines:
@@ -287,6 +305,7 @@ ChangeLog
   - Add `message-id` command to mailestdctl(1).
 
 0.9.7
+~~~~~
 
   - Fix: When the database doesn't exists, the database thread stopps
     forever.
@@ -294,6 +313,7 @@ ChangeLog
     of errors.
 
 0.9.6
+~~~~~
 
   -  Fix: cannot search non ASCII/UTF-8 mails
   -  Fix: mailestd exits abnormally sometimes when it is stopped during
@@ -301,6 +321,7 @@ ChangeLog
 
 
 0.9.5
+~~~~~
 
   -  First "update" to huge database taked long time.  Fix it not to wait
      database cache updating before update starts.
