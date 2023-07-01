@@ -116,7 +116,7 @@ See [man pages](#man-pages) also.
 ChangeLog
 ---------
 
-0.9.25 (not yet)
+0.9.25
 
   - sys/tree.h and sys/queue.h were missed in the distribution.
   - Traverse files in a directory in numeric order.  This make "guess"
@@ -126,13 +126,13 @@ ChangeLog
     cache is updated.
   - Fix a wrong behaviour when stopping the process.  There had been a
     race between threads when stopping the process.  The race had
-    triggered "task_worker_add_task: write(): Bad file descriptor"
+    triggered ``task_worker_add_task: write(): Bad file descriptor``
     warning or crash by memory corruption.
   - Fix links in man pages.
   - Add "guess" command to mailestctl(1).  Which orders mailestd to
     start guessing parent messages again to find the parents which have
     appeared after the last guessing.
-  - Some minor fixes for replace/open_memstream.c
+  - Some minor fixes for ``replace/open_memstream.c``
   - Add missing -liconv.  Pointed out on OpenBSD ports by
     naddy at openbsd.org.
   - Mask signals on threads other than main.
