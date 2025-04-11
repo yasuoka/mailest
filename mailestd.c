@@ -1103,7 +1103,7 @@ mailestd_fts(struct mailestd *_this, struct gather *ctx, time_t curr_time,
 
 		bn = ftse->fts_name;
 		for (i = 0; bn[i] != '\0'; i++) {
-			if (!isdigit(bn[i]))
+			if (!isdigit((unsigned char)bn[i]))
 				break;
 		}
 		if (bn[i] != '\0') {
@@ -3372,12 +3372,12 @@ skip_subject(const char *subj)
 	/* Re^2: Re*2: */
 	while (*subj == '*' || *subj == '^')
 		subj++;
-	while (isdigit(*subj))
+	while (isdigit((unsigned char)*subj))
 		subj++;
 	if (*subj != ':')
 		return (NULL);
 	subj++;
-	while (isspace(*subj))
+	while (isspace((unsigned char *)*subj))
 		subj++;
 	return (subj);
 }
